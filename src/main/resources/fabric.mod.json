@@ -1,0 +1,30 @@
+  {
+  "schemaVersion": 1,
+  "id": "interactivestuff",
+  "version": "${version}",
+  "name": "InteractiveStuff",
+  "description": "Items Interact within your First-Person View!",
+  "authors": ["OmarDotContent"],
+    "contact": {
+      "homepage": "https://omardotcontent.github.io/"
+    },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/interactivestuff/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "omar.projects.interactivestuff.ISClient"
+    ],
+    "main": [
+      "omar.projects.interactivestuff.IS"
+    ]
+  },
+  "mixins": [
+    "interactivestuff.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
