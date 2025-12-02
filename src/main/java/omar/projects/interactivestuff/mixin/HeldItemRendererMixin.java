@@ -11,6 +11,7 @@ import omar.projects.interactivestuff.handlers.VibrationTracker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
@@ -28,20 +29,42 @@ public final class HeldItemRendererMixin {
             argsOnly = true
     )
     private ItemStack modifyRenderStack(final ItemStack stack) {
-        final boolean isSculk = stack.isOf(Items.SCULK_SENSOR) || stack.isOf(Items.CALIBRATED_SCULK_SENSOR);
-        if (isSculk && VibrationTracker.isVibrating()) {
-            final ItemStack visualStack = stack.copy();
-            visualStack.set(ISComponents.VIBRATING, true);
-            return visualStack;
+        if (stack.isOf(Items.SCULK_SENSOR)) {
+            if (VibrationTracker.isVibrating()) {
+                final ItemStack visualStack = stack.copy();
+                visualStack.set(ISComponents.VIBRATING, true);
+                return visualStack;
+            }
+            return stack;
         }
 
-        final boolean isCampfire = stack.isOf(Items.CAMPFIRE) || stack.isOf(Items.SOUL_CAMPFIRE) || stack.isOf(Items.TORCH) || stack.isOf(Items.SOUL_TORCH) || stack.isOf(Items.COPPER_TORCH);
-        if (isCampfire && this.client.player != null) {
-            final ItemStack visualStack = stack.copy();
-            visualStack.set(ISComponents.WATERLOGGED, this.client.player.isSubmergedInWater());
-            return visualStack;
+        if (stack.isOf(Items.CALIBRATED_SCULK_SENSOR)) {
+            if (VibrationTracker.isCalibratedVibrating()) {
+                final ItemStack visualStack = stack.copy();
+                visualStack.set(ISComponents.CALIBRATED_VIBRATING, true);
+                return visualStack;
+            }
+            return stack;
+        }
+
+        if (isTorchOrCampfire(stack)) {
+            if (this.client.player != null) {
+                final ItemStack visualStack = stack.copy();
+                visualStack.set(ISComponents.WATERLOGGED, this.client.player.isSubmergedInWater());
+                return visualStack;
+            }
         }
 
         return stack;
+    }
+
+    @Unique
+    private boolean isTorchOrCampfire(final ItemStack stack) {
+        return stack.isOf(Items.CAMPFIRE) ||
+                stack.isOf(Items.SOUL_CAMPFIRE) ||
+                stack.isOf(Items.TORCH) ||
+                stack.isOf(Items.SOUL_TORCH) ||
+                stack.isOf(Items.COPPER_TORCH) ||
+                stack.isOf(Items.REDSTONE_TORCH);
     }
 }

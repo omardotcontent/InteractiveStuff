@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.sound.SoundEvents;
 
-public class NoteBlockSoundHandler {
+public final class NoteBlockSoundHandler {
 
     private static boolean wasSneaking = false;
 

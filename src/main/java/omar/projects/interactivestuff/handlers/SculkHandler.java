@@ -19,7 +19,12 @@ public final class SculkHandler {
 
     private static boolean wasOnGround = false;
 
-    // Pre-define ignored sounds to avoid creating new objects every check
+    private static final double RANGE_NORMAL_SQ = 64.0;
+    private static final double RANGE_CALIBRATED_SQ = 256.0;
+
+    private static final int COOLDOWN_NORMAL = 40;
+    private static final int COOLDOWN_CALIBRATED = 20;
+
     private static final Set<Identifier> IGNORED_SOUND_IDS = Set.of(
             SoundEvents.BLOCK_SCULK_SENSOR_CLICKING.id(),
             SoundEvents.BLOCK_SCULK_SENSOR_CLICKING_STOP.id(),
@@ -31,17 +36,17 @@ public final class SculkHandler {
     );
 
     public static void register() {
-        // Register the tick listener only ONCE here.
         ClientTickEvents.END_CLIENT_TICK.register(SculkHandler::onTick);
     }
 
     private static void onTick(final MinecraftClient client) {
-        if (client.player == null) return;
+        if (client.player == null) {
+            return;
+        }
 
         final ClientPlayerEntity player = client.player;
         final boolean onGround = player.isOnGround();
 
-        // Detect landing (previously in air, now on ground)
         if (!wasOnGround && onGround) {
             handleLanding(player);
         }
@@ -50,79 +55,116 @@ public final class SculkHandler {
     }
 
     private static void handleLanding(final ClientPlayerEntity player) {
-        // Sculk logic
         if (!isWool(player.getSteppingPos(), player.getEntityWorld()) && !player.isSneaking()) {
-            // Pass null to indicate a physical vibration (landing), not a sound event
             sculkCheck(null);
         }
     }
 
     public static void sculkCheck(final SoundInstance sound) {
-        // External tracker check
-        if (VibrationTracker.isVibrating()) return;
-
-        // Player must be holding a sensor
-        if (!isHoldingSensor()) return;
-
-        final MinecraftClient client = MinecraftClient.getInstance();
-
-        // Sound validation
-        if (sound != null) {
-            if (isIgnoredSound(sound)) return;
-
-            // Distance check (squared is faster than sqrt)
-            if (client.player != null && client.player.squaredDistanceTo(sound.getX(), sound.getY(), sound.getZ()) >= 64.0) {
-                return;
-            }
+        if (sound != null && isIgnoredSound(sound)) {
+            return;
         }
 
-        // Activate Sculk Effect
+        final MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) {
+            return;
+        }
+
+        double distanceSq = 0.0;
+        if (sound != null) {
+            distanceSq = client.player.squaredDistanceTo(sound.getX(), sound.getY(), sound.getZ());
+        }
+
+        // Process Main Hand
+        processSensor(client, client.player.getMainHandStack(), distanceSq);
+
+        // Process Off Hand
+        processSensor(client, client.player.getOffHandStack(), distanceSq);
+    }
+
+    private static void processSensor(final MinecraftClient client, final ItemStack stack, final double distanceSq) {
+        if (stack.isOf(Items.SCULK_SENSOR)) {
+            handleNormalSensor(client, distanceSq);
+            return;
+        }
+
+        if (stack.isOf(Items.CALIBRATED_SCULK_SENSOR)) {
+            handleCalibratedSensor(client, distanceSq);
+        }
+    }
+
+    private static void handleNormalSensor(final MinecraftClient client, final double distanceSq) {
+        if (VibrationTracker.isVibrating()) {
+            return;
+        }
+
+        if (distanceSq > RANGE_NORMAL_SQ) {
+            return;
+        }
+
+        activateNormal(client);
+    }
+
+    private static void handleCalibratedSensor(final MinecraftClient client, final double distanceSq) {
+        if (VibrationTracker.isCalibratedVibrating()) {
+            return;
+        }
+
+        if (distanceSq > RANGE_CALIBRATED_SQ) {
+            return;
+        }
+
+        activateCalibrated(client);
+    }
+
+    private static void activateNormal(final MinecraftClient client) {
         if (client.player != null) {
             client.player.playSound(SoundEvents.BLOCK_SCULK_SENSOR_CLICKING, 1.0f, 1.0f);
         }
 
         VibrationTracker.setVibrating(true);
 
-        // Schedule deactivation
-        BackgroundLoopHandler.getInstance().waitTicks("SculkDeactivate", 50, () -> client.execute(() -> {
-            if (client.player == null || !VibrationTracker.isVibrating()) return;
+        BackgroundLoopHandler.getInstance().waitTicks("SculkDeactivateNormal", COOLDOWN_NORMAL, () -> client.execute(() -> {
+            if (client.player == null || !VibrationTracker.isVibrating()) {
+                return;
+            }
 
             VibrationTracker.setVibrating(false);
             client.player.playSound(SoundEvents.BLOCK_SCULK_SENSOR_CLICKING_STOP, 1.0f, 1.0f);
         }));
     }
 
-    private static boolean isHoldingSensor() {
-        final ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (player == null) return false;
+    private static void activateCalibrated(final MinecraftClient client) {
+        if (client.player != null) {
+            client.player.playSound(SoundEvents.BLOCK_SCULK_SENSOR_CLICKING, 1.0f, 1.0f);
+        }
 
-        final ItemStack main = player.getMainHandStack();
-        final ItemStack off = player.getOffHandStack();
+        VibrationTracker.setCalibratedVibrating(true);
 
-        return isSensorItem(main) || isSensorItem(off);
-    }
+        BackgroundLoopHandler.getInstance().waitTicks("SculkDeactivateCalibrated", COOLDOWN_CALIBRATED, () -> client.execute(() -> {
+            if (client.player == null || !VibrationTracker.isCalibratedVibrating()) {
+                return;
+            }
 
-    private static boolean isSensorItem(final ItemStack stack) {
-        return stack.isOf(Items.SCULK_SENSOR) || stack.isOf(Items.CALIBRATED_SCULK_SENSOR);
+            VibrationTracker.setCalibratedVibrating(false);
+            client.player.playSound(SoundEvents.BLOCK_SCULK_SENSOR_CLICKING_STOP, 1.0f, 1.0f);
+        }));
     }
 
     private static boolean isIgnoredSound(final SoundInstance sound) {
-        // 1. Check Attenuation (Global sounds vs Positional sounds)
-        if (sound.getAttenuationType() == SoundInstance.AttenuationType.NONE) return true;
-
-        // 2. Check Category
-        if (sound.getCategory() == SoundCategory.AMBIENT) return true;
-
-        // 3. Check Specific IDs (using the Set defined at the top)
+        if (sound.getAttenuationType() == SoundInstance.AttenuationType.NONE) {
+            return true;
+        }
+        if (sound.getCategory() == SoundCategory.AMBIENT) {
+            return true;
+        }
         return IGNORED_SOUND_IDS.contains(sound.getId());
     }
 
-    /**
-     * Checks if a block is part of the WOOL tag.
-     * This replaces the manual check for every color.
-     */
     public static boolean isWool(final BlockPos pos, final net.minecraft.world.World world) {
-        if (world == null) return false;
+        if (world == null) {
+            return false;
+        }
         final BlockState state = world.getBlockState(pos);
         return state.isIn(BlockTags.WOOL);
     }

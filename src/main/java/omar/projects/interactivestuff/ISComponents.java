@@ -12,6 +12,10 @@ public final class ISComponents {
             builder.codec(com.mojang.serialization.Codec.BOOL)
     );
 
+    public static final ComponentType<Boolean> CALIBRATED_VIBRATING = register("calibrated_vibrating", builder ->
+            builder.codec(com.mojang.serialization.Codec.BOOL)
+    );
+
     public static final ComponentType<Boolean> WATERLOGGED = register("waterlogged", builder ->
             builder.codec(com.mojang.serialization.Codec.BOOL)
     );

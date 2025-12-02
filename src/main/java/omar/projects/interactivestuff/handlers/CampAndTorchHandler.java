@@ -50,6 +50,6 @@ public final class CampAndTorchHandler {
     private static boolean isCampfireOrTorch(final ItemStack stack) {
         return stack.isOf(Items.CAMPFIRE) || stack.isOf(Items.SOUL_CAMPFIRE) ||
                stack.isOf(Items.TORCH) || stack.isOf(Items.SOUL_TORCH) ||
-               stack.isOf(Items.COPPER_TORCH);
+               stack.isOf(Items.COPPER_TORCH) || stack.isOf(Items.REDSTONE_TORCH);
     }
 }

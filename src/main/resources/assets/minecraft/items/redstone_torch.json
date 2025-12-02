@@ -2,19 +2,19 @@
   "model": {
     "type": "minecraft:select",
     "property": "minecraft:component",
-    "component": "interactivestuff:calibrated_vibrating",
+    "component": "interactivestuff:waterlogged",
     "cases": [
       {
         "when": true,
         "model": {
           "type": "minecraft:model",
-          "model": "minecraft:block/calibrated_sculk_sensor_active"
+          "model": "interactivestuff:item/redstone_torch_off"
         }
       }
     ],
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:block/calibrated_sculk_sensor_inactive"
+      "model": "minecraft:item/redstone_torch"
     }
   }
 }
