@@ -1,0 +1,35 @@
+name: Build Mod
+
+on:
+  push:
+    branches: [ main ]      # build when pushing to main
+  pull_request:
+  workflow_dispatch:         # allow manual running
+  release:
+    types: [created]         # optional: build when a GitHub Release is created
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21 
+
+      - name: Grant execute permission to Gradle
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Upload built jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: InteractiveStuff-JAR
+          path: build/libs/*.jar
