@@ -1,9 +1,9 @@
 name: InteractiveStuffCommits
 
 on:
-  push:                             # runs on every commit
+  push:
     branches:
-      - "**"
+      - "**"    # Run on all branches
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 21   # Change to 21 if your mod uses Java 21
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -25,15 +25,17 @@ jobs:
       - name: Build JAR
         run: ./gradlew build
 
-      # Create safe commit name for filename
+      # Clean commit message so it works as a file name
       - name: Prepare commit name
         id: commit
         run: |
-          CLEANED_MSG=$(echo "${{ github.event.head_commit.message }}" | tr ' ' '_' | tr -cd '[:alnum:]_-.')
+          CLEANED_MSG=$(echo "${{ github.event.head_commit.message }}" \
+            | tr ' ' '_' \
+            | tr -cd '[:alnum:]_.-')
           echo "msg=$CLEANED_MSG" >> $GITHUB_OUTPUT
 
       - name: Upload artifact with commit name
         uses: actions/upload-artifact@v4
         with:
-          name: InteractiveStuff-${{ steps.commit.outputs.msg }}
+          name: InteractiveStuffCommits-${{ steps.commit.outputs.msg }}
           path: build/libs/*.jar
