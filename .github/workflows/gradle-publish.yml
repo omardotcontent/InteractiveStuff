@@ -1,0 +1,41 @@
+name: InteractiveStuffCommits
+
+on:
+  push:
+    branches:
+      - "**"    # Run on all branches
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21   # Change to 21 if your mod uses Java 21
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build JAR
+        run: ./gradlew build
+
+      # Clean commit message so it works as a file name
+      - name: Prepare commit name
+        id: commit
+        run: |
+          CLEANED_MSG=$(echo "${{ github.event.head_commit.message }}" \
+            | tr ' ' '_' \
+            | tr -cd '[:alnum:]_.-')
+          echo "msg=$CLEANED_MSG" >> $GITHUB_OUTPUT
+
+      - name: Upload artifact with commit name
+        uses: actions/upload-artifact@v4
+        with:
+          name: InteractiveStuffCommits-${{ steps.commit.outputs.msg }}
+          path: build/libs/*.jar
