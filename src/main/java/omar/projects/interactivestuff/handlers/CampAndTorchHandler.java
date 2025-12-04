@@ -20,7 +20,7 @@ public final class CampAndTorchHandler {
 
     static void tick(final MinecraftClient client) {
         final PlayerEntity player = client.player;
-        if (player == null) {
+        if (player == null || client.world == null || player.isSpectator()) {
             return;
         }
 
@@ -36,11 +36,11 @@ public final class CampAndTorchHandler {
         }
 
         if (isSubmerged) {
-            player.playSound(SoundEvents.BLOCK_FIRE_EXTINGUISH, 0.5f, 1.0f);
+            player.playSound(SoundEvents.BLOCK_FIRE_EXTINGUISH, 0.6f, 1.0f);
             return;
         }
 
-        player.playSound(SoundEvents.ITEM_FIRECHARGE_USE, 0.5f, 1.5f);
+        player.playSound(SoundEvents.ITEM_FLINTANDSTEEL_USE, 0.6f, 1.0f);
     }
 
     private static boolean isHoldingCampfireOrTorch(final PlayerEntity player) {

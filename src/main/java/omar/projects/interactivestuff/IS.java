@@ -7,6 +7,7 @@ public final class IS implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        ISComponents.init();
+       ISComponents.init();
     }
+
 }

@@ -19,7 +19,7 @@ public final class NoteBlockSoundHandler {
     private static void tick(final MinecraftClient client) {
         final PlayerEntity player = client.player;
 
-        if (player == null || client.world == null) {
+        if (player == null || client.world == null || player.isSpectator()) {
             return;
         }
 

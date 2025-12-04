@@ -3,7 +3,6 @@ package omar.projects.interactivestuff.mixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundSystem;
 import omar.projects.interactivestuff.handlers.SculkHandler;
@@ -22,13 +21,10 @@ public final class SoundListenerMixin {
 
     @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;", at = @At("HEAD"))
     private void onPlaySound(final SoundInstance sound, final CallbackInfoReturnable<SoundSystem.PlayResult> cir) {
-        final ClientPlayerEntity player = client.player;
-        if (player == null) {
+        if (client.player == null) {
             return;
         }
         SculkHandler.sculkCheck(sound);
-
-
     }
 
 

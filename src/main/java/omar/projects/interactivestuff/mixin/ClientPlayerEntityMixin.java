@@ -2,9 +2,9 @@ package omar.projects.interactivestuff.mixin;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import omar.projects.interactivestuff.handlers.InteractionHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,8 +20,6 @@ public final class ClientPlayerEntityMixin {
 
     @Inject(method = "swingHand", at = @At("HEAD"))
     private void onSwingHand(final Hand hand, final CallbackInfo ci) {
-        if (client.player.getStackInHand(hand).isOf(Items.BELL)) {
-            client.player.playSound(SoundEvents.BLOCK_BELL_USE, 1.0f, 1.0f);
-        }
+        InteractionHandler.getInstance().handleBlockInteraction(client, BlockPos.ofFloored(client.crosshairTarget.getPos()), hand);
     }
 }

@@ -47,7 +47,7 @@ public final class HeldItemRendererMixin {
             return stack;
         }
 
-        if (isTorchOrCampfire(stack)) {
+        if (isEligible(stack)) {
             if (this.client.player != null) {
                 final ItemStack visualStack = stack.copy();
                 visualStack.set(ISComponents.WATERLOGGED, this.client.player.isSubmergedInWater());
@@ -59,12 +59,13 @@ public final class HeldItemRendererMixin {
     }
 
     @Unique
-    private boolean isTorchOrCampfire(final ItemStack stack) {
+    private boolean isEligible(final ItemStack stack) {
         return stack.isOf(Items.CAMPFIRE) ||
                 stack.isOf(Items.SOUL_CAMPFIRE) ||
                 stack.isOf(Items.TORCH) ||
                 stack.isOf(Items.SOUL_TORCH) ||
                 stack.isOf(Items.COPPER_TORCH) ||
-                stack.isOf(Items.REDSTONE_TORCH);
+                stack.isOf(Items.REDSTONE_TORCH) ||
+                stack.isOf(Items.WATER_BUCKET);
     }
 }
