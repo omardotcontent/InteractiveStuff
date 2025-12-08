@@ -6,6 +6,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.sound.SoundEvents;
+import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 
 public final class CampAndTorchHandler {
 
@@ -19,6 +20,9 @@ public final class CampAndTorchHandler {
     }
 
     static void tick(final MinecraftClient client) {
+        if (!ConfigHandler.INSTANCE.enableTextureChanges) {
+            return;
+        }
         final PlayerEntity player = client.player;
         if (player == null || client.world == null || player.isSpectator()) {
             return;

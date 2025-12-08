@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import omar.projects.interactivestuff.ISComponents;
 import omar.projects.interactivestuff.handlers.VibrationTracker;
+import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,11 +51,10 @@ public final class HeldItemRendererMixin {
         if (isEligible(stack)) {
             if (this.client.player != null) {
                 final ItemStack visualStack = stack.copy();
-                visualStack.set(ISComponents.WATERLOGGED, this.client.player.isSubmergedInWater());
+                visualStack.set(ISComponents.WATERLOGGED, this.client.player.isSubmergedInWater() && ConfigHandler.INSTANCE.enableTextureChanges);
                 return visualStack;
             }
         }
-
         return stack;
     }
 

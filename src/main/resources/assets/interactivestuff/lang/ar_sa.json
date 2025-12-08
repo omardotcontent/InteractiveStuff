@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "معاينة الصوت",
+  "interactive_stuff.config.preview_sound.tooltip": "قم بمعاينة الصوت بالإعدادات المطبقة. (احفظ أولاً)",
+
+  "interactive_stuff.config.included_items": "العناصر المضمنة",
+  "interactive_stuff.config.included_items.tooltip": "العنصر (العناصر) التي تشغل صوت هذه المادة.",
+
+  "interactive_stuff.config.custom_pitches": "درجات صوت مخصصة",
+  "interactive_stuff.config.custom_pitches.tooltip": "التنسيق: item_id=pitch (مثال: minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "يتطلب ضرب كتلة",
+  "interactive_stuff.config.requires_block_hit.tooltip": "يتم تشغيل الصوت فقط عند ضرب كتلة.",
+
+  "interactive_stuff.config.random_pitch": "درجة صوت عشوائية",
+  "interactive_stuff.config.random_pitch.tooltip": "درجة صوت عشوائية بين %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "درجة الصوت الأساسية",
+  "interactive_stuff.config.base_pitch.tooltip": "مضاعف درجة الصوت.",
+
+  "interactive_stuff.config.volume": "مستوى الصوت",
+  "interactive_stuff.config.volume.tooltip": "مضاعف مستوى الصوت.",
+
+  "interactive_stuff.config.sound_id": "معرف حدث الصوت",
+  "interactive_stuff.config.sound_id.tooltip": "معرف SoundEvent الذي سيتم تشغيله.",
+
+  "interactive_stuff.config.settings.general": "إعدادات عامة",
+  "interactive_stuff.config.settings.general.tooltip": "بعض الإعدادات العامة القابلة للتعديل.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "تفعيل الضربات التفاعلية",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "هدوء الضربة",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "تشغيل صوت الضربة بعد كم تيك (مفيد إذا كنت تستخدم حركات الشخص الأول)",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "يشغل أصوات تفاعلية عند ضرب الكتل بعناصر محددة.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "تفعيل مستشعر السكالك في منظور الشخص الأول",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "سيتصرف مستشعر السكالك مثل الكتلة الفعلية في منظور الشخص الأول.",
+
+  "interactive_stuff.config.settings.general.note_block": "تفعيل الانحناء مع كتلة النغمات",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "الانحناء (Crouch) على كتلة ريدستون أثناء حمل كتلة نغمات سيؤدي لعمل نغمة.",
+
+  "interactive_stuff.config.settings.general.model_changes": "تفعيل تغييرات النموذج",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "يغير نماذج/أنسجة عناصر/كتل معينة عند حدوث حدث معين.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "الكتل المستبعدة",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "الكتلة (الكتل) التي تتجاهل أصوات التفاعل.",
+
+  "interactive_stuff.config.settings.materials": "إدارة المواد",
+  "interactive_stuff.config.settings.materials.tooltip": "إضافة، إعادة تسمية، إعادة ترتيب، أو إزالة مواد التفاعل.",
+  "interactive_stuff.config.settings.materials.details1": "استخدم ➕ لإضافة مادة جديدة.",
+  "interactive_stuff.config.settings.materials.details2": "أعد التسمية بالنقر على النص.",
+  "interactive_stuff.config.settings.materials.details3": "أعد الترتيب على اليسار.",
+  "interactive_stuff.config.settings.materials.details4": "قم بالإزالة باستخدام أيقونة ✖."
+}

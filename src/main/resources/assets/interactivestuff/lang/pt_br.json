@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "Prévia do Som",
+  "interactive_stuff.config.preview_sound.tooltip": "Visualize o som com as configurações aplicadas. (Salve primeiro)",
+
+  "interactive_stuff.config.included_items": "Itens Incluídos",
+  "interactive_stuff.config.included_items.tooltip": "Item(ns) que ativam o som deste material.",
+
+  "interactive_stuff.config.custom_pitches": "Tons Personalizados",
+  "interactive_stuff.config.custom_pitches.tooltip": "Formato: item_id=tom (ex: minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Requer Bater no Bloco",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Toca o som apenas ao bater em um bloco.",
+
+  "interactive_stuff.config.random_pitch": "Tom Aleatório",
+  "interactive_stuff.config.random_pitch.tooltip": "Tom aleatório entre %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Tom Base",
+  "interactive_stuff.config.base_pitch.tooltip": "Multiplicador de tom.",
+
+  "interactive_stuff.config.volume": "Volume",
+  "interactive_stuff.config.volume.tooltip": "Multiplicador de volume.",
+
+  "interactive_stuff.config.sound_id": "ID do Evento de Som",
+  "interactive_stuff.config.sound_id.tooltip": "O ID do SoundEvent a ser tocado.",
+
+  "interactive_stuff.config.settings.general": "Configurações Gerais",
+  "interactive_stuff.config.settings.general.tooltip": "Algumas configurações gerais editáveis.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Ativar Golpes Interativos",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Tempo de Recarga do Golpe",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Tocar o som do golpe após quantos ticks (útil se você estiver usando animações em 1ª pessoa).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Toca sons de interação ao bater em blocos com itens específicos.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Ativar Sensor Sculk em 1ª Pessoa",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Sensores Sculk se comportarão como o bloco real em primeira pessoa.",
+
+  "interactive_stuff.config.settings.general.note_block": "Ativar Agachar com Bloco Musical",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Agachar-se em um bloco de redstone segurando um bloco musical tocará uma nota.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Ativar Mudanças de Modelo",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Altera modelos/texturas de certos itens/blocos quando um evento específico acontece.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Blocos Excluídos",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Bloco(s) que ignoram sons de interação.",
+
+  "interactive_stuff.config.settings.materials": "Gerenciar Materiais",
+  "interactive_stuff.config.settings.materials.tooltip": "Adicionar, renomear, reordenar ou remover materiais de interação.",
+  "interactive_stuff.config.settings.materials.details1": "Use ➕ para adicionar um novo material.",
+  "interactive_stuff.config.settings.materials.details2": "Renomeie clicando no texto.",
+  "interactive_stuff.config.settings.materials.details3": "Reordene à esquerda.",
+  "interactive_stuff.config.settings.materials.details4": "Remova usando o ícone ✖."
+}

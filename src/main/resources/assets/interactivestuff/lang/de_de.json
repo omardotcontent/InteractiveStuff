@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "Sound-Vorschau",
+  "interactive_stuff.config.preview_sound.tooltip": "Vorschau des Sounds mit den angewendeten Einstellungen. (Zuerst speichern)",
+
+  "interactive_stuff.config.included_items": "Enthaltene Gegenstände",
+  "interactive_stuff.config.included_items.tooltip": "Gegenstand/Gegenstände, die den Sound dieses Materials auslösen.",
+
+  "interactive_stuff.config.custom_pitches": "Benutzerdefinierte Tonhöhen",
+  "interactive_stuff.config.custom_pitches.tooltip": "Format: item_id=pitch (z. B. minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Erfordert Blockschlag",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Spielt den Sound nur ab, wenn ein Block geschlagen wird.",
+
+  "interactive_stuff.config.random_pitch": "Zufällige Tonhöhe",
+  "interactive_stuff.config.random_pitch.tooltip": "Zufällige Tonhöhe zwischen %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Basis-Tonhöhe",
+  "interactive_stuff.config.base_pitch.tooltip": "Tonhöhen-Multiplikator.",
+
+  "interactive_stuff.config.volume": "Lautstärke",
+  "interactive_stuff.config.volume.tooltip": "Lautstärke-Multiplikator.",
+
+  "interactive_stuff.config.sound_id": "Sound-Event-ID",
+  "interactive_stuff.config.sound_id.tooltip": "Die abzuspielende SoundEvent-ID.",
+
+  "interactive_stuff.config.settings.general": "Allgemeine Einstellungen",
+  "interactive_stuff.config.settings.general.tooltip": "Einige bearbeitbare allgemeine Einstellungen.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Interaktive Schläge aktivieren",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Schlag-Abklingzeit",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Nach wie vielen Ticks der Schlagsound abgespielt wird (hilfreich bei Animationen in der Ego-Perspektive).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Spielt Interaktionsgeräusche ab, wenn Blöcke mit bestimmten Gegenständen geschlagen werden.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Sculk-Sensor in Ego-Perspektive aktivieren",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Sculk-Sensoren verhalten sich in der Ego-Perspektive wie der eigentliche Block.",
+
+  "interactive_stuff.config.settings.general.note_block": "Notenblock-Schleichen aktivieren",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Beim Schleichen auf einem Redstone-Block mit einem Notenblock in der Hand wird eine Note gespielt.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Modelländerungen aktivieren",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Ändert Modelle/Texturen bestimmter Gegenstände/Blöcke, wenn ein bestimmtes Ereignis eintritt.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Ausgeschlossene Blöcke",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Block/Blöcke, die Interaktionsgeräusche ignorieren.",
+
+  "interactive_stuff.config.settings.materials": "Materialien verwalten",
+  "interactive_stuff.config.settings.materials.tooltip": "Interaktionsmaterialien hinzufügen, umbenennen, neu anordnen oder entfernen.",
+  "interactive_stuff.config.settings.materials.details1": "Benutze ➕, um ein neues Material hinzuzufügen.",
+  "interactive_stuff.config.settings.materials.details2": "Umbenennen durch Klicken auf den Text.",
+  "interactive_stuff.config.settings.materials.details3": "Neu anordnen auf der linken Seite.",
+  "interactive_stuff.config.settings.materials.details4": "Entfernen mit dem Symbol ✖."
+}

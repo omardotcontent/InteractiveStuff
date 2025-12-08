@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "Pratinjau Suara",
+  "interactive_stuff.config.preview_sound.tooltip": "Pratinjau suara dengan pengaturan yang diterapkan. (Simpan dulu)",
+
+  "interactive_stuff.config.included_items": "Item Termasuk",
+  "interactive_stuff.config.included_items.tooltip": "Item yang memicu suara material ini.",
+
+  "interactive_stuff.config.custom_pitches": "Nada Kustom",
+  "interactive_stuff.config.custom_pitches.tooltip": "Format: item_id=pitch (misal: minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Butuh Pukul Blok",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Hanya memutar suara saat memukul blok.",
+
+  "interactive_stuff.config.random_pitch": "Nada Acak",
+  "interactive_stuff.config.random_pitch.tooltip": "Nada acak antara %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Nada Dasar",
+  "interactive_stuff.config.base_pitch.tooltip": "Pengali nada.",
+
+  "interactive_stuff.config.volume": "Volume",
+  "interactive_stuff.config.volume.tooltip": "Pengali volume.",
+
+  "interactive_stuff.config.sound_id": "ID Event Suara",
+  "interactive_stuff.config.sound_id.tooltip": "ID SoundEvent yang akan diputar.",
+
+  "interactive_stuff.config.settings.general": "Pengaturan Umum",
+  "interactive_stuff.config.settings.general.tooltip": "Beberapa pengaturan umum yang dapat diedit.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Aktifkan Pukulan Interaktif",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Cooldown Pukulan",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Putar suara pukulan setelah berapa tick (berguna jika menggunakan animasi orang pertama).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Memutar suara interaksi saat memukul blok dengan item tertentu.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Aktifkan Sensor Sculk di Orang Pertama",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Sensor Sculk akan berperilaku seperti blok asli dalam mode Orang Pertama.",
+
+  "interactive_stuff.config.settings.general.note_block": "Aktifkan Jongkok Blok Nada",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Jongkok di atas blok redstone sambil memegang blok nada akan memainkan nada.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Aktifkan Perubahan Model",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Mengubah Model/Tekstur item/blok tertentu saat event tertentu terjadi.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Blok Dikecualikan",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Blok yang mengabaikan suara interaksi.",
+
+  "interactive_stuff.config.settings.materials": "Kelola Material",
+  "interactive_stuff.config.settings.materials.tooltip": "Tambah, ganti nama, urutkan ulang, atau hapus material interaksi.",
+  "interactive_stuff.config.settings.materials.details1": "Gunakan ➕ untuk menambah material baru.",
+  "interactive_stuff.config.settings.materials.details2": "Ganti nama dengan mengklik teks.",
+  "interactive_stuff.config.settings.materials.details3": "Urutkan ulang di sebelah kiri.",
+  "interactive_stuff.config.settings.materials.details4": "Hapus dengan menggunakan ikon ✖."
+}

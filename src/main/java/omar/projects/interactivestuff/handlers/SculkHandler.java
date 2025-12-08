@@ -9,6 +9,7 @@ import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
+import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 
 import java.util.Set;
 
@@ -37,6 +38,10 @@ public final class SculkHandler {
     }
 
     private static void onTick(final MinecraftClient client) {
+        if (!ConfigHandler.INSTANCE.enableSculkSensorFeature) {
+            return;
+        }
+
         final ClientPlayerEntity player = client.player;
         if (player == null) {
             return;
@@ -64,6 +69,12 @@ public final class SculkHandler {
     }
 
     public static void sculkCheck(final SoundInstance sound) {
+        final ConfigHandler config = ConfigHandler.INSTANCE;
+
+        if (!config.enableSculkSensorFeature) {
+            return;
+        }
+
         if (sound == null) {
             return;
         }
