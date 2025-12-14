@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "Geluidvoorbeel",
+  "interactive_stuff.config.preview_sound.tooltip": "Bekijk een voorbeeld van het geluid met de toegepaste instellingen. (Eerst opslaan)",
+
+  "interactive_stuff.config.included_items": "Inbegrepen voorwerpen",
+  "interactive_stuff.config.included_items.tooltip": "Voorwerp(en) die het geluid van dit materiaal activeren.",
+
+  "interactive_stuff.config.custom_pitches": "Aangepaste toonhoogtes",
+  "interactive_stuff.config.custom_pitches.tooltip": "Formaat: item_id=pitch (bijv. minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Vereist blok slaan",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Speelt het geluid alleen af bij het slaan van een blok.",
+
+  "interactive_stuff.config.random_pitch": "Willekeurige toonhoogte",
+  "interactive_stuff.config.random_pitch.tooltip": "Willekeurige toonhoogte tussen %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Basistoonhoogte",
+  "interactive_stuff.config.base_pitch.tooltip": "Toonhoogtevermenigvuldiger.",
+
+  "interactive_stuff.config.volume": "Volume",
+  "interactive_stuff.config.volume.tooltip": "Volumevermenigvuldiger.",
+
+  "interactive_stuff.config.sound_id": "Geluidsgebeurtenis-ID",
+  "interactive_stuff.config.sound_id.tooltip": "De af te spelen SoundEvent-ID.",
+
+  "interactive_stuff.config.settings.general": "Algemene instellingen",
+  "interactive_stuff.config.settings.general.tooltip": "Enkele bewerkbare algemene instellingen.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Interactieve slagen inschakelen",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Slagafkoeltijd",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Speel het slaggeluid na hoeveel ticks (handig bij eerstepersoonsanimaties).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Speelt interactiegeluiden af bij het slaan van blokken met specifieke voorwerpen.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Sculksensor in eerste persoon inschakelen",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Sculksensoren gedragen zich als het daadwerkelijke blok in eerste persoon.",
+
+  "interactive_stuff.config.settings.general.note_block": "Nootblok sluipen inschakelen",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Sluipen op een redstoneblok met een nootblok in de hand speelt een noot af.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Modelwijzigingen inschakelen",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Verandert modellen/texturen van bepaalde voorwerpen/blokken bij een specifieke gebeurtenis.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Uitgesloten blokken",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Blok(ken) die interactiegeluiden negeren.",
+
+  "interactive_stuff.config.settings.materials": "Materialen beheren",
+  "interactive_stuff.config.settings.materials.tooltip": "Interactiematerialen toevoegen, hernoemen, opnieuw ordenen of verwijderen.",
+  "interactive_stuff.config.settings.materials.details1": "Gebruik ➕ om een nieuw materiaal toe te voegen.",
+  "interactive_stuff.config.settings.materials.details2": "Hernoemen door op de tekst te klikken.",
+  "interactive_stuff.config.settings.materials.details3": "Opnieuw ordenen aan de linkerkant.",
+  "interactive_stuff.config.settings.materials.details4": "Verwijderen met het ✖ pictogram."
+}

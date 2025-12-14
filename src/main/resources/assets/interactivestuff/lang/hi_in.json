@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "ध्वनि पूर्वावलोकन (Preview Sound)",
+  "interactive_stuff.config.preview_sound.tooltip": "लागू की गई सेटिंग्स के साथ ध्वनि का पूर्वावलोकन करें। (पहले सहेजें)",
+
+  "interactive_stuff.config.included_items": "शामिल वस्तुएं (Included Items)",
+  "interactive_stuff.config.included_items.tooltip": "वस्तु(एं) जो इस सामग्री की ध्वनि को ट्रिगर करती हैं।",
+
+  "interactive_stuff.config.custom_pitches": "कस्टम पिच (Custom Pitches)",
+  "interactive_stuff.config.custom_pitches.tooltip": "प्रारूप: item_id=pitch (जैसे: minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "ब्लॉक हिट आवश्यक है",
+  "interactive_stuff.config.requires_block_hit.tooltip": "ब्लॉक को मारने पर ही ध्वनि बजती है।",
+
+  "interactive_stuff.config.random_pitch": "यादृच्छिक पिच (Random Pitch)",
+  "interactive_stuff.config.random_pitch.tooltip": "%1$s–2.0 के बीच यादृच्छिक पिच।",
+
+  "interactive_stuff.config.base_pitch": "आधार पिच (Base Pitch)",
+  "interactive_stuff.config.base_pitch.tooltip": "पिच गुणक।",
+
+  "interactive_stuff.config.volume": "वॉल्यूम",
+  "interactive_stuff.config.volume.tooltip": "वॉल्यूम गुणक।",
+
+  "interactive_stuff.config.sound_id": "साउंड इवेंट ID",
+  "interactive_stuff.config.sound_id.tooltip": "बजाने के लिए SoundEvent ID।",
+
+  "interactive_stuff.config.settings.general": "सामान्य सेटिंग्स",
+  "interactive_stuff.config.settings.general.tooltip": "कुछ संपादन योग्य सामान्य सेटिंग्स।",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "इंटरएक्टिव हिट्स सक्षम करें",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "हिट कूलडाउन",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "कितने टिक के बाद हिट ध्वनि बजाएं (यदि आप प्रथम-व्यक्ति एनीमेशन का उपयोग कर रहे हैं तो सहायक)।",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "विशिष्ट वस्तुओं के साथ ब्लॉक मारते समय इंटरैक्शन ध्वनियां बजाता है।",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "प्रथम-व्यक्ति में स्कल्क सेंसर सक्षम करें",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "स्कल्क सेंसर प्रथम-व्यक्ति (First-Person) मोड में वास्तविक ब्लॉक की तरह व्यवहार करेंगे।",
+
+  "interactive_stuff.config.settings.general.note_block": "नोट ब्लॉक क्राउच सक्षम करें",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "नोट ब्लॉक पकड़े हुए रेडस्टोन ब्लॉक पर झुकने (Crouch) से एक नोट बजेगा।",
+
+  "interactive_stuff.config.settings.general.model_changes": "मॉडल परिवर्तन सक्षम करें",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "विशिष्ट घटना होने पर कुछ वस्तुओं/ब्लॉकों के मॉडल/टेक्सचर बदलता है।",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "बहिष्कृत ब्लॉक",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "ब्लॉक जो इंटरैक्शन ध्वनियों को अनदेखा करते हैं।",
+
+  "interactive_stuff.config.settings.materials": "सामग्री प्रबंधित करें",
+  "interactive_stuff.config.settings.materials.tooltip": "इंटरैक्शन सामग्री जोड़ें, नाम बदलें, पुन: व्यवस्थित करें, या हटाएं।",
+  "interactive_stuff.config.settings.materials.details1": "नई सामग्री जोड़ने के लिए ➕ का उपयोग करें।",
+  "interactive_stuff.config.settings.materials.details2": "टेक्स्ट पर क्लिक करके नाम बदलें।",
+  "interactive_stuff.config.settings.materials.details3": "बाईं ओर पुन: व्यवस्थित करें।",
+  "interactive_stuff.config.settings.materials.details4": "✖ आइकन का उपयोग करके हटाएं।"
+}

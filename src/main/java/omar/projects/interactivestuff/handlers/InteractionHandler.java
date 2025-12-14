@@ -69,13 +69,9 @@ public final class InteractionHandler {
         // Fix: Random does not have nextFloat(min, max). Used (min + random * range)
         final float pitch = material.randomPitch ? basePitch + (random.nextFloat() * 1.5F) : basePitch;
 
-        // Fix: Use client.world.playSound to play sound client-side with a category
-        client.player.playSoundToPlayer(
-                material.getSoundEvent(),
-                SoundCategory.BLOCKS,
-                material.volume,
-                pitch
-        );
+        if (client.world != null) {
+            client.world.playSoundClient(material.getSoundEvent(), SoundCategory.BLOCKS,material.volume, pitch);
+        }
 
         final StatusEffectInstance haste = player.getStatusEffect(StatusEffects.HASTE);
         final StatusEffectInstance conduit = player.getStatusEffect(StatusEffects.CONDUIT_POWER);

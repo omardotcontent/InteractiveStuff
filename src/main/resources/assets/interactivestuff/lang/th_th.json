@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "ตัวอย่างเสียง",
+  "interactive_stuff.config.preview_sound.tooltip": "ดูตัวอย่างเสียงด้วยการตั้งค่าที่ใช้ (บันทึกก่อน)",
+
+  "interactive_stuff.config.included_items": "ไอเทมที่รวมอยู่",
+  "interactive_stuff.config.included_items.tooltip": "ไอเทมที่กระตุ้นเสียงของวัสดุนี้",
+
+  "interactive_stuff.config.custom_pitches": "ระดับเสียงกำหนดเอง",
+  "interactive_stuff.config.custom_pitches.tooltip": "รูปแบบ: item_id=pitch (เช่น minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "ต้องตีบล็อก",
+  "interactive_stuff.config.requires_block_hit.tooltip": "เล่นเสียงเฉพาะเมื่อตีบล็อกเท่านั้น",
+
+  "interactive_stuff.config.random_pitch": "สุ่มระดับเสียง",
+  "interactive_stuff.config.random_pitch.tooltip": "สุ่มระดับเสียงระหว่าง %1$s–2.0",
+
+  "interactive_stuff.config.base_pitch": "ระดับเสียงพื้นฐาน",
+  "interactive_stuff.config.base_pitch.tooltip": "ตัวคูณระดับเสียง",
+
+  "interactive_stuff.config.volume": "ความดัง",
+  "interactive_stuff.config.volume.tooltip": "ตัวคูณความดัง",
+
+  "interactive_stuff.config.sound_id": "ID เหตุการณ์เสียง",
+  "interactive_stuff.config.sound_id.tooltip": "ID SoundEvent ที่จะเล่น",
+
+  "interactive_stuff.config.settings.general": "การตั้งค่าทั่วไป",
+  "interactive_stuff.config.settings.general.tooltip": "การตั้งค่าทั่วไปบางอย่างที่แก้ไขได้",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "เปิดใช้งานการตีแบบโต้ตอบ",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "คูลดาวน์การตี",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "เล่นเสียงตีหลังจากผ่านไปกี่ tick (มีประโยชน์หากใช้อนิเมชันมุมมองบุคคลที่หนึ่ง)",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "เล่นเสียงโต้ตอบเมื่อตีบล็อกด้วยไอเทมเฉพาะ",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "เปิดใช้งานสกัล์กเซ็นเซอร์ในมุมมองบุคคลที่หนึ่ง",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "สกัล์กเซ็นเซอร์จะทำงานเหมือนบล็อกจริงในมุมมองบุคคลที่หนึ่ง",
+
+  "interactive_stuff.config.settings.general.note_block": "เปิดใช้งานย่อตัวบนบล็อกโน้ต",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "การย่อตัวบนบล็อกเรดสโตนขณะถือบล็อกโน้ตจะเล่นเสียงโน้ต",
+
+  "interactive_stuff.config.settings.general.model_changes": "เปิดใช้งานการเปลี่ยนโมเดล",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "เปลี่ยนโมเดล/พื้นผิวของไอเทม/บล็อกบางอย่างเมื่อเกิดเหตุการณ์เฉพาะ",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "บล็อกที่ยกเว้น",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "บล็อกที่ไม่สนใจเสียงโต้ตอบ",
+
+  "interactive_stuff.config.settings.materials": "จัดการวัสดุ",
+  "interactive_stuff.config.settings.materials.tooltip": "เพิ่ม เปลี่ยนชื่อ จัดลำดับใหม่ หรือลบวัสดุโต้ตอบ",
+  "interactive_stuff.config.settings.materials.details1": "ใช้ ➕ เพื่อเพิ่มวัสดุใหม่",
+  "interactive_stuff.config.settings.materials.details2": "เปลี่ยนชื่อโดยคลิกที่ข้อความ",
+  "interactive_stuff.config.settings.materials.details3": "จัดลำดับใหม่ทางด้านซ้าย",
+  "interactive_stuff.config.settings.materials.details4": "ลบออกโดยใช้ไอคอน ✖"
+}

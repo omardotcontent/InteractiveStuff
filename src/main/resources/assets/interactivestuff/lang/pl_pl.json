@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "Podgląd dźwięku",
+  "interactive_stuff.config.preview_sound.tooltip": "Odsłuchaj dźwięk z zastosowanymi ustawieniami. (Najpierw zapisz)",
+
+  "interactive_stuff.config.included_items": "Uwzględnione przedmioty",
+  "interactive_stuff.config.included_items.tooltip": "Przedmiot(y) wyzwalający(e) dźwięk tego materiału.",
+
+  "interactive_stuff.config.custom_pitches": "Własna tonacja",
+  "interactive_stuff.config.custom_pitches.tooltip": "Format: item_id=pitch (np. minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Wymaga uderzenia w blok",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Odtwarza dźwięk tylko podczas uderzania w blok.",
+
+  "interactive_stuff.config.random_pitch": "Losowa tonacja",
+  "interactive_stuff.config.random_pitch.tooltip": "Losowa tonacja pomiędzy %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Bazowa tonacja",
+  "interactive_stuff.config.base_pitch.tooltip": "Mnożnik tonacji.",
+
+  "interactive_stuff.config.volume": "Głośność",
+  "interactive_stuff.config.volume.tooltip": "Mnożnik głośności.",
+
+  "interactive_stuff.config.sound_id": "ID zdarzenia dźwiękowego",
+  "interactive_stuff.config.sound_id.tooltip": "ID SoundEvent do odtworzenia.",
+
+  "interactive_stuff.config.settings.general": "Ustawienia ogólne",
+  "interactive_stuff.config.settings.general.tooltip": "Kilka edytowalnych ustawień ogólnych.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Włącz interaktywne uderzenia",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Czas odnowienia uderzenia",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Po ilu tickach odtworzyć dźwięk uderzenia (przydatne przy animacjach pierwszoosobowych).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Odtwarza dźwięki interakcji podczas uderzania w bloki określonymi przedmiotami.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Włącz czujnik sculku w pierwszej osobie",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Czujniki sculku będą zachowywać się jak rzeczywisty blok w widoku pierwszoosobowym.",
+
+  "interactive_stuff.config.settings.general.note_block": "Włącz blok dźwiękowy przy skradaniu",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Skradanie się na bloku redstone z blokiem dźwiękowym w ręku odtworzy nutę.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Włącz zmiany modeli",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Zmienia modele/tekstury określonych przedmiotów/bloków po wystąpieniu zdarzenia.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Wykluczone bloki",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Blok(i) ignorujący(e) dźwięki interakcji.",
+
+  "interactive_stuff.config.settings.materials": "Zarządzaj materiałami",
+  "interactive_stuff.config.settings.materials.tooltip": "Dodawaj, zmieniaj nazwy, zmieniaj kolejność lub usuwaj materiały interakcji.",
+  "interactive_stuff.config.settings.materials.details1": "Użyj ➕, aby dodać nowy materiał.",
+  "interactive_stuff.config.settings.materials.details2": "Zmień nazwę, klikając tekst.",
+  "interactive_stuff.config.settings.materials.details3": "Zmień kolejność po lewej stronie.",
+  "interactive_stuff.config.settings.materials.details4": "Usuń za pomocą ikony ✖."
+}

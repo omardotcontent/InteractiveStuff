@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "Попередній перегляд звуку",
+  "interactive_stuff.config.preview_sound.tooltip": "Перевірити звук із застосованими налаштуваннями. (Спочатку збережіть)",
+
+  "interactive_stuff.config.included_items": "Включені предмети",
+  "interactive_stuff.config.included_items.tooltip": "Предмет(и), що активують звук цього матеріалу.",
+
+  "interactive_stuff.config.custom_pitches": "Власна висота тону",
+  "interactive_stuff.config.custom_pitches.tooltip": "Формат: item_id=pitch (напр., minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Вимагає удару по блоку",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Відтворює звук лише при ударі по блоку.",
+
+  "interactive_stuff.config.random_pitch": "Випадкова висота тону",
+  "interactive_stuff.config.random_pitch.tooltip": "Випадковий тон між %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Базова висота тону",
+  "interactive_stuff.config.base_pitch.tooltip": "Множник висоти тону.",
+
+  "interactive_stuff.config.volume": "Гучність",
+  "interactive_stuff.config.volume.tooltip": "Множник гучності.",
+
+  "interactive_stuff.config.sound_id": "ID звукової події",
+  "interactive_stuff.config.sound_id.tooltip": "ID SoundEvent для відтворення.",
+
+  "interactive_stuff.config.settings.general": "Загальні налаштування",
+  "interactive_stuff.config.settings.general.tooltip": "Деякі редаговані загальні налаштування.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Увімкнути інтерактивні удари",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Перезарядка удару",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Через скільки тіків відтворювати звук удару (корисно для анімацій від першої особи).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Відтворює звуки взаємодії при ударі по блоках певними предметами.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Скалк-сенсор від першої особи",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Скалк-сенсори поводитимуться як реальний блок у режимі від першої особи.",
+
+  "interactive_stuff.config.settings.general.note_block": "Нотний блок при присіданні",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Присідання на редстоун-блоці з нотним блоком у руці відтворить ноту.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Увімкнути зміни моделей",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Змінює моделі/текстури певних предметів/блоків, коли трапляється подія.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Виключені блоки",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Блок(и), що ігнорують звуки взаємодії.",
+
+  "interactive_stuff.config.settings.materials": "Керування матеріалами",
+  "interactive_stuff.config.settings.materials.tooltip": "Додати, перейменувати, змінити порядок або видалити матеріали.",
+  "interactive_stuff.config.settings.materials.details1": "Використовуйте ➕, щоб додати новий матеріал.",
+  "interactive_stuff.config.settings.materials.details2": "Перейменуйте, натиснувши на текст.",
+  "interactive_stuff.config.settings.materials.details3": "Змініть порядок зліва.",
+  "interactive_stuff.config.settings.materials.details4": "Видаліть за допомогою значка ✖."
+}

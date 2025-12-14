@@ -17,21 +17,13 @@ public abstract class LocomotionFirstPersonItemMixin {
 
     @ModifyVariable(
             method = "renderItem",
-            remap = true,
+            at = @At("HEAD"),
             argsOnly = true,
-            require = 0,
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/item/ItemStack;isEmpty()Z",
-                    ordinal = 0
-            ))
-    private ItemStack modifyItemStackBeforeEmptyCheck(ItemStack stack) {
-        return processItemStack(stack);
-    }
-
-    @Unique
-    private ItemStack processItemStack(ItemStack stack) {
-        // Your existing logic...
+            ordinal = 0,
+            require = 0
+    )
+    private ItemStack modifyLocomotionRenderedStack(ItemStack stack) {
+        // --- Example: SCULK SENSOR visual vibration ---
         if (stack.isOf(Items.SCULK_SENSOR)) {
             if (VibrationTracker.isVibrating()) {
                 ItemStack copy = stack.copy();
@@ -41,6 +33,7 @@ public abstract class LocomotionFirstPersonItemMixin {
             return stack;
         }
 
+        // --- Example: CALIBRATED SENSOR visual vibration ---
         if (stack.isOf(Items.CALIBRATED_SCULK_SENSOR)) {
             if (VibrationTracker.isCalibratedVibrating()) {
                 ItemStack copy = stack.copy();
@@ -50,6 +43,7 @@ public abstract class LocomotionFirstPersonItemMixin {
             return stack;
         }
 
+        // --- WATERLOGGED torch logic ---
         if (isEligibleTorch(stack)) {
             var player = MinecraftClient.getInstance().player;
             if (player != null) {

@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "Aperçu du son",
+  "interactive_stuff.config.preview_sound.tooltip": "Écouter le son avec les paramètres appliqués. (Enregistrer d'abord)",
+
+  "interactive_stuff.config.included_items": "Objets inclus",
+  "interactive_stuff.config.included_items.tooltip": "Objet(s) qui déclenchent le son de ce matériau.",
+
+  "interactive_stuff.config.custom_pitches": "Hauteurs personnalisées",
+  "interactive_stuff.config.custom_pitches.tooltip": "Format : item_id=pitch (ex : minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Nécessite de frapper un bloc",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Joue le son uniquement lors de la frappe d'un bloc.",
+
+  "interactive_stuff.config.random_pitch": "Hauteur aléatoire",
+  "interactive_stuff.config.random_pitch.tooltip": "Hauteur aléatoire entre %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Hauteur de base",
+  "interactive_stuff.config.base_pitch.tooltip": "Multiplicateur de hauteur.",
+
+  "interactive_stuff.config.volume": "Volume",
+  "interactive_stuff.config.volume.tooltip": "Multiplicateur de volume.",
+
+  "interactive_stuff.config.sound_id": "ID de l'événement sonore",
+  "interactive_stuff.config.sound_id.tooltip": "L'ID du SoundEvent à jouer.",
+
+  "interactive_stuff.config.settings.general": "Paramètres généraux",
+  "interactive_stuff.config.settings.general.tooltip": "Quelques paramètres généraux modifiables.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Activer les frappes interactives",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Temps de recharge de frappe",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Jouer le son de frappe après combien de ticks (utile pour les animations à la première personne).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Joue des sons d'interaction lors de la frappe de blocs avec des objets spécifiques.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Capteur Sculk en première personne",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Les capteurs Sculk se comporteront comme le bloc réel en première personne.",
+
+  "interactive_stuff.config.settings.general.note_block": "Activer le bloc musical en s'accroupissant",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "S'accroupir sur un bloc de redstone en tenant un bloc musical jouera une note.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Activer les changements de modèle",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Modifie les modèles/textures de certains objets/blocs lorsqu'un événement spécifique se produit.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Blocs exclus",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Bloc(s) qui ignorent les sons d'interaction.",
+
+  "interactive_stuff.config.settings.materials": "Gérer les matériaux",
+  "interactive_stuff.config.settings.materials.tooltip": "Ajouter, renommer, réorganiser ou supprimer des matériaux d'interaction.",
+  "interactive_stuff.config.settings.materials.details1": "Utilisez ➕ pour ajouter un nouveau matériau.",
+  "interactive_stuff.config.settings.materials.details2": "Renommez en cliquant sur le texte.",
+  "interactive_stuff.config.settings.materials.details3": "Réorganisez à gauche.",
+  "interactive_stuff.config.settings.materials.details4": "Supprimez en utilisant l'icône ✖."
+}

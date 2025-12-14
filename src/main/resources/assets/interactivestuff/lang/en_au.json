@@ -1,0 +1,47 @@
+{
+  "interactive_stuff.config.preview_sound": "Preview Sound",
+  "interactive_stuff.config.preview_sound.tooltip": "Preview the sound with the applied settings. (Save first)",
+
+  "interactive_stuff.config.included_items": "Included Items",
+  "interactive_stuff.config.included_items.tooltip": "Item(s) that trigger this material's sound.",
+
+  "interactive_stuff.config.custom_pitches": "Custom Pitches",
+  "interactive_stuff.config.custom_pitches.tooltip": "Format: item_id=pitch (e.g., minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Requires Block Hit",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Only plays sound when hitting a block.",
+
+  "interactive_stuff.config.random_pitch": "Random Pitch",
+  "interactive_stuff.config.random_pitch.tooltip": "Random pitch between %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Base Pitch",
+  "interactive_stuff.config.base_pitch.tooltip": "Pitch multiplier.",
+
+  "interactive_stuff.config.volume": "Volume",
+  "interactive_stuff.config.volume.tooltip": "Volume multiplier.",
+
+  "interactive_stuff.config.sound_id": "Sound Event ID",
+  "interactive_stuff.config.sound_id.tooltip": "The SoundEvent ID to play.",
+  "interactive_stuff.config.settings.general": "General Settings",
+  "interactive_stuff.config.settings.general.tooltip": "Some editable general settings.",
+  "interactive_stuff.config.settings.general.interactive_hits": "Enable Interactive Hits",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Hit Cooldown",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Play the hit sound after how many ticks (helpful if you're using 1st person animations)",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Plays interaction sounds when hitting blocks with specific items.",
+  "interactive_stuff.config.settings.general.sculk_sensor": "Enable Sculk Sensor in First-Person",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Sculk Sensors will behave like the actual block in First-Person.",
+  "interactive_stuff.config.settings.general.note_block": "Enable Note block Crouch",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Crouching on a redstone block while holding a noteblock will play a note.",
+  "interactive_stuff.config.settings.general.model_changes": "Enable Model Changes",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Changes Models/Textures of certain items/blocks when a specific event happens.",
+  "interactive_stuff.config.settings.general.excluded_blocks": "Excluded Blocks",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Block(s) that ignore interaction sounds.",
+  "interactive_stuff.config.settings.materials": "Manage Materials",
+  "interactive_stuff.config.settings.materials.tooltip": "Add, rename, reorder, or remove interaction materials.",
+  "interactive_stuff.config.settings.materials.details1": "Use ➕ to add a new material.",
+  "interactive_stuff.config.settings.materials.details2": "Rename by clicking on text.",
+  "interactive_stuff.config.settings.materials.details3": "Reorder on the left.",
+  "interactive_stuff.config.settings.materials.details4": "Remove by using the ✖ icon."
+
+
+}

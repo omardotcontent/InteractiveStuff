@@ -6,7 +6,8 @@
   "mixins": [
     "ClientPlayerEntityMixin",
     "SoundListenerMixin",
-    "locomotion.LocomotionFirstPersonItemMixin"
+    "locomotion.LocomotionFirstPersonItemMixin",
+    "locomotion.LocomotionBlockItemMixin"
   ],
   "client": [
     "HeldItemRendererMixin"

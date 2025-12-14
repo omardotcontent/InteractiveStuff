@@ -29,7 +29,7 @@ dependencies {
     modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 
-    modImplementation("com.trainguy9512:locomotion-fabric:${project.locomotion_version}")
+    modImplementation("com.trainguy9512:locomotion-common:${project.locomotion_version}")
 
 }
 

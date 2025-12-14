@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "Sesi Önizle",
+  "interactive_stuff.config.preview_sound.tooltip": "Uygulanan ayarlarla sesi önizleyin. (Önce kaydedin)",
+
+  "interactive_stuff.config.included_items": "Dahil Edilen Eşyalar",
+  "interactive_stuff.config.included_items.tooltip": "Bu malzemenin sesini tetikleyen eşya(lar).",
+
+  "interactive_stuff.config.custom_pitches": "Özel Perdeler",
+  "interactive_stuff.config.custom_pitches.tooltip": "Format: item_id=pitch (ör: minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Blok Vurma Gerektirir",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Sadece bir bloğa vururken ses çalar.",
+
+  "interactive_stuff.config.random_pitch": "Rastgele Perde",
+  "interactive_stuff.config.random_pitch.tooltip": "%1$s–2.0 arasında rastgele perde.",
+
+  "interactive_stuff.config.base_pitch": "Temel Perde",
+  "interactive_stuff.config.base_pitch.tooltip": "Perde çarpanı.",
+
+  "interactive_stuff.config.volume": "Ses Düzeyi",
+  "interactive_stuff.config.volume.tooltip": "Ses düzeyi çarpanı.",
+
+  "interactive_stuff.config.sound_id": "Ses Olayı Kimliği",
+  "interactive_stuff.config.sound_id.tooltip": "Çalınacak SoundEvent ID'si.",
+
+  "interactive_stuff.config.settings.general": "Genel Ayarlar",
+  "interactive_stuff.config.settings.general.tooltip": "Düzenlenebilir bazı genel ayarlar.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Etkileşimli Vuruşları Etkinleştir",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Vuruş Soğuma Süresi",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Vuruş sesinin kaç tick sonra çalınacağı (birinci şahıs animasyonları kullanıyorsanız yararlıdır).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Belirli eşyalarla bloklara vurulduğunda etkileşim sesleri çalar.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Birinci Şahısta Sculk Sensörünü Etkinleştir",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Sculk Sensörleri, Birinci Şahıs modunda gerçek blok gibi davranacaktır.",
+
+  "interactive_stuff.config.settings.general.note_block": "Nota Bloğu ile Eğilmeyi Etkinleştir",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Elde nota bloğu varken kızıltaş bloğu üzerinde eğilmek bir nota çalar.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Model Değişikliklerini Etkinleştir",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Belirli bir olay gerçekleştiğinde bazı eşyaların/blokların Modellerini/Dokularını değiştirir.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Hariç Tutulan Bloklar",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Etkileşim seslerini görmezden gelen blok(lar).",
+
+  "interactive_stuff.config.settings.materials": "Malzemeleri Yönet",
+  "interactive_stuff.config.settings.materials.tooltip": "Etkileşim malzemeleri ekle, yeniden adlandır, yeniden sırala veya kaldır.",
+  "interactive_stuff.config.settings.materials.details1": "Yeni malzeme eklemek için ➕ kullanın.",
+  "interactive_stuff.config.settings.materials.details2": "Metne tıklayarak yeniden adlandırın.",
+  "interactive_stuff.config.settings.materials.details3": "Soldan yeniden sıralayın.",
+  "interactive_stuff.config.settings.materials.details4": "✖ simgesini kullanarak kaldırın."
+}

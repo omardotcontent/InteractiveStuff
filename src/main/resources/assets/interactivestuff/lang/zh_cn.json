@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "预览声音",
+  "interactive_stuff.config.preview_sound.tooltip": "预览应用设置后的声音。（请先保存）",
+
+  "interactive_stuff.config.included_items": "包含的物品",
+  "interactive_stuff.config.included_items.tooltip": "触发该材质声音的物品。",
+
+  "interactive_stuff.config.custom_pitches": "自定义音调",
+  "interactive_stuff.config.custom_pitches.tooltip": "格式：item_id=pitch（例如：minecraft:dirt=1.5）",
+
+  "interactive_stuff.config.requires_block_hit": "需要敲击方块",
+  "interactive_stuff.config.requires_block_hit.tooltip": "仅在敲击方块时播放声音。",
+
+  "interactive_stuff.config.random_pitch": "随机音调",
+  "interactive_stuff.config.random_pitch.tooltip": "%1$s–2.0 之间的随机音调。",
+
+  "interactive_stuff.config.base_pitch": "基础音调",
+  "interactive_stuff.config.base_pitch.tooltip": "音调倍率。",
+
+  "interactive_stuff.config.volume": "音量",
+  "interactive_stuff.config.volume.tooltip": "音量倍率。",
+
+  "interactive_stuff.config.sound_id": "声音事件 ID",
+  "interactive_stuff.config.sound_id.tooltip": "要播放的 SoundEvent ID。",
+
+  "interactive_stuff.config.settings.general": "常规设置",
+  "interactive_stuff.config.settings.general.tooltip": "一些可编辑的常规设置。",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "启用交互打击",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "打击冷却",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "多少刻后播放打击声音（使用第一人称动画时很有用）。",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "使用特定物品敲击方块时播放交互声音。",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "启用第一人称幽匿感测体",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "幽匿感测体在第一人称下将像实际方块一样运作。",
+
+  "interactive_stuff.config.settings.general.note_block": "启用音符盒潜行互动",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "手持音符盒在红石块上潜行时将播放音符。",
+
+  "interactive_stuff.config.settings.general.model_changes": "启用模型更改",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "发生特定事件时更改特定物品/方块的模型/纹理。",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "排除的方块",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "忽略交互声音的方块。",
+
+  "interactive_stuff.config.settings.materials": "管理材质",
+  "interactive_stuff.config.settings.materials.tooltip": "添加、重命名、重新排序或移除交互材质。",
+  "interactive_stuff.config.settings.materials.details1": "使用 ➕ 添加新材质。",
+  "interactive_stuff.config.settings.materials.details2": "点击文本进行重命名。",
+  "interactive_stuff.config.settings.materials.details3": "在左侧重新排序。",
+  "interactive_stuff.config.settings.materials.details4": "使用 ✖ 图标移除。"
+}

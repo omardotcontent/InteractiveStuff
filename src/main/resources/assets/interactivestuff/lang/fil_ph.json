@@ -1,0 +1,52 @@
+{
+  "interactive_stuff.config.preview_sound": "I-preview ang Tunog",
+  "interactive_stuff.config.preview_sound.tooltip": "I-preview ang tunog gamit ang inilapat na settings. (I-save muna)",
+
+  "interactive_stuff.config.included_items": "Kasama na mga Item",
+  "interactive_stuff.config.included_items.tooltip": "(Mga) item na nagti-trigger ng tunog ng materyal na ito.",
+
+  "interactive_stuff.config.custom_pitches": "Custom na Pitch",
+  "interactive_stuff.config.custom_pitches.tooltip": "Format: item_id=pitch (hal. minecraft:dirt=1.5)",
+
+  "interactive_stuff.config.requires_block_hit": "Kailangan ng Paghampas sa Bloke",
+  "interactive_stuff.config.requires_block_hit.tooltip": "Tumutugtog lang ang tunog kapag humahampas ng bloke.",
+
+  "interactive_stuff.config.random_pitch": "Random na Pitch",
+  "interactive_stuff.config.random_pitch.tooltip": "Random na pitch sa pagitan ng %1$s–2.0.",
+
+  "interactive_stuff.config.base_pitch": "Base na Pitch",
+  "interactive_stuff.config.base_pitch.tooltip": "Multiplier ng pitch.",
+
+  "interactive_stuff.config.volume": "Lakas ng Tunog",
+  "interactive_stuff.config.volume.tooltip": "Multiplier ng lakas ng tunog.",
+
+  "interactive_stuff.config.sound_id": "Sound Event ID",
+  "interactive_stuff.config.sound_id.tooltip": "Ang SoundEvent ID na ipe-play.",
+
+  "interactive_stuff.config.settings.general": "Pangkalahatang Settings",
+  "interactive_stuff.config.settings.general.tooltip": "Ilang nae-edit na pangkalahatang settings.",
+
+  "interactive_stuff.config.settings.general.interactive_hits": "Paganahin ang Interactive Hits",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Hit Cooldown",
+  "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "I-play ang tunog ng hampas pagkalipas ng ilang ticks (nakakatulong kung gumagamit ka ng 1st person animations).",
+  "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Nagpe-play ng tunog ng interaksyon kapag humahampas ng mga bloke gamit ang mga partikular na item.",
+
+  "interactive_stuff.config.settings.general.sculk_sensor": "Paganahin ang Sculk Sensor sa First-Person",
+  "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Ang mga Sculk Sensor ay kikilos tulad ng totoong bloke sa First-Person.",
+
+  "interactive_stuff.config.settings.general.note_block": "Paganahin ang Note Block Crouch",
+  "interactive_stuff.config.settings.general.note_block.tooltip": "Ang pag-crouch sa isang redstone block habang may hawak na note block ay tutugtog ng nota.",
+
+  "interactive_stuff.config.settings.general.model_changes": "Paganahin ang Pagbabago ng Modelo",
+  "interactive_stuff.config.settings.general.model_changes.tooltip": "Binabago ang Mga Modelo/Texture ng ilang item/bloke kapag may nangyaring partikular na event.",
+
+  "interactive_stuff.config.settings.general.excluded_blocks": "Mga Hindi Kasamang Bloke",
+  "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "(Mga) bloke na hindi pinapansin ang mga tunog ng interaksyon.",
+
+  "interactive_stuff.config.settings.materials": "Pamahalaan ang mga Materyales",
+  "interactive_stuff.config.settings.materials.tooltip": "Magdagdag, palitan ang pangalan, ayusin muli, o alisin ang mga materyales ng interaksyon.",
+  "interactive_stuff.config.settings.materials.details1": "Gamitin ang ➕ upang magdagdag ng bagong materyal.",
+  "interactive_stuff.config.settings.materials.details2": "Palitan ang pangalan sa pamamagitan ng pag-click sa teksto.",
+  "interactive_stuff.config.settings.materials.details3": "Ayusin muli sa kaliwa.",
+  "interactive_stuff.config.settings.materials.details4": "Alisin gamit ang ✖ icon."
+}
