@@ -4,13 +4,13 @@
   "package": "omar.projects.interactivestuff.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ClientPlayerEntityMixin",
+    "render.ClientPlayerEntityMixin",
     "SoundListenerMixin",
-    "locomotion.LocomotionFirstPersonItemMixin",
-    "locomotion.LocomotionBlockItemMixin"
+    "render.locomotion.LocomotionFirstPersonItemMixin",
+    "render.locomotion.LocomotionBlockItemMixin"
   ],
   "client": [
-    "HeldItemRendererMixin"
+    "render.HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

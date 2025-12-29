@@ -1,4 +1,4 @@
-package omar.projects.interactivestuff.mixin;
+package omar.projects.interactivestuff.mixin.render;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -25,17 +25,15 @@ public final class ClientPlayerEntityMixin {
         BlockPos pos = null;
 
         if (target instanceof BlockHitResult blockHit) {
-            // This gets the actual block, not the air next to it
             pos = blockHit.getBlockPos();
         } else if (target != null) {
-            // Fallback for non-block hits (e.g. looking at sky/entity)
             pos = BlockPos.ofFloored(target.getPos());
         } else if (client.player != null) {
             pos = client.player.getBlockPos();
         }
 
         if (pos != null) {
-            InteractionHandler.getInstance().handleBlockInteraction(client, pos, hand);
+            InteractionHandler.getInstance().handleBlockInteraction(client, hand);
         }
     }
 }

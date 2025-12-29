@@ -56,6 +56,8 @@ public final class SculkHandler {
         wasOnGround = isOnGround;
     }
 
+
+
     private static void handleLanding(final ClientPlayerEntity player, final MinecraftClient client) {
         if (player.getEntityWorld().getBlockState(player.getSteppingPos()).isIn(BlockTags.WOOL)) {
             return;
@@ -150,6 +152,7 @@ public final class SculkHandler {
         }
 
         VibrationTracker.setVibrating(true);
+        VibrationTracker.pulse(5);
 
         BackgroundLoopHandler.getInstance().waitTicks("SculkDeactivateNormal", COOLDOWN_NORMAL, () -> client.execute(() -> {
             final ClientPlayerEntity currentPlayer = client.player;
@@ -172,6 +175,7 @@ public final class SculkHandler {
         }
 
         VibrationTracker.setCalibratedVibrating(true);
+        VibrationTracker.pulse(5);
 
         BackgroundLoopHandler.getInstance().waitTicks("SculkDeactivateCalibrated", COOLDOWN_CALIBRATED, () -> client.execute(() -> {
             final ClientPlayerEntity currentPlayer = client.player;

@@ -1,4 +1,4 @@
-package omar.projects.interactivestuff.mixin.locomotion;
+package omar.projects.interactivestuff.mixin.render.locomotion;
 
 import com.trainguy9512.locomotion.render.FirstPersonBlockItemRenderer;
 import net.minecraft.block.BlockState;
@@ -29,12 +29,12 @@ public abstract class LocomotionBlockItemMixin {
             require = 0
     )
     private static void captureStackContext(
-            ItemStack stack,
-            MatrixStack poseStack,
-            OrderedRenderCommandQueue nodeCollector,
-            int combinedLight,
-            Arm side,
-            CallbackInfo ci
+            final ItemStack stack,
+            final MatrixStack poseStack,
+            final OrderedRenderCommandQueue nodeCollector,
+            final int combinedLight,
+            final Arm side,
+            final CallbackInfo ci
     ) {
         CURRENT_STACK.set(stack);
     }
@@ -44,7 +44,7 @@ public abstract class LocomotionBlockItemMixin {
             at = @At("RETURN"),
             remap = false
     )
-    private static void releaseStackContext(CallbackInfo ci) {
+    private static void releaseStackContext(final CallbackInfo ci) {
         CURRENT_STACK.remove();
     }
 
@@ -54,7 +54,7 @@ public abstract class LocomotionBlockItemMixin {
             ordinal = 0,
             remap = false
     )
-    private static BlockState modifyLocalBlockState(BlockState originalState) {
+    private static BlockState modifyLocalBlockState(final BlockState originalState) {
         ItemStack stack = CURRENT_STACK.get();
         if (stack == null) return originalState;
 

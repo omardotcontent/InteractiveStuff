@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public final class ModMenuIntegration implements ModMenuApi {
 
     private static final Random random = new Random();
+    private static Screen parent;
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
@@ -34,22 +35,23 @@ public final class ModMenuIntegration implements ModMenuApi {
             ConfigHandler.INSTANCE = ConfigHandler.load();
         final ConfigHandler instance = ConfigHandler.INSTANCE;
         final ConfigHandler defaults = new ConfigHandler();
+        ModMenuIntegration.parent = parent;
 
         final YetAnotherConfigLib.Builder builder = YetAnotherConfigLib.createBuilder()
                 .title(Text.literal("InteractiveStuff Config §6§b(Beta)"))
                 .save(instance::save);
 
         // --------------------- General Settings ---------------------
-        final ConfigCategory generalCategory = createGeneralCategory(instance, defaults).build();
-        builder.category(generalCategory);
+        builder.category(createGeneralCategory(instance, defaults).build());
+
+        // --------------------- Config Settings ---------------------
+        builder.category(createConfigSettingsCategory().build());
 
         // --------------------- Excluded Blocks ---------------------
-        final ConfigCategory excludedCategory = createExcludedBlocksCategory(instance, defaults).build();
-        builder.category(excludedCategory);
+        builder.category(createExcludedBlocksCategory(instance, defaults).build());
 
         // --------------------- Manage Materials ---------------------
-        final ConfigCategory manageMaterialsCategory = createManageMaterialsCategory(instance, defaults).build();
-        builder.category(manageMaterialsCategory);
+        builder.category(createManageMaterialsCategory(instance, defaults).build());
 
         // --------------------- Individual Material Categories ---------------------
         for (final InteractionMaterial mat : instance.materials) {
@@ -58,9 +60,7 @@ public final class ModMenuIntegration implements ModMenuApi {
                     .findFirst()
                     .orElse(null);
 
-            final ConfigCategory matCategory = createMaterialCategory(mat, defaultMat).build();
-
-            builder.category(matCategory);
+            builder.category(createMaterialCategory(mat, defaultMat).build());
         }
 
         return builder.build().generateScreen(parent);
@@ -77,6 +77,13 @@ public final class ModMenuIntegration implements ModMenuApi {
                 .name(Text.translatable("interactive_stuff.config.settings.general.interactive_hits"))
                 .description(OptionDescription.of(Text.translatable("interactive_stuff.config.settings.general.interactive_hits.tooltip")))
                 .binding(defaults.enableInteractiveHits, () -> instance.enableInteractiveHits, newVal -> instance.enableInteractiveHits = newVal)
+                .controller(TickBoxControllerBuilder::create)
+                .build());
+
+        general.option(Option.<Boolean>createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.general.specialized_note_block"))
+                .description(OptionDescription.of(Text.translatable("interactive_stuff.config.settings.general.specialized_note_block.tooltip")))
+                .binding(defaults.specializedNoteblockHits, () -> instance.specializedNoteblockHits, newVal -> instance.specializedNoteblockHits = newVal)
                 .controller(TickBoxControllerBuilder::create)
                 .build());
 
@@ -111,6 +118,36 @@ public final class ModMenuIntegration implements ModMenuApi {
 
         return general;
     }
+
+
+    private ConfigCategory.Builder createConfigSettingsCategory() {
+        final ConfigCategory.Builder cat = ConfigCategory.createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.config"))
+                .tooltip(Text.translatable("interactive_stuff.config.settings.config.tooltip"));
+
+
+        cat.option(ButtonOption.createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.config.export"))
+                .action((yaclScreen, thisOption) -> ConfigHandler.INSTANCE.openConfigDirectory())
+                .build()
+        );
+
+        cat.option(ButtonOption.createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.config.reload"))
+                .action((yaclScreen, thisOption) -> {
+                    ConfigHandler.INSTANCE.reload();
+                    MinecraftClient.getInstance().setScreen(
+                            createConfigScreen(parent)
+                    );
+                })
+
+                .build()
+        );
+
+
+        return cat;
+    }
+
 
     private ConfigCategory.Builder createExcludedBlocksCategory(final ConfigHandler instance, final ConfigHandler defaults) {
         final ConfigCategory.Builder cat = ConfigCategory.createBuilder()

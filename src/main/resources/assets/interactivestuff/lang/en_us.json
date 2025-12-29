@@ -41,7 +41,13 @@
   "interactive_stuff.config.settings.materials.details1": "Use ➕ to add a new material.",
   "interactive_stuff.config.settings.materials.details2": "Rename by clicking on text.",
   "interactive_stuff.config.settings.materials.details3": "Reorder on the left.",
-  "interactive_stuff.config.settings.materials.details4": "Remove by using the ✖ icon."
+  "interactive_stuff.config.settings.materials.details4": "Remove by using the ✖ icon.",
+  "interactive_stuff.config.settings.general.specialized_note_block": "Specialized Note Block Hits.",
+  "interactive_stuff.config.settings.general.specialized_note_block.tooltip": "Plays specific Note Block Instrument depending on the block.",
+  "interactive_stuff.config.settings.config": "Config Settings",
+  "interactive_stuff.config.settings.config.tooltip": "Additional Settings about the Configuration File",
+  "interactive_stuff.config.settings.config.export": "Open Config file's Directory.",
+  "interactive_stuff.config.settings.config.reload": "Reload Configuration"
 
 
 }

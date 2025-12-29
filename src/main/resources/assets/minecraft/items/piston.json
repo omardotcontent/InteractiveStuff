@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": "firstperson_left_hand",
+        "model": {
+          "type": "minecraft:model",
+          "model": "interactivestuff:block/piston_base"
+        }
+      },
+      {
+        "when": "firstperson_right_hand",
+        "model": {
+          "type": "minecraft:model",
+          "model": "interactivestuff:block/piston_base"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/piston_inventory"
+    }
+  }
+}

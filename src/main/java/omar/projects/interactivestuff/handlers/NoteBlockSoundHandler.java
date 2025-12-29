@@ -6,7 +6,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.hit.BlockHitResult;
 import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 
 public final class NoteBlockSoundHandler {
@@ -42,6 +44,16 @@ public final class NoteBlockSoundHandler {
 
 
         wasSneaking = isSneaking;
+    }
+
+    public static void handleNoteBlockInteraction(final MinecraftClient client) {
+        assert client.world != null;
+        final BlockHitResult blockHit = (BlockHitResult) client.crosshairTarget;
+        assert blockHit != null;
+        client.world.playSoundClient(client.world.getBlockState(blockHit.getBlockPos()).getInstrument().getSound().value()
+                , SoundCategory.BLOCKS,
+                0.25f,
+                1f);
     }
 
     private static boolean isHoldingNoteBlock(final PlayerEntity player) {

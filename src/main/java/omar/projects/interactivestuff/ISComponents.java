@@ -23,7 +23,7 @@ public final class ISComponents {
     private static <T> ComponentType<T> register(final String name, final UnaryOperator<ComponentType.Builder<T>> builderOperator) {
         return Registry.register(
                 Registries.DATA_COMPONENT_TYPE,
-                Identifier.of("interactivestuff", name),
+                Identifier.of(IS.MOD_ID, name),
                 builderOperator.apply(ComponentType.builder()).build()
         );
     }
