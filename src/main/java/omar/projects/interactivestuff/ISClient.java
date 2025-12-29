@@ -4,7 +4,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import omar.projects.interactivestuff.handlers.*;
-import omar.projects.interactivestuff.objects.special.PistonAnimation;
 
 @Environment(EnvType.CLIENT)
 public final class ISClient implements ClientModInitializer {
@@ -17,9 +16,6 @@ public final class ISClient implements ClientModInitializer {
         NoteBlockSoundHandler.register();
         CampAndTorchHandler.register();
         SculkHandler.register();
-
-        // Special Interactions
-        PistonAnimation.register();
     }
 
 
