@@ -5,7 +5,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundSystem;
-import omar.projects.interactivestuff.handlers.SculkHandler;
+import net.minecraft.sound.SoundCategory;
+import omar.projects.interactivestuff.scripts.ScriptInterpreter;
+import omar.projects.interactivestuff.scripts.variables.Position;
+import omar.projects.interactivestuff.scripts.variables.Sound;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,13 +22,15 @@ public final class SoundListenerMixin {
     @Unique
     private final MinecraftClient client = MinecraftClient.getInstance();
 
-    @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;", at = @At("HEAD"))
+    @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;", at = @At("TAIL"))
     private void onPlaySound(final SoundInstance sound, final CallbackInfoReturnable<SoundSystem.PlayResult> cir) {
-        if (client.player == null) {
+        if (client.player == null || client.world == null) {
             return;
         }
-        SculkHandler.sculkCheck(sound);
+        if(sound.getSound() != null && sound.getCategory() != SoundCategory.UI && sound.getCategory() != SoundCategory.AMBIENT) ScriptInterpreter.onPlaySound(new Sound(
+                sound.getId().toString(),
+                sound.getVolume(),
+                sound.getPitch(),
+                new Position((int) sound.getX(), (int) sound.getY(), (int) sound.getZ())));
     }
-
-
 }

@@ -1,9 +1,8 @@
 package omar.projects.interactivestuff.mixin.render.locomotion;
 
 import com.trainguy9512.locomotion.render.FirstPersonPlayerRenderer;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
-import omar.projects.interactivestuff.handlers.ItemVisualHelper;
+import omar.projects.interactivestuff.scripts.ScriptInterpreter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -19,9 +18,6 @@ public abstract class LocomotionFirstPersonItemMixin {
             require = 0
     )
     private ItemStack modifyLocomotionRenderedStack(final ItemStack stack) {
-        return ItemVisualHelper.applyVisuals(
-                stack,
-                MinecraftClient.getInstance().player
-        );
+        return ScriptInterpreter.itemUpdate(stack, null);
     }
 }

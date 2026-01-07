@@ -4,6 +4,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import omar.projects.interactivestuff.handlers.*;
+import omar.projects.interactivestuff.scripts.ScriptInterpreter;
+import omar.projects.interactivestuff.scripts.ScriptLoader;
 
 @Environment(EnvType.CLIENT)
 public final class ISClient implements ClientModInitializer {
@@ -13,9 +15,8 @@ public final class ISClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         BackgroundLoopHandler.getInstance().register();
-        NoteBlockSoundHandler.register();
-        CampAndTorchHandler.register();
-        SculkHandler.register();
+        ScriptInterpreter.register();
+        ScriptLoader.register();
     }
 
 

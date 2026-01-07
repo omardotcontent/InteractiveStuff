@@ -33,7 +33,7 @@ public final class ConfigHandler {
             .create();
 
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("interactivestuff.json");
-    private static final String DEFAULT_CONFIG_PATH = "/assets/interactivestuff/default_config.json";
+    private static final String DEFAULT_CONFIG_PATH = "default_config.json";
 
 
     public boolean enableInteractiveHits = true;

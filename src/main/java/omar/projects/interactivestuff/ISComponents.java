@@ -8,19 +8,15 @@ import java.util.function.UnaryOperator;
 
 public final class ISComponents {
 
-    public static final ComponentType<Boolean> VIBRATING = register("vibrating", builder ->
-            builder.codec(com.mojang.serialization.Codec.BOOL)
-    );
+    public static final ComponentType<Boolean> VIBRATING = register("vibrating");
 
-    public static final ComponentType<Boolean> CALIBRATED_VIBRATING = register("calibrated_vibrating", builder ->
-            builder.codec(com.mojang.serialization.Codec.BOOL)
-    );
+    public static final ComponentType<Boolean> CALIBRATED_VIBRATING = register("calibrated_vibrating");
 
-    public static final ComponentType<Boolean> WATERLOGGED = register("waterlogged", builder ->
-            builder.codec(com.mojang.serialization.Codec.BOOL)
-    );
+    public static final ComponentType<Boolean> WATERLOGGED = register("waterlogged");
 
-    private static <T> ComponentType<T> register(final String name, final UnaryOperator<ComponentType.Builder<T>> builderOperator) {
+    private static ComponentType<Boolean> register(final String name) {
+        final UnaryOperator<ComponentType.Builder<Boolean>> builderOperator = builder ->
+                builder.codec(com.mojang.serialization.Codec.BOOL);
         return Registry.register(
                 Registries.DATA_COMPONENT_TYPE,
                 Identifier.of(IS.MOD_ID, name),
@@ -28,5 +24,6 @@ public final class ISComponents {
         );
     }
 
-    public static void init() {}
+    public static void init() {
+    }
 }
