@@ -9,7 +9,7 @@
       "homepage": "https://omardotcontent.github.io/"
     },
   "license": "All-Rights-Reserved",
-  "icon": "assets/interactivestuff/icon.png",
+  "icon": "icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [

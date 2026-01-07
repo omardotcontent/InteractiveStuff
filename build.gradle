@@ -2,6 +2,7 @@ plugins {
     id 'fabric-loom' version '1.14-SNAPSHOT'
     id 'java'
     id 'maven-publish'
+    id "io.github.goooler.shadow" version "8.1.7"
 }
 
 version = project.mod_version
@@ -22,6 +23,10 @@ repositories {
         name = "Gegy"
         url = uri("https://maven.gegy.dev")
     }
+
+    flatDir {
+        dirs 'libs' // Points to the 'libs' folder in your project root
+    }
 }
 
 dependencies {
@@ -39,6 +44,11 @@ dependencies {
     modImplementation("com.trainguy9512:locomotion-common:${project.locomotion_version}")
 
     modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${project.lambdynamiclights_version}")
+
+    implementation files("libs/Vyn.jar")
+
+    shadow files("libs/Vyn.jar")
+
 }
 
 processResources {
@@ -86,6 +96,15 @@ publishing {
     }
 }
 
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+}
+
+tasks.remapJar {
+    inputFile.set(shadowJar.archiveFile)
+    dependsOn shadowJar
+}
 
 
 
