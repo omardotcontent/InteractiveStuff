@@ -1,0 +1,9 @@
+{
+  "pack": {
+    "description": "InteractiveStuff 0.7 | By OmarDotContent",
+    "pack_format":35,
+    "supported_formats":[35,64],
+    "min_format":[35,0],
+    "max_format":[75,114514]
+  }
+}
