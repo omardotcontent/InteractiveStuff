@@ -1,4 +1,4 @@
-package omar.projects.interactivestuff.mixin;
+package omar.projects.interactivestuff.mixin.sound;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,7 +23,7 @@ public abstract class SoundListenerMixin {
     private final MinecraftClient client = MinecraftClient.getInstance();
 
     @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)Lnet/minecraft/client/sound/SoundSystem$PlayResult;", at = @At("TAIL"))
-    private void onPlaySound(final SoundInstance sound, final CallbackInfoReturnable<SoundSystem.PlayResult> cir) {
+    private void interactivestuff$play(final SoundInstance sound, final CallbackInfoReturnable<SoundSystem.PlayResult> cir) {
         if (client.player == null || client.world == null) {
             return;
         }

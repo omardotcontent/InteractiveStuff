@@ -19,11 +19,15 @@ end
 
 task onItemUpdate takes itemRendered, matrices do
     check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
-        check isWaterSensitive(itemRendered) do
-            check player.isSubmergedInWater() do
-                itemRendered.setDataComponent("interactivestuff:waterlogged", true)
-            otherwise
-                itemRendered.setDataComponent("interactivestuff:waterlogged", false)
+        check player.isSubmergedInWater() do
+            check isWaterTorch(itemRendered) do
+                itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:torch_off")
+            end
+            check isRedStoneTorch(itemRendered) do
+                itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:redstone_torch_off")
+            end
+            check isWaterCampFire(itemRendered) do
+                itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:campfire_off")
             end
         end
     end
@@ -34,6 +38,14 @@ task isHoldingCampfireOrTorch do
     reply player.isHoldingItem("minecraft:campfire") || player.isHoldingItem("minecraft:torch") || player.isHoldingItem("minecraft:redstone_torch") || player.isHoldingItem("minecraft:soul_campfire") || player.isHoldingItem("minecraft:soul_torch") || player.isHoldingItem("minecraft:wall_torch") || player.isHoldingItem("minecraft:copper_torch")
 end
 
-task isWaterSensitive takes itemHeld do
-    reply itemHeld.getName() == "minecraft:campfire" || itemHeld.getName() == "minecraft:torch" || itemHeld.getName() == "minecraft:redstone_torch" || itemHeld.getName() == "minecraft:soul_campfire" || itemHeld.getName() == "minecraft:soul_torch" || itemHeld.getName() == "minecraft:copper_torch"
+task isWaterTorch takes itemHeld do
+    reply itemHeld.getName() == "minecraft:torch" || itemHeld.getName() == "minecraft:redstone_torch" || itemHeld.getName() == "minecraft:soul_torch" || itemHeld.getName() == "minecraft:copper_torch"
+end
+
+task isRedStoneTorch takes itemHeld do
+    reply itemHeld.getName() == "minecraft:redstone_torch"
+end
+
+task isWaterCampFire takes itemHeld do
+    reply itemHeld.getName() == "minecraft:campfire" || itemHeld.getName() == "minecraft:soul_campfire"
 end

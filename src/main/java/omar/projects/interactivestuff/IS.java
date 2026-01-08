@@ -17,7 +17,6 @@ public final class IS implements ModInitializer {
     @Override
     public void onInitialize() {
         ConfigHandler.INSTANCE = ConfigHandler.load();
-        ISComponents.init();
         ResourceManagerHelper.registerBuiltinResourcePack(
                 Identifier.of(MOD_ID, "interactive_resourcepack"),
                 FabricLoader.getInstance()

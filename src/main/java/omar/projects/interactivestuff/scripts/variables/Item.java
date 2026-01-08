@@ -2,13 +2,10 @@ package omar.projects.interactivestuff.scripts.variables;
 
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import omar.projects.interactivestuff.scripts.Utilities.ScriptComponentApplier;
+import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
 
 @VynType(name = "Item")
 public final class Item {
@@ -31,7 +28,7 @@ public final class Item {
 
     @VynFunc
     public void setDataComponent(final String key, final Object value) {
-        item = ScriptComponentApplier.apply(item, key, value.toString());
+        item = ScriptItemHandler.apply(item, key, value.toString());
     }
 
     @VynFunc

@@ -1,4 +1,4 @@
-package omar.projects.interactivestuff.mixin;
+package omar.projects.interactivestuff.mixin.player;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;

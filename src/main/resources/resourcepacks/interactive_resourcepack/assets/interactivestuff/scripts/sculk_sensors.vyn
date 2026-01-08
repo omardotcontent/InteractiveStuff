@@ -84,16 +84,12 @@ end
 
 task onItemUpdate takes itemRendered, matrices do
     check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do
-        itemRendered.setDataComponent("interactivestuff:vibrating", true)
+        itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:sculk_sensor_active")
         matrices.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
-    otherwise
-        itemRendered.setDataComponent("interactivestuff:vibrating", false)
     end
     check calibratedVibrating && itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
-        itemRendered.setDataComponent("interactivestuff:calibrated_vibrating", true)
+        itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:calibrated_sculk_sensor_active")
         matrices.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
-    otherwise
-        itemRendered.setDataComponent("interactivestuff:calibrated_vibrating", false)
     end
 end
 
