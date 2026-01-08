@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
-public final class ClientPlayerEntityMixin {
+public abstract class ArmSwingMixin {
 
     @Unique
     private final MinecraftClient client = MinecraftClient.getInstance();

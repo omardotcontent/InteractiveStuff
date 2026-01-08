@@ -54,7 +54,8 @@ public final class Player {
 
     @VynFunc
     public String getGamemode() {
-        return player == null ? null : Objects.requireNonNull(player.getGameMode()).asString();
+        if (player.getGameMode() == null) return null;
+        return player == null ? null : player.getGameMode().asString();
     }
 
     @VynFunc

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Environment(EnvType.CLIENT)
 @Mixin(SoundSystem.class)
-public final class SoundListenerMixin {
+public abstract class SoundListenerMixin {
 
     @Unique
     private final MinecraftClient client = MinecraftClient.getInstance();

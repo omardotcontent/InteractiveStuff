@@ -18,36 +18,33 @@ repositories {
     mavenCentral()
     maven { url "https://maven.isxander.dev/releases" }
     maven { url "https://maven.terraformersmc.com/releases" }
-
-    maven {
-        name = "Gegy"
-        url = uri("https://maven.gegy.dev")
-    }
+    maven { url = "https://maven.bawnorton.com/releases" }
 
     flatDir {
         dirs 'libs' // Points to the 'libs' folder in your project root
     }
+
 }
 
 dependencies {
-
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
     modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
-
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
-
     modImplementation("com.trainguy9512:locomotion-common:${project.locomotion_version}")
 
-    modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${project.lambdynamiclights_version}")
+    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.3.7-beta.1")))
 
+
+    // --- VYN ---
     implementation files("libs/Vyn.jar")
-
     shadow files("libs/Vyn.jar")
+
+    // --- HMI ---
+    modImplementation name: 'hmi', version: '5.1.1'
+    include name: 'hmi', version: '5.1.1'
 
 }
 

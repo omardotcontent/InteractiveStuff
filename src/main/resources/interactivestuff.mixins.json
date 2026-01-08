@@ -4,17 +4,20 @@
   "package": "omar.projects.interactivestuff.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "render.ClientPlayerEntityMixin",
-    "SoundListenerMixin",
-    "render.locomotion.LocomotionFirstPersonItemMixin",
-    "render.locomotion.LocomotionBlockItemMixin"
+
   ],
   "client": [
+    "render.ArmSwingMixin",
+    "SoundListenerMixin",
+    "render.locomotion.LocomotionBlockItemMixin",
+    "render.locomotion.LocomotionFirstPersonItemMixin",
+    "render.holdmyitems.HMIHeldItemRendererMixin",
     "render.HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
+  "plugin": "com.bawnorton.mixinsquared.platform.fabric.MixinSquaredMixinConfigPlugin",
   "overwrites": {
     "requireAnnotations": true
   }

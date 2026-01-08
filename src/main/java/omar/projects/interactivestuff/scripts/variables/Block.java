@@ -4,6 +4,7 @@ import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
 import java.util.Locale;
@@ -42,6 +43,15 @@ public final class Block {
         return position;
     }
 
+    @VynFunc
+    public int getBlockLightLevel() {
+        return world.getLightLevel(LightType.SKY, sourceBlock);
+    }
+
+    @VynFunc
+    public int getSkyLightLevel() {
+        return world.getLightLevel(LightType.SKY, sourceBlock);
+    }
 
     @VynFunc
     public String getInstrument() {

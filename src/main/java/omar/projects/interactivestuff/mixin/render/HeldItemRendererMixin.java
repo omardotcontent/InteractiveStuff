@@ -1,7 +1,5 @@
 package omar.projects.interactivestuff.mixin.render;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -12,9 +10,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Environment(EnvType.CLIENT)
 @Mixin(HeldItemRenderer.class)
-public final class HeldItemRendererMixin {
+public abstract class HeldItemRendererMixin {
 
     @Redirect(
             method = "renderFirstPersonItem",
@@ -26,15 +23,10 @@ public final class HeldItemRendererMixin {
     private void interactivestuff$redirectRenderItem(
             HeldItemRenderer instance, LivingEntity entity, ItemStack stack, net.minecraft.item.ItemDisplayContext renderMode, MatrixStack matrices, OrderedRenderCommandQueue orderedRenderCommandQueue, int light
     ) {
-
-        matrices.push();
-
         ItemStack processedStack = stack;
-
         if (stack != null && !stack.isEmpty()) {
             processedStack = ScriptInterpreter.itemUpdate(stack, matrices);
         }
-
 
         instance.renderItem(
                 entity,
@@ -45,7 +37,5 @@ public final class HeldItemRendererMixin {
                 light
         );
 
-
-        matrices.pop();
     }
 }

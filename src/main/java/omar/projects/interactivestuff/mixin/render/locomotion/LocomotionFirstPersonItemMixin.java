@@ -1,6 +1,7 @@
 package omar.projects.interactivestuff.mixin.render.locomotion;
 
 import com.trainguy9512.locomotion.render.FirstPersonPlayerRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import omar.projects.interactivestuff.scripts.ScriptInterpreter;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,6 +19,6 @@ public abstract class LocomotionFirstPersonItemMixin {
             require = 0
     )
     private ItemStack modifyLocomotionRenderedStack(final ItemStack stack) {
-        return ScriptInterpreter.itemUpdate(stack, null);
+        return ScriptInterpreter.itemUpdate(stack, new MatrixStack());
     }
 }

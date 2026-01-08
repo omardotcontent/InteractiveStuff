@@ -69,7 +69,7 @@ public final class Script {
         } catch (final Exception e) {
             state = State.ERROR;
             if(playerVar != null) playerVar.sendMessage("§6(" + filename + ") §cError in script during "+ functionType.getName() + ": " + e.getMessage());
-            else System.out.println("[InteractiveStuff] (" + filename + ") Error in script during "+ functionType.getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
