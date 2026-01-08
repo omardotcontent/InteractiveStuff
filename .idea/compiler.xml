@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <annotationProcessing>
-      <profile name="Gradle Imported" enabled="true">
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.bawnorton.mixinsquared/mixinsquared-fabric/0.3.7-beta.1/d67df522e6bc6a90d6f2f7d9d8240aae050f0c9f/mixinsquared-fabric-0.3.7-beta.1.jar" />
-        </processorPath>
-        <module name="InteractiveStuff.main" />
-      </profile>
-    </annotationProcessing>
     <bytecodeTargetLevel target="21" />
   </component>
 </project>

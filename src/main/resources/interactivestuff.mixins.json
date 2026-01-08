@@ -7,17 +7,13 @@
 
   ],
   "client": [
-    "render.ArmSwingMixin",
+    "ArmSwingMixin",
     "SoundListenerMixin",
-    "render.locomotion.LocomotionBlockItemMixin",
-    "render.locomotion.LocomotionFirstPersonItemMixin",
-    "render.holdmyitems.HMIHeldItemRendererMixin",
     "render.HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
-  "plugin": "com.bawnorton.mixinsquared.platform.fabric.MixinSquaredMixinConfigPlugin",
   "overwrites": {
     "requireAnnotations": true
   }

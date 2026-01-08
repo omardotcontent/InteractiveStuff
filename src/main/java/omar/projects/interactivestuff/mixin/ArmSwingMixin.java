@@ -1,4 +1,4 @@
-package omar.projects.interactivestuff.mixin.render;
+package omar.projects.interactivestuff.mixin;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -17,7 +17,7 @@ public abstract class ArmSwingMixin {
     private final MinecraftClient client = MinecraftClient.getInstance();
 
     @Inject(method = "swingHand", at = @At("HEAD"))
-    private void onSwingHand(final Hand hand, final CallbackInfo ci) {
+    private void interactivestuff$swingHand(final Hand hand, final CallbackInfo ci) {
         InteractionHandler.getInstance().handleBlockInteraction(client, hand);
     }
 }

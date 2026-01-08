@@ -28,7 +28,6 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "~${minecraft_version}",
-    "mixinsquared": ">=0.2.0"
+    "minecraft": "~${minecraft_version}"
   }
 }
