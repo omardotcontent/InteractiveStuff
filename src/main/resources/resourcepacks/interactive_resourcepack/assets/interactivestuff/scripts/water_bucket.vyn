@@ -1,0 +1,15 @@
+task onItemUpdate takes itemRendered, matrices do
+    check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
+        check isWaterSensitive(itemRendered) do
+            check player.isSubmergedInWater() do
+                itemRendered.setDataComponent("interactivestuff:waterlogged", true)
+            otherwise
+                itemRendered.setDataComponent("interactivestuff:waterlogged", false)
+            end
+        end
+    end
+end
+
+task isWaterSensitive takes itemHeld do
+    reply itemHeld.getName() == "minecraft:water_bucket"
+end
