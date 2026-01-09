@@ -64,9 +64,13 @@ public final class InteractionHandler {
         }
 
         if (client.world != null) {
-            final BlockHitResult blockHit = (BlockHitResult) client.crosshairTarget;
-            assert blockHit != null;
-            if (config.isExcluded(client.world.getBlockState(blockHit.getBlockPos()).getBlock())) {
+            try {
+                final BlockHitResult blockHit = (BlockHitResult) client.crosshairTarget;
+                assert blockHit != null;
+                if (config.isExcluded(client.world.getBlockState(blockHit.getBlockPos()).getBlock())) {
+                    return;
+                }
+            } catch (Exception ignored) {
                 return;
             }
         }
