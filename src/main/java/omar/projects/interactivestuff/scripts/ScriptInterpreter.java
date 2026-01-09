@@ -13,6 +13,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import omar.projects.interactivestuff.scripts.functions.ImportScript;
+import omar.projects.interactivestuff.scripts.functions.ExcludeScript;
 import omar.projects.interactivestuff.scripts.handlers.WaitHandler;
 import omar.projects.interactivestuff.scripts.objects.PackScripts;
 import omar.projects.interactivestuff.scripts.objects.Script;
@@ -31,6 +32,8 @@ public final class ScriptInterpreter {
 
     private static final NativeFunction importScriptFunction = new ImportScript(scripts);
 
+    private static final NativeFunction excludeScriptFunction = new ExcludeScript(scripts);
+
     static {
         playerVar = new Player(MinecraftClient.getInstance().player, MinecraftClient.getInstance());
         ClientPlayConnectionEvents.JOIN
@@ -46,6 +49,7 @@ public final class ScriptInterpreter {
             NativeBinder.defineConstant(listener, "config", interactiveStuffConfig);
             NativeBinder.defineConstant(listener, "key", key);
             listener.defineFunction("importScript", importScriptFunction);
+            listener.defineFunction("excludeScript", excludeScriptFunction);
         });
         ClientTickEvents.END_CLIENT_TICK.register(ScriptInterpreter::tick);
     }

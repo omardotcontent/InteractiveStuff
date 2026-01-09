@@ -24,6 +24,12 @@ public final class PackScripts {
         }
     }
 
+    public void excludeScript(final Script script) {
+        script.setState(Script.State.EXCLUDED);
+    }
+
+
+
     public Script getScript(final String fileName) {
         return scripts.get(fileName);
     }

@@ -73,6 +73,10 @@ public final class Script {
         }
     }
 
+    void setState(final State state) {
+        this.state = state;
+    }
+
     public State getState() {
         return state;
     }
@@ -88,7 +92,8 @@ public final class Script {
     public enum State {
         LOADED,
         IMPORTABLE,
-        ERROR
+        ERROR,
+        EXCLUDED
     }
 
     public enum FunctionType {
