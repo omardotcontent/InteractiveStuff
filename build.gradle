@@ -32,12 +32,15 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
     modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
-    modImplementation("com.trainguy9512:locomotion-common:${project.locomotion_version}")
 
     // --- VYN ---
     implementation files("libs/Vyn.jar")
     shadow files("libs/Vyn.jar")
 
+
+    // --- LOCOMOTION ---
+    modImplementation name: 'locomotion-fabric', version: '0.1.8+1.21.10-playtesting'
+    include name: 'locomotion-fabric', version: '0.1.8+1.21.10-playtesting'
 }
 
 processResources {

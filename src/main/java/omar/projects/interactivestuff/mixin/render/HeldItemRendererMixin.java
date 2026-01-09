@@ -21,7 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = HeldItemRenderer.class, priority = 2000)
 public class HeldItemRendererMixin {
 
-    // Shadowing the manager so we can use it manually
     @Final
     @Shadow private ItemModelManager itemModelManager;
 
@@ -39,7 +38,7 @@ public class HeldItemRendererMixin {
             final int light,
             final CallbackInfo ci
     ) {
-        ItemStack modifiedStack = ScriptInterpreter.itemUpdate(stack, matrices);
+        final ItemStack modifiedStack = ScriptInterpreter.itemUpdate(stack, matrices);
 
         // If unchanged → let vanilla render
         if (modifiedStack == stack) {
@@ -47,7 +46,7 @@ public class HeldItemRendererMixin {
         }
 
         if (!modifiedStack.isEmpty()) {
-            ItemRenderState itemRenderState = new ItemRenderState();
+            final ItemRenderState itemRenderState = new ItemRenderState();
 
             this.itemModelManager.clearAndUpdate(
                     itemRenderState,

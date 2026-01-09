@@ -44,27 +44,23 @@ public class LMHeldItemRendererMixin {
             ItemRenderType renderType,
             CallbackInfo ci
     ) {
-        // 1. CHECK GUARD: If we are already handling this call, return immediately
-        // This allows the reflection call (step 4) to actually execute the method body.
+
         if (IS_RENDERING.get()) {
             return;
         }
 
-        ItemStack modifiedStack = ScriptInterpreter.itemUpdate(originalStack, matrices);
+        final ItemStack modifiedStack = ScriptInterpreter.itemUpdate(originalStack, matrices);
 
-        // If unchanged, let the original run normally
         if (modifiedStack == originalStack) {
             return;
         }
 
-        // If empty, cancel and stop
         if (modifiedStack.isEmpty()) {
             ci.cancel();
             return;
         }
 
         try {
-            // 2. SET GUARD: Mark that we are actively modifying the render
             IS_RENDERING.set(true);
 
             if (renderItemHandle == null) {
@@ -78,8 +74,6 @@ public class LMHeldItemRendererMixin {
             }
 
             if (renderItemHandle != null) {
-                // 3. INVOKE REFLECTION: This triggers 'renderItem' again.
-                // Because IS_RENDERING is true, the Mixin will skip logic and let it run.
                 renderItemHandle.invoke(
                         this,
                         entity,
@@ -97,11 +91,9 @@ public class LMHeldItemRendererMixin {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            // 4. RESET GUARD: Important! Reset so the next frame works
             IS_RENDERING.set(false);
         }
 
-        // 5. CANCEL ORIGINAL: Stop the original renderItem from drawing the old stack
         ci.cancel();
     }
 }
