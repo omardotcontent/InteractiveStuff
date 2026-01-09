@@ -30,8 +30,8 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+    modCompileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 
     // --- VYN ---
     implementation files("libs/Vyn.jar")
@@ -39,8 +39,8 @@ dependencies {
 
 
     // --- LOCOMOTION ---
-    modImplementation name: 'locomotion-fabric', version: '0.1.8+1.21.10-playtesting'
-    include name: 'locomotion-fabric', version: '0.1.8+1.21.10-playtesting'
+    modCompileOnly name: 'locomotion-fabric', version: '0.1.8+1.21.10-playtesting'
+
 }
 
 processResources {
