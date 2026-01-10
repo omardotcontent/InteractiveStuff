@@ -25,7 +25,7 @@ import java.util.*;
 public final class ScriptInterpreter {
 
     private static final InteractiveStuffConfig interactiveStuffConfig = new InteractiveStuffConfig();
-    private static final ModLoader loader = new ModLoader(FabricLoader.getInstance());
+    private static final ModLoader modLoader = new ModLoader(FabricLoader.getInstance());
     private static final Player playerVar;
     private static final Key key = new Key();
 
@@ -50,7 +50,7 @@ public final class ScriptInterpreter {
             NativeBinder.defineConstant(listener, "world", playerVar.getWorld());
             NativeBinder.defineConstant(listener, "config", interactiveStuffConfig);
             NativeBinder.defineConstant(listener, "key", key);
-            NativeBinder.defineConstant(listener, "loader", loader);
+            NativeBinder.defineConstant(listener, "modLoader", modLoader);
             listener.defineFunction("importScript", importScriptFunction);
             listener.defineFunction("excludeScript", excludeScriptFunction);
         });

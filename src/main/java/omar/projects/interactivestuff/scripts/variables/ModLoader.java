@@ -4,7 +4,7 @@ import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.fabricmc.loader.api.FabricLoader;
 
-@VynType(name = "loader")
+@VynType(name = "ModLoader")
 public class ModLoader {
 
     private final FabricLoader loader;
