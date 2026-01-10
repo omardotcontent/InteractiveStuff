@@ -10,6 +10,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import omar.projects.interactivestuff.scripts.ScriptInterpreter;
+import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
+import omar.projects.interactivestuff.scripts.variables.ItemModel;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,6 +25,8 @@ public class HeldItemRendererMixin {
 
     @Final
     @Shadow private ItemModelManager itemModelManager;
+
+
 
     @Inject(
             method = "renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;I)V",
@@ -38,13 +42,13 @@ public class HeldItemRendererMixin {
             final int light,
             final CallbackInfo ci
     ) {
+
         final ItemStack modifiedStack = ScriptInterpreter.itemUpdate(stack, matrices);
 
         if (modifiedStack == null) {
             return;
         }
 
-        // Scripts modified the item, render the modified version
         if (!modifiedStack.isEmpty()) {
             final ItemRenderState itemRenderState = new ItemRenderState();
 
@@ -58,7 +62,34 @@ public class HeldItemRendererMixin {
             );
 
             itemRenderState.render(matrices, orderedRenderCommandQueue, light, OverlayTexture.DEFAULT_UV, 0);
+
         }
+
+        for (ItemModel model : ItemModelRenderRegistry.ACTIVE) {
+
+            ItemStack modelFinalStack = model.getFinalStack();
+            if (stack.isEmpty()) continue;
+
+            matrices.push();
+            model.apply(matrices);
+
+            final ItemRenderState state = new ItemRenderState();
+
+            this.itemModelManager.clearAndUpdate(
+                    state,
+                    modelFinalStack,
+                    renderMode,
+                    entity.getEntityWorld(),
+                    entity,
+                    entity.getId() + renderMode.ordinal() + model.getUniqueSeed()
+            );
+
+            state.render(matrices, orderedRenderCommandQueue, light, OverlayTexture.DEFAULT_UV, 0);
+
+            matrices.pop();
+        }
+
+        ItemModelRenderRegistry.clear();
 
         ci.cancel();
     }
