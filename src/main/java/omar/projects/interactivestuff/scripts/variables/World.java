@@ -2,6 +2,8 @@ package omar.projects.interactivestuff.scripts.variables;
 
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.dimension.DimensionTypes;
 
 @VynType(name = "World")
 public final class World {
@@ -19,9 +21,8 @@ public final class World {
 
     @VynFunc
     public String getDimension() {
-        return sourceWorld.getDimension().toString();
+        return sourceWorld.getRegistryKey().getValue().toString();
     }
-
     @VynFunc
     public boolean isDay() {
         return sourceWorld.isDay();
