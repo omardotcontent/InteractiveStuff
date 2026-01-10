@@ -24,12 +24,19 @@ public final class Item {
 
     @VynFunc
     public void setDataComponent(final String key, final Object value) {
-        // Copy on first modification
-        if (!modified) {
-            workingStack = originalStack.copy();
-            modified = true;
-        }
+        modificationCheck();
         ScriptItemHandler.apply(workingStack, key, value.toString());
+    }
+
+    @VynFunc
+    public void setBobbingAnimationTime(final int ticks) {
+        modificationCheck();
+        workingStack.setBobbingAnimationTime(ticks);
+    }
+
+    @VynFunc
+    public int getBobbingAnimationTime() {
+        return workingStack.getBobbingAnimationTime();
     }
 
     @VynFunc
@@ -59,6 +66,13 @@ public final class Item {
 
     public ItemStack getFinalItemStack() {
         return workingStack;
+    }
+
+    public void modificationCheck() {
+        if (!modified) {
+            workingStack = originalStack.copy();
+            modified = true;
+        }
     }
 
     /**
