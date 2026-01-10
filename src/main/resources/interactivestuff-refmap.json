@@ -1,7 +1,0 @@
-{
-  "mappings": {
-    "omar/projects/interactivestuff/mixin/render/locomotion/LMHeldItemRendererMixin": {
-      "renderItem": "Lcom/trainguy9512/locomotion/render/FirstPersonPlayerRenderer;renderItem(Lnet/minecraft/class_1309;Lnet/minecraft/class_1799;Lnet/minecraft/class_3883;Lnet/minecraft/class_4587;Lcom/trainguy9512/locomotion/animation/joint/JointChannel;Lnet/minecraft/class_4597;ILnet/minecraft/class_1306;Lnet/minecraft/class_1268;Lcom/trainguy9512/locomotion/render/ItemRenderType;)V"
-    }
-  }
-}

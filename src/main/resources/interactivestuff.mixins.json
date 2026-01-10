@@ -3,12 +3,10 @@
   "minVersion": "0.8",
   "package": "omar.projects.interactivestuff.mixin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "interactivestuff-refmap.json",
   "client": [
     "player.ArmSwingMixin",
     "sound.SoundListenerMixin",
-    "render.HeldItemRendererMixin",
-    "render.locomotion.LMHeldItemRendererMixin"
+    "render.HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

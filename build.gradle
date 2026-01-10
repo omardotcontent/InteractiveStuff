@@ -37,10 +37,6 @@ dependencies {
     implementation files("libs/Vyn.jar")
     shadow files("libs/Vyn.jar")
 
-
-    // --- LOCOMOTION ---
-    modCompileOnly name: 'locomotion-fabric', version: '0.1.8+1.21.10-playtesting'
-
 }
 
 processResources {

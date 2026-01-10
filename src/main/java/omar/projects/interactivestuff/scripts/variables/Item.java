@@ -3,66 +3,59 @@ package omar.projects.interactivestuff.scripts.variables;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
 
 @VynType(name = "Item")
 public final class Item {
 
-    private ItemStack item;
+    private final ItemStack stack;
 
-    public Item(final ItemStack item) {
-        this.item = item.copy();
+    public Item(final ItemStack stack) {
+        this.stack = stack;
     }
 
     @VynFunc
     public String getName() {
-        return item.getItem().toString();
-    }
-
-    @VynFunc
-    public void setItem(String item) {
-        this.item = new ItemStack(Registries.ITEM.get(Identifier.of(item)));
+        return stack.getItem().toString();
     }
 
     @VynFunc
     public void setDataComponent(final String key, final Object value) {
-        item = ScriptItemHandler.apply(item, key, value.toString());
+        ScriptItemHandler.apply(stack, key, value.toString());
     }
 
     @VynFunc
     public boolean isDamaged() {
-        return item.isDamaged();
+        return stack.isDamaged();
     }
 
     @VynFunc
     public boolean isDamageable() {
-        return item.isDamageable();
+        return stack.isDamageable();
     }
 
     @VynFunc
     public boolean isEnchantable() {
-        return item.isEnchantable();
+        return stack.isEnchantable();
     }
 
     @VynFunc
     public boolean isStackable() {
-        return item.isStackable();
+        return stack.isStackable();
     }
 
     @VynFunc
     public boolean isUsedOnRelease() {
-        return item.isUsedOnRelease();
+        return stack.isUsedOnRelease();
     }
 
     public ItemStack getFinalItemStack() {
-        return item;
+        return stack; // always same object
     }
 
-    @VynFunc
+    @Override
     public String toString() {
-        return item.toString();
+        return stack.toString();
     }
-
 }
+
