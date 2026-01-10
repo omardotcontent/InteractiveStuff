@@ -11,6 +11,7 @@ import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import omar.projects.interactivestuff.scripts.ScriptInterpreter;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
+import omar.projects.interactivestuff.scripts.variables.Item;
 import omar.projects.interactivestuff.scripts.variables.ItemModel;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,14 +44,21 @@ public class HeldItemRendererMixin {
             final CallbackInfo ci
     ) {
 
-        final ItemStack modifiedStack = ScriptInterpreter.itemUpdate(stack, matrices);
+        final Item scriptItem = ScriptInterpreter.itemUpdate(stack);
 
-        if (modifiedStack == null) {
+        if (scriptItem == null) {
             return;
         }
 
+        final ItemStack modifiedStack = scriptItem.getFinalItemStack();
+
         if (!modifiedStack.isEmpty()) {
             final ItemRenderState itemRenderState = new ItemRenderState();
+
+            matrices.push();
+
+            // 🔥 APPLY SCRIPT TRANSFORMS
+            scriptItem.apply(matrices);
 
             this.itemModelManager.clearAndUpdate(
                     itemRenderState,
@@ -63,7 +71,9 @@ public class HeldItemRendererMixin {
 
             itemRenderState.render(matrices, orderedRenderCommandQueue, light, OverlayTexture.DEFAULT_UV, 0);
 
+            matrices.pop();
         }
+
 
         for (ItemModel model : ItemModelRenderRegistry.ACTIVE) {
 

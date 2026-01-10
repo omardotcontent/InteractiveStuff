@@ -1,4 +1,4 @@
-task onItemUpdate takes itemRendered, matrices do
+task onItemUpdate takes itemRendered do
     check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
         check isWaterSensitive(itemRendered) do
             check player.isSubmergedInWater() do

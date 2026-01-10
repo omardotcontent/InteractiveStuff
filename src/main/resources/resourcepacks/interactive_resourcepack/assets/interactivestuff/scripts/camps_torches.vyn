@@ -25,7 +25,7 @@ task onTick do
 end
 
 
-task onItemUpdate takes itemRendered, matrices do
+task onItemUpdate takes itemRendered do
     check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
         check player.isSubmergedInWater() do
             make isTheItem = false
@@ -42,7 +42,7 @@ task onItemUpdate takes itemRendered, matrices do
                 make isTheItem = true
             end
             check isTheItem do
-                matrices.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
+                itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
             end
         end
     end

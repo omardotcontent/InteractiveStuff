@@ -43,7 +43,7 @@ end
 
 
 
-task onItemUpdate takes itemRendered, matrices do
+task onItemUpdate takes itemRendered do
 
     check itemRendered.getName() == "minecraft:piston" do
 

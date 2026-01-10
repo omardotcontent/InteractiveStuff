@@ -71,17 +71,16 @@ public final class ScriptInterpreter {
         }
     }
 
-    public static ItemStack itemUpdate(final ItemStack itemStack, final MatrixStack matrixStack) {
+    public static Item itemUpdate(final ItemStack itemStack) {
         if (playerVar.getPlayer() == null) return null;
         final Item item = new Item(itemStack);
-        final Matrices matrices = matrixStack == null ? null : new Matrices(matrixStack);
 
         for (final Script entry : globalScripts) {
-            entry.call(playerVar, Script.FunctionType.ON_ITEM_UPDATE, List.of(NativeBinder.toValue(entry.getEnvironment(), item), NativeBinder.toValue(entry.getEnvironment(), matrices)));
+            entry.call(playerVar, Script.FunctionType.ON_ITEM_UPDATE, List.of(NativeBinder.toValue(entry.getEnvironment(), item)));
         }
 
         // Only return modified stack if actually changed
-        return item.wasModified() ? item.getFinalItemStack() : null;
+        return item.wasModified() ? item : null;
     }
 
     public static void onSwingHand() {
