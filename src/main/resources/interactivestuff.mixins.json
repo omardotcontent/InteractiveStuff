@@ -6,7 +6,8 @@
   "client": [
     "player.ArmSwingMixin",
     "sound.SoundListenerMixin",
-    "render.HeldItemRendererMixin"
+    "render.HeldItemRendererMixin",
+    "render.InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
