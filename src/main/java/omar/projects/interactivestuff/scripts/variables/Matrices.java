@@ -4,6 +4,7 @@ package omar.projects.interactivestuff.scripts.variables;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.util.math.MatrixStack;
+import org.joml.Quaternionf;
 
 @VynType(name = "Matrices")
 public final class Matrices {
@@ -30,5 +31,10 @@ public final class Matrices {
                 y,
                 z
         );
+    }
+
+    @VynFunc
+    public void multiply(final double x, final double y, final double z, final double w) {
+        matrices.multiply(new Quaternionf(x, y, z, w));
     }
 }
