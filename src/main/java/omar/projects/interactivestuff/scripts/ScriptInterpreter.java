@@ -54,6 +54,9 @@ public final class ScriptInterpreter {
             NativeBinder.defineConstant(listener, "config", interactiveStuffConfig);
             NativeBinder.defineConstant(listener, "key", key);
             NativeBinder.defineConstant(listener, "modLoader", modLoader);
+            NativeBinder.bind(listener, ItemModel.class);
+            NativeBinder.bind(listener, Sound.class);
+            NativeBinder.bind(listener, Position.class);
             listener.defineFunction("importScript", importScriptFunction);
             listener.defineFunction("excludeScript", excludeScriptFunction);
             listener.defineFunction("debugText", debugTextFunction);
