@@ -6,6 +6,7 @@
   "client": [
     "player.ArmSwingMixin",
     "sound.SoundListenerMixin",
+    "client.MinecraftClientMixin",
     "render.HeldItemRendererMixin",
     "render.InGameHudMixin"
   ],

@@ -17,7 +17,6 @@ task onTick do
         end
         check intensity > 0.0 do
                 make intensity = intensity - 0.001
-
                 check intensity < 0.0 do
                     make intensity = 0.0
                 end
