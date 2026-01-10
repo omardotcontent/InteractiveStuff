@@ -8,54 +8,68 @@ import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
 @VynType(name = "Item")
 public final class Item {
 
-    private final ItemStack stack;
+    private final ItemStack originalStack;
+    private ItemStack workingStack;
+    private boolean modified = false;
 
     public Item(final ItemStack stack) {
-        this.stack = stack;
+        this.originalStack = stack;
+        this.workingStack = stack; // Start with original reference
     }
 
     @VynFunc
     public String getName() {
-        return stack.getItem().toString();
+        return workingStack.getItem().toString();
     }
 
     @VynFunc
     public void setDataComponent(final String key, final Object value) {
-        ScriptItemHandler.apply(stack, key, value.toString());
+        // Copy on first modification
+        if (!modified) {
+            workingStack = originalStack.copy();
+            modified = true;
+        }
+        ScriptItemHandler.apply(workingStack, key, value.toString());
     }
 
     @VynFunc
     public boolean isDamaged() {
-        return stack.isDamaged();
+        return workingStack.isDamaged();
     }
 
     @VynFunc
     public boolean isDamageable() {
-        return stack.isDamageable();
+        return workingStack.isDamageable();
     }
 
     @VynFunc
     public boolean isEnchantable() {
-        return stack.isEnchantable();
+        return workingStack.isEnchantable();
     }
 
     @VynFunc
     public boolean isStackable() {
-        return stack.isStackable();
+        return workingStack.isStackable();
     }
 
     @VynFunc
     public boolean isUsedOnRelease() {
-        return stack.isUsedOnRelease();
+        return workingStack.isUsedOnRelease();
     }
 
     public ItemStack getFinalItemStack() {
-        return stack; // always same object
+        return workingStack;
+    }
+
+    /**
+     * Returns whether this item was modified by scripts
+     */
+    public boolean wasModified() {
+        return modified;
     }
 
     @Override
     public String toString() {
-        return stack.toString();
+        return workingStack.toString();
     }
 }
-

@@ -40,11 +40,11 @@ public class HeldItemRendererMixin {
     ) {
         final ItemStack modifiedStack = ScriptInterpreter.itemUpdate(stack, matrices);
 
-        // If unchanged → let vanilla render
-        if (modifiedStack == stack) {
+        if (modifiedStack == null) {
             return;
         }
 
+        // Scripts modified the item, render the modified version
         if (!modifiedStack.isEmpty()) {
             final ItemRenderState itemRenderState = new ItemRenderState();
 
