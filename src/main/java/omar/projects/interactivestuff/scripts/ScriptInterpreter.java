@@ -8,6 +8,7 @@ import me.abdelaziz.runtime.function.nat.NativeFunction;
 import me.abdelaziz.util.NativeBinder;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 
 import net.minecraft.client.util.math.MatrixStack;
@@ -23,8 +24,9 @@ import java.util.*;
 
 public final class ScriptInterpreter {
 
-    private static final Player playerVar;
     private static final InteractiveStuffConfig interactiveStuffConfig = new InteractiveStuffConfig();
+    private static final ModLoader loader = new ModLoader(FabricLoader.getInstance());
+    private static final Player playerVar;
     private static final Key key = new Key();
 
     private static final Set<Script> globalScripts = new HashSet<>();
@@ -48,6 +50,7 @@ public final class ScriptInterpreter {
             NativeBinder.defineConstant(listener, "world", playerVar.getWorld());
             NativeBinder.defineConstant(listener, "config", interactiveStuffConfig);
             NativeBinder.defineConstant(listener, "key", key);
+            NativeBinder.defineConstant(listener, "loader", loader);
             listener.defineFunction("importScript", importScriptFunction);
             listener.defineFunction("excludeScript", excludeScriptFunction);
         });
