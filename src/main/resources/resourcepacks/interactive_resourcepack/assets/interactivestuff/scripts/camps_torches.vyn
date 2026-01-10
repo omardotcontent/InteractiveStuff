@@ -1,4 +1,5 @@
 make wasSubmerged = false
+make intensity = 0.0
 
 task onTick do
     check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
@@ -8,10 +9,18 @@ task onTick do
             check isHoldingCampfireOrTorch() do
                 check isSubmerged do
                     player.playSound("minecraft:block.fire.extinguish", 0.6, 1.0)
+                    make intensity = 0.015
                 otherwise
                     player.playSound("minecraft:item.flintandsteel.use", 0.6, 1.0)
                 end
             end
+        end
+        check intensity > 0.0 do
+                make intensity = intensity - 0.001
+
+                check intensity < 0.0 do
+                    make intensity = 0.0
+                end
         end
     end
 end
@@ -20,14 +29,21 @@ end
 task onItemUpdate takes itemRendered, matrices do
     check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
         check player.isSubmergedInWater() do
+            make isTheItem = false
             check isWaterTorch(itemRendered) do
                 itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:torch_off")
+                make isTheItem = true
             end
             check isRedStoneTorch(itemRendered) do
                 itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:redstone_torch_off")
+                make isTheItem = true
             end
             check isWaterCampFire(itemRendered) do
                 itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:campfire_off")
+                make isTheItem = true
+            end
+            check isTheItem do
+                matrices.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
             end
         end
     end
