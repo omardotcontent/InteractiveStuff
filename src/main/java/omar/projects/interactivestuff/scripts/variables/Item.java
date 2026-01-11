@@ -4,8 +4,8 @@ import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.RotationAxis;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
+import org.joml.Quaternionf;
 
 @VynType(name = "Item")
 public final class Item {
@@ -14,9 +14,11 @@ public final class Item {
     private ItemStack workingStack;
     private boolean modified = false;
 
+    private final Quaternionf rotation = new Quaternionf();
     private double x, y, z;
-    private double rx, ry, rz;
     private double sx = 1, sy = 1, sz = 1;
+    private double px = 0.5, py = 0.5, pz = 0.5;
+
 
     public Item(final ItemStack stack) {
         this.originalStack = stack;
@@ -70,6 +72,8 @@ public final class Item {
         return workingStack.isUsedOnRelease();
     }
 
+    // ---------- Transform API ----------
+
     @VynFunc
     public void translate(double x, double y, double z) {
         modificationCheck();
@@ -79,11 +83,50 @@ public final class Item {
     }
 
     @VynFunc
-    public void rotate(double x, double y, double z) {
+    public void setPivot(double x, double y, double z) {
         modificationCheck();
-        this.rx += x;
-        this.ry += y;
-        this.rz += z;
+        this.px = x;
+        this.py = y;
+        this.pz = z;
+    }
+
+    /**
+     * Rotates the item around its OWN axes (Local Space).
+     * If the item is upside down, rotateLocal(0, 10, 0) will spin it around its upside-down Y axis.
+     */
+    @VynFunc
+    public void rotateLocal(double x, double y, double z) {
+        modificationCheck();
+        // Post-multiplication: this = this * rot
+        if (x != 0) this.rotation.rotateX((float) Math.toRadians(x));
+        if (y != 0) this.rotation.rotateY((float) Math.toRadians(y));
+        if (z != 0) this.rotation.rotateZ((float) Math.toRadians(z));
+    }
+
+    /**
+     * Rotates the item around the WORLD axes (Global/Camera Space).
+     * No matter how the item is rotated, rotateGlobal(0, 10, 0) will always spin it horizontally relative to the ground.
+     */
+    @VynFunc
+    public void rotateGlobal(double x, double y, double z) {
+        modificationCheck();
+        // Create the new rotation in world space
+        final Quaternionf globalRot = new Quaternionf()
+                .rotateX((float) Math.toRadians(x))
+                .rotateY((float) Math.toRadians(y))
+                .rotateZ((float) Math.toRadians(z));
+
+        // Pre-multiplication: this = rot * this
+        this.rotation.premul(globalRot);
+    }
+
+    /**
+     * Legacy rotation method for backwards compatibility.
+     * Equivalent to rotateGlobal.
+     */
+    @VynFunc
+    public void rotate(double x, double y, double z) {
+        rotateGlobal(x, y, z);
     }
 
     @VynFunc
@@ -93,7 +136,6 @@ public final class Item {
         this.sy *= y;
         this.sz *= z;
     }
-
 
     public ItemStack getFinalItemStack() {
         return workingStack;
@@ -113,12 +155,9 @@ public final class Item {
         return modified;
     }
 
-
     public void apply(MatrixStack matrices) {
         matrices.translate(x, y, z);
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees((float) rx));
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float) ry));
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) rz));
+        matrices.multiply(rotation, (float) px, (float) py, (float) pz);
         matrices.scale((float) sx, (float) sy, (float) sz);
     }
 
