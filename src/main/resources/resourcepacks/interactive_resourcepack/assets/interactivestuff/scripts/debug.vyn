@@ -11,4 +11,7 @@ task onTick do
     debugText("Is Jumping?: " + player.isJumping())
     debugText("Is Underwater?: " + player.isSubmergedInWater())
     debugText("Is at cloud height?: " + player.isAtCloudHeight())
+    debugText("X Velocity: " + player.getVelocityX())
+    debugText("Y Velocity: " + player.getVelocityY())
+    debugText("Z Velocity: " + player.getVelocityZ())
 end

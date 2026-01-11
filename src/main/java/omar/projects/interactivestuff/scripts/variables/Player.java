@@ -39,16 +39,12 @@ public final class Player {
 
     @VynFunc
     public Block getTargetBlock() {
-        final BlockHitResult blockHit = (BlockHitResult) client.crosshairTarget;
-        if (blockHit == null) {
-            return null;
+        if (!(client.crosshairTarget instanceof BlockHitResult blockHit)) { return null;}
+        if (player == null) {
+            return (null);
         } else {
-            if (player == null) {
-                return (null);
-            } else {
-                assert client.world != null;
-                return (new Block(blockHit.getBlockPos(), client.world));
-            }
+            assert client.world != null;
+            return (new Block(blockHit.getBlockPos(), client.world));
         }
     }
 
@@ -66,6 +62,21 @@ public final class Player {
     @VynFunc
     public World getWorld() {
         return client.world == null ? null : new World(client.world);
+    }
+
+    @VynFunc
+    public double getVelocityX() {
+        return player.getVelocity().getX();
+    }
+
+    @VynFunc
+    public double getVelocityY() {
+        return player.getVelocity().getY() == -0.0784000015258789 ? 0 : player.getVelocity().getY();
+    }
+
+    @VynFunc
+    public double getVelocityZ() {
+        return player.getVelocity().getZ();
     }
 
     @VynFunc
