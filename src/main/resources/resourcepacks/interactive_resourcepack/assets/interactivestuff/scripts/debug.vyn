@@ -1,8 +1,8 @@
 task onTick do
-    check player.getSteppingBlock() != nothing do
-        debugText("Stepping Block: " + player.getSteppingBlock().getName())
+    debugText("Stepping Block: " + player.getSteppingBlock().getName())
+    check player.getTargetBlock() != nothing do
+        debugText("Target Block: " + player.getTargetBlock().getName())
     end
-    debugText("Target Block: " + player.getTargetBlock().getName())
     debugText("Gamemode: " + player.getGamemode())
     debugText("Pos: " + player.getPosition().getX() + ", " + player.getPosition().getY() + ", " + player.getPosition().getZ())
     debugText("Dimension: " + player.getWorld().getDimension())
