@@ -47,7 +47,9 @@
   "interactive_stuff.config.settings.config": "Config Settings",
   "interactive_stuff.config.settings.config.tooltip": "Additional Settings about the Configuration File",
   "interactive_stuff.config.settings.config.export": "Open Config file's Directory.",
-  "interactive_stuff.config.settings.config.reload": "Reload Configuration"
+  "interactive_stuff.config.settings.config.reload": "Reload Configuration",
+  "interactive_stuff.config.settings.general.resourcepack_debug": "Resource Pack Debug Mode.",
+  "interactive_stuff.config.settings.general.resourcepack_debug.tooltip": "This shows the texts made for Resource pack devs to print on screen!"
 
 
 }

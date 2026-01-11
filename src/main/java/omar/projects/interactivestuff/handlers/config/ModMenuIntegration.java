@@ -116,6 +116,14 @@ public final class ModMenuIntegration implements ModMenuApi {
                 .controller(TickBoxControllerBuilder::create)
                 .build());
 
+        general.option(Option.<Boolean>createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.general.resourcepack_debug"))
+                .description(OptionDescription.of(Text.translatable("interactive_stuff.config.settings.general.resourcepack_debug.tooltip")))
+                .binding(defaults.resourcePackDebugMode, () -> instance.resourcePackDebugMode, newVal -> instance.resourcePackDebugMode = newVal)
+                .controller(TickBoxControllerBuilder::create)
+                .build());
+
+
         return general;
     }
 
@@ -124,7 +132,6 @@ public final class ModMenuIntegration implements ModMenuApi {
         final ConfigCategory.Builder cat = ConfigCategory.createBuilder()
                 .name(Text.translatable("interactive_stuff.config.settings.config"))
                 .tooltip(Text.translatable("interactive_stuff.config.settings.config.tooltip"));
-
 
         cat.option(ButtonOption.createBuilder()
                 .name(Text.translatable("interactive_stuff.config.settings.config.export"))

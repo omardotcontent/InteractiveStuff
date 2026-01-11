@@ -41,6 +41,7 @@ public final class ConfigHandler {
     public boolean enableSculkSensorFeature = true;
     public boolean enableNoteBlockCrouchFeature = true;
     public boolean enableTextureChanges = true;
+    public boolean resourcePackDebugMode = false;
     public int HitCooldownTicks = 4;
 
     public @NotNull List<Item> excludedBlocks = new ArrayList<>();
@@ -56,9 +57,10 @@ public final class ConfigHandler {
     public void reload() {
         ConfigHandler loaded = load();
 
-        this.enableInteractiveHits = loaded.enableInteractiveHits;
-        this.enableSculkSensorFeature = loaded.enableSculkSensorFeature;
         this.enableNoteBlockCrouchFeature = loaded.enableNoteBlockCrouchFeature;
+        this.enableSculkSensorFeature = loaded.enableSculkSensorFeature;
+        this.resourcePackDebugMode = loaded.resourcePackDebugMode;
+        this.enableInteractiveHits = loaded.enableInteractiveHits;
         this.enableTextureChanges = loaded.enableTextureChanges;
         this.HitCooldownTicks = loaded.HitCooldownTicks;
         this.excludedBlocks = loaded.excludedBlocks;

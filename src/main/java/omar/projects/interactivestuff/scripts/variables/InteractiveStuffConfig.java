@@ -8,6 +8,9 @@ import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 public final class InteractiveStuffConfig {
 
     @VynFunc
+    public boolean isResourcePackDebugModeEnabled () {return ConfigHandler.INSTANCE.resourcePackDebugMode;}
+
+    @VynFunc
     public boolean isInteractiveHitsEnabled() {
         return ConfigHandler.INSTANCE.enableInteractiveHits;
     }
