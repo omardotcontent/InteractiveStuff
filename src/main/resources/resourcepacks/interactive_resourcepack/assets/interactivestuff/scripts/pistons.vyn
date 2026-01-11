@@ -41,76 +41,59 @@ task onTick do
 end
 
 
-
-
 task onItemUpdate takes itemRendered do
 
-    check itemRendered.getName() == "minecraft:piston" do
+    make vy = player.getVelocityY()
+    make fallTarget = 0
 
+
+    check vy < -0.1 do
+        make fallTarget = vy * -50
+        check fallTarget > 100 do
+            make fallTarget = 100
+        end
+    end
+
+
+    check itemRendered.getName() == "minecraft:piston" do
         itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:piston_base")
 
-        lock pistonTop = new ItemModel
+        make pistonTop = new ItemModel
         pistonTop.setItemModel("interactivestuff:piston_top")
+
+        make currentTarget = fallTarget
 
         check isOnRedstone do
             check isSneaking do
-                check progress < 100 do
-                    make progress = progress + 5
-                    check progress > 100 do
-                        make progress = 100
-                    end
-                end
-            otherwise
-                check progress > 0 do
-                    make progress = progress - 5
-                    check progress < 0 do
-                        make progress = 0
-                    end
-                end
-            end
-        otherwise
-            check progress > 0 do
-                make progress = progress - 5
-                check progress < 0 do
-                    make progress = 0
-                end
+
+                make currentTarget = 100
             end
         end
+
+        make progress = progress + (currentTarget - progress) * 0.2
+
         pistonTop.translate(0, 0.275 * (progress / 100), 0)
     end
-
 
     check itemRendered.getName() == "minecraft:sticky_piston" do
         itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:piston_base")
 
-        lock pistonTop = new ItemModel
+        make pistonTop = new ItemModel
         pistonTop.setItemModel("interactivestuff:sticky_piston_top")
+
+
+        make currentStTarget = fallTarget
 
 
         check isOnRedstone do
             check isSneaking do
-                check stprogress < 100 do
-                    make stprogress = stprogress + 5
-                    check stprogress > 100 do
-                        make stprogress = 100
-                    end
-                end
-            otherwise
-                check stprogress > 0 do
-                    make stprogress = stprogress - 5
-                    check stprogress < 0 do
-                        make stprogress = 0
-                    end
-                end
-            end
-        otherwise
-            check stprogress > 0 do
-                make stprogress = stprogress - 5
-                check stprogress < 0 do
-                    make stprogress = 0
-                end
+                make currentStTarget = 100
             end
         end
+
+
+        make stprogress = stprogress + (currentStTarget - stprogress) * 0.2
+
         pistonTop.translate(0, 0.275 * (stprogress / 100), 0)
     end
 
