@@ -8,6 +8,8 @@
     "sound.SoundListenerMixin",
     "client.MinecraftClientMixin",
     "render.HeldItemRendererMixin",
+    "render.ItemRenderStateAccessor",
+    "render.ItemRenderStateLayerAccessor",
     "render.InGameHudMixin"
   ],
   "injectors": {

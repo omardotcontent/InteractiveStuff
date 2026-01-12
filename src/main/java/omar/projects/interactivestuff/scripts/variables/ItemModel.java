@@ -7,6 +7,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
@@ -38,9 +39,17 @@ public final class ItemModel {
      * Constructor for scripts creating NEW models: `var m = new Item()`
      */
     @VynConstructor
-    public ItemModel() {
-        this(new ItemStack(Items.STICK));
-        ItemModelRenderRegistry.ACTIVE.add(this); // Auto-register extra models
+    public ItemModel(final String itemId) {
+        this(createStackFromId(itemId));
+        ItemModelRenderRegistry.ACTIVE.add(this);
+    }
+
+    private static ItemStack createStackFromId(final String itemId) {
+        try {
+            return new ItemStack(Registries.ITEM.get(Identifier.of(itemId)));
+        } catch (Exception e) {
+            return new ItemStack(Items.AIR);
+        }
     }
 
     /**
@@ -110,9 +119,9 @@ public final class ItemModel {
 
     @VynFunc
     public void setColor(int r, int g, int b) {
-        this.red = r / 255.0f;
-        this.green = g / 255.0f;
-        this.blue = b / 255.0f;
+        this.red = MathHelper.clamp(r, 0, 255) / 255.0f;
+        this.green = MathHelper.clamp(g, 0, 255) / 255.0f;
+        this.blue = MathHelper.clamp(b, 0, 255) / 255.0f;
     }
 
     @VynFunc
@@ -161,10 +170,13 @@ public final class ItemModel {
     }
 
     public int getRenderColor() {
-        int a = (int) (opacity * 255.0f) << 24;
-        int r = (int) (red * 255.0f) << 16;
-        int g = (int) (green * 255.0f) << 8;
-        int b = (int) (blue * 255.0f);
-        return a | r | g | b;
+        // Clamp all values to valid range
+        int a = (int) (MathHelper.clamp(opacity, 0.0f, 1.0f) * 255.0f);
+        int r = (int) (MathHelper.clamp(red, 0.0f, 1.0f) * 255.0f);
+        int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f);
+        int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f);
+
+        // Pack into ARGB format (0xAARRGGBB)
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 }

@@ -58,7 +58,7 @@ task onItemUpdate takes itemRendered do
     check itemRendered.getName() == "minecraft:piston" do
         itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:piston_base")
 
-        make pistonTop = new ItemModel
+        make pistonTop = new ItemModel("minecraft:piston")
         pistonTop.setItemModel("interactivestuff:piston_top")
 
         make currentTarget = fallTarget
@@ -78,7 +78,7 @@ task onItemUpdate takes itemRendered do
     check itemRendered.getName() == "minecraft:sticky_piston" do
         itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:piston_base")
 
-        make pistonTop = new ItemModel
+        make pistonTop = new ItemModel("minecraft:sticky_piston")
         pistonTop.setItemModel("interactivestuff:sticky_piston_top")
 
 

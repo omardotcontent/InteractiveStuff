@@ -5,23 +5,20 @@ task onItemUpdate takes itemRendered do
     make vy = player.getVelocityY()
     make fallTarget = 0
 
-    check vy < -0.1 do
         make fallTarget = vy * -50
         check fallTarget > 100 do
             make fallTarget = 100
         end
-    end
 
     check itemRendered.getName() == "minecraft:chest" do
         itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:chest_base")
 
-        make chestTop = new ItemModel
+        make chestTop = new ItemModel("minecraft:chest")
         chestTop.setItemModel("interactivestuff:chest_top")
 
         make progress = progress + (fallTarget - progress) * 0.2
 
         chestTop.setPivot(0.1, 0.1, -0.1)
-
         chestTop.rotate(-30 * (progress / 100), 0, -45 * (progress / 100))
     end
 end

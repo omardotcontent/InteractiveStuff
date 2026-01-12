@@ -2,9 +2,11 @@ package omar.projects.interactivestuff.mixin.render;
 
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemDisplayContext;
@@ -20,6 +22,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Arrays;
+
 
 @Mixin(value = HeldItemRenderer.class, priority = 2000)
 public class HeldItemRendererMixin {
@@ -30,22 +34,30 @@ public class HeldItemRendererMixin {
     @Inject(method = "renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;I)V", at = @At("HEAD"), cancellable = true)
     private void interactivestuff$renderItem(LivingEntity entity, ItemStack stack, ItemDisplayContext renderMode, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, CallbackInfo ci) {
 
-        // 1. Handle the main item (the one actually in the hand)
+        // 1. Check if script wants to handle this item
         final ItemModel mainItem = ScriptInterpreter.itemUpdate(stack);
+
+        // If script doesn't handle this item, let vanilla rendering continue
+        if (mainItem == null && ItemModelRenderRegistry.ACTIVE.isEmpty()) {
+            return; // Don't cancel - let vanilla handle it
+        }
+
+        // 2. Script is handling this item - cancel vanilla rendering
+        ci.cancel();
+
+        // 3. Render the main item if script provided one
         if (mainItem != null) {
             renderScriptItem(mainItem, entity, renderMode, matrices, queue, light);
         }
 
-        // 2. Handle any extra models created via `new Item()`
+        // 4. Handle any extra models created via `new Item()`
         for (ItemModel extraModel : ItemModelRenderRegistry.ACTIVE) {
             renderScriptItem(extraModel, entity, renderMode, matrices, queue, light);
         }
 
         ItemModelRenderRegistry.clear();
-        ci.cancel();
     }
 
-    // Helper method to avoid duplicating the ItemRenderState logic
     @Unique
     private void renderScriptItem(ItemModel item, LivingEntity entity, ItemDisplayContext mode, MatrixStack matrices, OrderedRenderCommandQueue queue, int light) {
         ItemStack stack = item.getFinalStack();
@@ -60,9 +72,51 @@ public class HeldItemRendererMixin {
                 entity, entity.getId() + mode.ordinal() + item.getUniqueSeed()
         );
 
-        state.render(matrices, queue, light, OverlayTexture.DEFAULT_UV, item.getRenderColor());
+        // Apply custom colors to ALL layers
+        int renderColor = item.getRenderColor();
+        applyColorToState(state, renderColor);
+
+        applyOpacity(state, renderColor);
+
+        // Render with no outline color
+        state.render(matrices, queue, light, OverlayTexture.DEFAULT_UV, 0);
 
         matrices.pop();
     }
+
+    @Unique
+    private void applyColorToState(final ItemRenderState state, final int argbColor) {
+        final ItemRenderStateAccessor accessor = (ItemRenderStateAccessor) state;
+        final int layerCount = accessor.getLayerCount();
+        final ItemRenderState.LayerRenderState[] layers = accessor.getLayers();
+
+        for (int i = 0; i < layerCount; i++) {
+            final ItemRenderState.LayerRenderState layer = layers[i];
+
+            int quadCount = layer.getQuads().size();
+
+            if (quadCount > 0) {
+                int[] tints = layer.initTints(quadCount);
+
+                Arrays.fill(tints, argbColor);
+            }
+        }
+    }
+
+    @Unique
+    private void applyOpacity(final ItemRenderState state, final int argb) {
+        final int alpha = (argb >>> 24) & 0xFF;
+        if (alpha >= 250) return;
+
+        final ItemRenderStateAccessor acc = (ItemRenderStateAccessor) state;
+        final var layers = acc.getLayers();
+        final int count = acc.getLayerCount();
+
+        for (int i = 0; i < count; i++) {
+            final ItemRenderStateLayerAccessor layer = (ItemRenderStateLayerAccessor) layers[i];
+            layer.setInteractiveLayer(RenderLayer.getItemEntityTranslucentCull(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
+        }
+    }
+
 
 }
