@@ -6,8 +6,8 @@ import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.RotationAxis; // Ensure this is imported
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
-import org.joml.Quaternionf;
 
 @VynType(name = "ItemModel")
 public final class ItemModel {
@@ -15,7 +15,11 @@ public final class ItemModel {
     private static int NEXT_SEED = 1;
     private final int seed = NEXT_SEED++;
 
-    private final Quaternionf rotation = new Quaternionf();
+    // Replaced Quaternionf with explicit Euler angles (in degrees)
+    private float rotX = 0;
+    private float rotY = 0;
+    private float rotZ = 0;
+
     private final Item item = new Item(new ItemStack(Items.STICK));
 
     private double x, y, z;
@@ -56,28 +60,13 @@ public final class ItemModel {
     }
 
     /**
-     * Rotates the item around its OWN axes (Local Space).
-     * If the item is upside down, rotateLocal(0, 10, 0) will spin it around its upside-down Y axis.
+     * Accumulates rotation degrees for the X, Y, and Z axes.
      */
     @VynFunc
-    public void rotateLocal(double x, double y, double z) {
-        if (x != 0) this.rotation.rotateX((float) Math.toRadians(x));
-        if (y != 0) this.rotation.rotateY((float) Math.toRadians(y));
-        if (z != 0) this.rotation.rotateZ((float) Math.toRadians(z));
-    }
-
-    /**
-     * Rotates the item around the WORLD axes (Global/Camera Space).
-     * No matter how the item is rotated, rotateGlobal(0, 10, 0) will always spin it horizontally relative to the ground.
-     */
-    @VynFunc
-    public void rotateGlobal(double x, double y, double z) {
-        final Quaternionf globalRot = new Quaternionf()
-                .rotateX((float) Math.toRadians(x))
-                .rotateY((float) Math.toRadians(y))
-                .rotateZ((float) Math.toRadians(z));
-
-        this.rotation.premul(globalRot);
+    public void rotate(double x, double y, double z) {
+        this.rotX += (float) x;
+        this.rotY += (float) y;
+        this.rotZ += (float) z;
     }
 
     @VynFunc
@@ -95,11 +84,14 @@ public final class ItemModel {
 
     public void apply(MatrixStack matrices) {
         matrices.translate(x, y, z);
-        matrices.multiply(rotation, (float) px, (float) py, (float) pz);
 
 
-        // Apply the accumulated Quaternion rotation around the Pivot Point
-        matrices.multiply(rotation, (float) px, (float) py, (float) pz);
+        matrices.translate(px, py, pz);
+        if (rotX != 0) matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotX));
+        if (rotY != 0) matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotY));
+        if (rotZ != 0) matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotZ));
+        matrices.translate(-px, -py, -pz);
+
         matrices.scale((float) sx, (float) sy, (float) sz);
     }
 

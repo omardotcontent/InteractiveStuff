@@ -65,6 +65,12 @@ public final class Player {
     }
 
     @VynFunc
+    public Item getActiveItem() {
+        return player == null ? null : new Item(player.getActiveItem());
+    }
+
+
+    @VynFunc
     public double getVelocityX() {
         return player.getVelocity().getX();
     }
@@ -252,6 +258,16 @@ public final class Player {
     }
 
     @VynFunc
+    public Item getMainHandItem() {
+        return player == null ? null : new Item(player.getMainHandStack());
+    }
+
+    @VynFunc
+    public Item getOffHandItem() {
+        return player == null ? null : new Item(player.getOffHandStack());
+    }
+
+    @VynFunc
     public void playSound(final String soundId, final double volume, final double pitch) {
         if (player != null)
             player.playSound(Registries.SOUND_EVENT.get(Identifier.of(soundId)), (float) volume, (float) pitch);
@@ -299,16 +315,6 @@ public final class Player {
         if (player != null)
             player.sendMessage(Text.of("§e[InteractiveStuff] " + message), false);
     }
-
-    public Item getMainHandItem() {
-        return player == null ? null : new Item(player.getMainHandStack());
-    }
-
-
-    public Item getOffHandItem() {
-        return player == null ? null : new Item(player.getOffHandStack());
-    }
-
 
     public ClientPlayerEntity getPlayer() {
         return player;

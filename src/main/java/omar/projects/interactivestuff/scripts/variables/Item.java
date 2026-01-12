@@ -96,11 +96,9 @@ public final class Item {
      */
     @VynFunc
     public void rotateLocal(double x, double y, double z) {
-        modificationCheck();
-        // Post-multiplication: this = this * rot
-        if (x != 0) this.rotation.rotateX((float) Math.toRadians(x));
-        if (y != 0) this.rotation.rotateY((float) Math.toRadians(y));
-        if (z != 0) this.rotation.rotateZ((float) Math.toRadians(z));
+        if (x != 0) this.rotation.rotateLocalX((float) Math.toRadians(x));
+        if (y != 0) this.rotation.rotateLocalY((float) Math.toRadians(y));
+        if (z != 0) this.rotation.rotateLocalZ((float) Math.toRadians(z));
     }
 
     /**
@@ -109,24 +107,9 @@ public final class Item {
      */
     @VynFunc
     public void rotateGlobal(double x, double y, double z) {
-        modificationCheck();
-        // Create the new rotation in world space
-        final Quaternionf globalRot = new Quaternionf()
-                .rotateX((float) Math.toRadians(x))
-                .rotateY((float) Math.toRadians(y))
-                .rotateZ((float) Math.toRadians(z));
-
-        // Pre-multiplication: this = rot * this
-        this.rotation.premul(globalRot);
-    }
-
-    /**
-     * Legacy rotation method for backwards compatibility.
-     * Equivalent to rotateGlobal.
-     */
-    @VynFunc
-    public void rotate(double x, double y, double z) {
-        rotateGlobal(x, y, z);
+        if (x != 0) this.rotation.rotateX((float) Math.toRadians(x));
+        if (y != 0) this.rotation.rotateY((float) Math.toRadians(y));
+        if (z != 0) this.rotation.rotateZ((float) Math.toRadians(z));
     }
 
     @VynFunc

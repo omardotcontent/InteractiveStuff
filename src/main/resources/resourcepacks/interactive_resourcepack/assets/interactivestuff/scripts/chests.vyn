@@ -22,6 +22,6 @@ task onItemUpdate takes itemRendered do
 
         chestTop.setPivot(0.1, 0.1, -0.1)
 
-        chestTop.rotateLocal(-15 * (progress / 100), 0, -20 * (progress / 100))
+        chestTop.rotate(-30 * (progress / 100), 0, -45 * (progress / 100))
     end
 end
