@@ -65,10 +65,9 @@ public final class Player {
     }
 
     @VynFunc
-    public Item getActiveItem() {
-        return player == null ? null : new Item(player.getActiveItem());
+    public ItemModel getActiveItem() {
+        return player == null ? null : new ItemModel(player.getActiveItem());
     }
-
 
     @VynFunc
     public double getVelocityX() {
@@ -248,7 +247,7 @@ public final class Player {
 
     @VynFunc
     public boolean isHoldingItem(final String itemId) {
-        final Item mainHandItem = getMainHandItem(),
+        final ItemModel mainHandItem = getMainHandItem(),
                 offHandItem = getOffHandItem();
 
         final String mainItemName = mainHandItem == null ? "AIR" : mainHandItem.getName(),
@@ -258,13 +257,13 @@ public final class Player {
     }
 
     @VynFunc
-    public Item getMainHandItem() {
-        return player == null ? null : new Item(player.getMainHandStack());
+    public ItemModel getMainHandItem() {
+        return player == null ? null : new ItemModel(player.getMainHandStack());
     }
 
     @VynFunc
-    public Item getOffHandItem() {
-        return player == null ? null : new Item(player.getOffHandStack());
+    public ItemModel getOffHandItem() {
+        return player == null ? null : new ItemModel(player.getOffHandStack());
     }
 
     @VynFunc
