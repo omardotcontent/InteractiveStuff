@@ -6,6 +6,7 @@ import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
@@ -50,12 +51,46 @@ public final class ItemModel {
         this.workingStack = stack;
     }
 
+    // ---------- Item Utility Getters (Restored) ----------
+
+    @VynFunc
+    public String getName() {
+        // Returns the registry ID (e.g., "minecraft:diamond_sword")
+        return Registries.ITEM.getId(workingStack.getItem()).toString();
+    }
+
+    @VynFunc
+    public boolean isDamaged() { return workingStack.isDamaged(); }
+
+    @VynFunc
+    public boolean isDamageable() { return workingStack.isDamageable(); }
+
+    @VynFunc
+    public boolean isEnchantable() { return workingStack.isEnchantable(); }
+
+    @VynFunc
+    public boolean isStackable() { return workingStack.isStackable(); }
+
+    @VynFunc
+    public int getCount() { return workingStack.getCount(); }
+
+    @VynFunc
+    public int getMaxCount() { return workingStack.getMaxCount(); }
+
+    @VynFunc
+    public int getBobbingAnimationTime() { return workingStack.getBobbingAnimationTime(); }
+
     // ---------- Item Logic ----------
 
     @VynFunc
     public void setItemModel(final String model) {
         modificationCheck();
         ScriptItemHandler.apply(workingStack, "minecraft:item_model", model);
+    }
+
+    @VynFunc
+    public void setBobbingTime(final int bobbingTime) {
+        workingStack.setBobbingAnimationTime(bobbingTime);
     }
 
     @VynFunc
