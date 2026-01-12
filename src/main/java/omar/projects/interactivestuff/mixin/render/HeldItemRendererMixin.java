@@ -11,11 +11,11 @@ import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import omar.projects.interactivestuff.scripts.ScriptInterpreter;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
-import omar.projects.interactivestuff.scripts.variables.Item;
 import omar.projects.interactivestuff.scripts.variables.ItemModel;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,81 +27,42 @@ public class HeldItemRendererMixin {
     @Final
     @Shadow private ItemModelManager itemModelManager;
 
+    @Inject(method = "renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;I)V", at = @At("HEAD"), cancellable = true)
+    private void interactivestuff$renderItem(LivingEntity entity, ItemStack stack, ItemDisplayContext renderMode, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, CallbackInfo ci) {
 
-
-    @Inject(
-            method = "renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;I)V",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    private void interactivestuff$renderItem(
-            final LivingEntity entity,
-            final ItemStack stack,
-            final ItemDisplayContext renderMode,
-            final MatrixStack matrices,
-            final OrderedRenderCommandQueue orderedRenderCommandQueue,
-            final int light,
-            final CallbackInfo ci
-    ) {
-
-        final Item scriptItem = ScriptInterpreter.itemUpdate(stack);
-
-        if (scriptItem == null) {
-            return;
+        // 1. Handle the main item (the one actually in the hand)
+        final ItemModel mainItem = ScriptInterpreter.itemUpdate(stack);
+        if (mainItem != null) {
+            renderScriptItem(mainItem, entity, renderMode, matrices, queue, light);
         }
 
-        final ItemStack modifiedStack = scriptItem.getFinalItemStack();
-
-        if (!modifiedStack.isEmpty()) {
-            final ItemRenderState itemRenderState = new ItemRenderState();
-
-            matrices.push();
-
-            // 🔥 APPLY SCRIPT TRANSFORMS
-            scriptItem.apply(matrices);
-
-            this.itemModelManager.clearAndUpdate(
-                    itemRenderState,
-                    modifiedStack,
-                    renderMode,
-                    entity.getEntityWorld(),
-                    entity,
-                    entity.getId() + renderMode.ordinal()
-            );
-
-            itemRenderState.render(matrices, orderedRenderCommandQueue, light, OverlayTexture.DEFAULT_UV, 0);
-
-            matrices.pop();
-        }
-
-
-        for (ItemModel model : ItemModelRenderRegistry.ACTIVE) {
-
-            ItemStack modelFinalStack = model.getFinalStack();
-            if (stack.isEmpty()) continue;
-
-            matrices.push();
-            model.apply(matrices);
-
-            final ItemRenderState state = new ItemRenderState();
-
-            this.itemModelManager.clearAndUpdate(
-                    state,
-                    modelFinalStack,
-                    renderMode,
-                    entity.getEntityWorld(),
-                    entity,
-                    entity.getId() + renderMode.ordinal() + model.getUniqueSeed()
-            );
-
-            state.render(matrices, orderedRenderCommandQueue, light, OverlayTexture.DEFAULT_UV, 0);
-
-            matrices.pop();
+        // 2. Handle any extra models created via `new Item()`
+        for (ItemModel extraModel : ItemModelRenderRegistry.ACTIVE) {
+            renderScriptItem(extraModel, entity, renderMode, matrices, queue, light);
         }
 
         ItemModelRenderRegistry.clear();
-
         ci.cancel();
+    }
+
+    // Helper method to avoid duplicating the ItemRenderState logic
+    @Unique
+    private void renderScriptItem(ItemModel item, LivingEntity entity, ItemDisplayContext mode, MatrixStack matrices, OrderedRenderCommandQueue queue, int light) {
+        ItemStack stack = item.getFinalStack();
+        if (stack.isEmpty()) return;
+
+        matrices.push();
+        item.apply(matrices);
+
+        ItemRenderState state = new ItemRenderState();
+        this.itemModelManager.clearAndUpdate(
+                state, stack, mode, entity.getEntityWorld(),
+                entity, entity.getId() + mode.ordinal() + item.getUniqueSeed()
+        );
+
+        state.render(matrices, queue, light, OverlayTexture.DEFAULT_UV, item.getRenderColor());
+
+        matrices.pop();
     }
 
 }
