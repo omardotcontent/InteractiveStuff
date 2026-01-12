@@ -2,8 +2,6 @@ package omar.projects.interactivestuff.scripts.variables;
 
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.dimension.DimensionTypes;
 
 @VynType(name = "World")
 public final class World {
@@ -46,6 +44,11 @@ public final class World {
     @VynFunc
     public String getBiomeAt(int x, int y, int z) {
         return sourceWorld.getBiome(new net.minecraft.util.math.BlockPos(x, y, z)).getIdAsString();
+    }
+
+    @VynFunc
+    public int getBiomeColorAt(int x, int y, int z) {
+        return sourceWorld.getBlockColor(new net.minecraft.util.math.BlockPos(x, y, z));
     }
 
     @VynFunc
