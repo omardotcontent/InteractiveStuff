@@ -26,32 +26,36 @@ import java.util.Arrays;
 
 
 @Mixin(value = HeldItemRenderer.class, priority = 2000)
-public class HeldItemRendererMixin {
+public final class HeldItemRendererMixin {
 
     @Final
     @Shadow private ItemModelManager itemModelManager;
 
     @Inject(method = "renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;I)V", at = @At("HEAD"), cancellable = true)
-    private void interactivestuff$renderItem(LivingEntity entity, ItemStack stack, ItemDisplayContext renderMode, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, CallbackInfo ci) {
+    private void interactivestuff$renderItem(
+            final LivingEntity entity,
+            final ItemStack stack,
+            final ItemDisplayContext renderMode,
+            final MatrixStack matrices,
+            final OrderedRenderCommandQueue queue,
+            final int light,
+            final CallbackInfo ci) {
 
-        // 1. Check if script wants to handle this item
+
         final ItemModel mainItem = ScriptInterpreter.itemUpdate(stack);
 
-        // If script doesn't handle this item, let vanilla rendering continue
+
         if (mainItem == null && ItemModelRenderRegistry.ACTIVE.isEmpty()) {
-            return; // Don't cancel - let vanilla handle it
+            return;
         }
 
-        // 2. Script is handling this item - cancel vanilla rendering
         ci.cancel();
 
-        // 3. Render the main item if script provided one
         if (mainItem != null) {
             renderScriptItem(mainItem, entity, renderMode, matrices, queue, light);
         }
 
-        // 4. Handle any extra models created via `new Item()`
-        for (ItemModel extraModel : ItemModelRenderRegistry.ACTIVE) {
+        for (final ItemModel extraModel : ItemModelRenderRegistry.ACTIVE) {
             renderScriptItem(extraModel, entity, renderMode, matrices, queue, light);
         }
 
@@ -59,26 +63,32 @@ public class HeldItemRendererMixin {
     }
 
     @Unique
-    private void renderScriptItem(ItemModel item, LivingEntity entity, ItemDisplayContext mode, MatrixStack matrices, OrderedRenderCommandQueue queue, int light) {
-        ItemStack stack = item.getFinalStack();
+    private void renderScriptItem(
+            final ItemModel item,
+            final LivingEntity entity,
+            final ItemDisplayContext mode,
+            final MatrixStack matrices,
+            final OrderedRenderCommandQueue queue,
+            final int light) {
+        final ItemStack stack = item.getFinalStack();
         if (stack.isEmpty()) return;
 
         matrices.push();
         item.apply(matrices);
 
-        ItemRenderState state = new ItemRenderState();
+        final ItemRenderState state = new ItemRenderState();
         this.itemModelManager.clearAndUpdate(
                 state, stack, mode, entity.getEntityWorld(),
                 entity, entity.getId() + mode.ordinal() + item.getUniqueSeed()
         );
 
-        // Apply custom colors to ALL layers
+
         int renderColor = item.getRenderColor();
         applyColorToState(state, renderColor);
 
         applyOpacity(state, renderColor);
 
-        // Render with no outline color
+
         state.render(matrices, queue, light, OverlayTexture.DEFAULT_UV, 0);
 
         matrices.pop();
@@ -96,7 +106,7 @@ public class HeldItemRendererMixin {
             int quadCount = layer.getQuads().size();
 
             if (quadCount > 0) {
-                int[] tints = layer.initTints(quadCount);
+                final int[] tints = layer.initTints(quadCount);
 
                 Arrays.fill(tints, argbColor);
             }
