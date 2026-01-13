@@ -49,7 +49,6 @@ public final class Script {
                 "Loaded .vyn script: " + filename +
                         " (state=" + state + ")"
         );
-        call(playerVar, Script.FunctionType.ON_LOAD);
     }
 
     public void call(final Player playerVar) {
@@ -100,8 +99,7 @@ public final class Script {
         ON_TICK("onTick"),
         ON_ITEM_UPDATE("onItemUpdate"),
         ON_SWING_HAND("onSwingHand"),
-        ON_PLAY_SOUND("onPlaySound"),
-        ON_LOAD("onLoad");
+        ON_PLAY_SOUND("onPlaySound");
 
         private final String name;
         

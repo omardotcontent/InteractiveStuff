@@ -61,7 +61,7 @@ public final class ScriptInterpreter {
             listener.defineFunction("excludeScript", excludeScriptFunction);
             listener.defineFunction("debugText", debugTextFunction);
         });
-        ClientTickEvents.END_CLIENT_TICK.register(ScriptInterpreter::tick);
+        ClientTickEvents.START_CLIENT_TICK.register(ScriptInterpreter::tick);
     }
 
     private static void tick(final MinecraftClient client) {
