@@ -1,5 +1,9 @@
 make wasSneaking = false
-make pitch = 0.5
+
+make pitchIndex = -1
+
+lock song_pattern = new List
+song_pattern.add(0.5,0.5,0.5,0.5,0.75,0.6)
 
 task onTick do
     check player.getWorld() == nothing do
@@ -8,8 +12,12 @@ task onTick do
     check config.isNoteBlockCrouchFeatureEnabled() && player.getGamemode() != "spectator" do
         make isSneaking = player.isSneaking()
         check player.getSteppingBlock().getName() == "minecraft:redstone_block" && player.isHoldingItem("minecraft:note_block") && isSneaking && !wasSneaking do
-            player.playSound("minecraft:block.note_block.harp", 0.5, pitch)
-            make pitch = max((pitch + 0.1) % 2.0, 0.5)
+            check pitchIndex < (song_pattern.size() - 1) do
+                make pitchIndex = pitchIndex + 1
+            otherwise
+                make pitchIndex = 0
+            end
+            player.playSound("minecraft:block.note_block.harp", 0.5, song_pattern.get(pitchIndex))
         end
         make wasSneaking = isSneaking
     end
