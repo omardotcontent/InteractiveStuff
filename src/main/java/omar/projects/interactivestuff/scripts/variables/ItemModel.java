@@ -11,6 +11,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
+import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
 
 @VynType(name = "ItemModel")
@@ -34,6 +35,10 @@ public final class ItemModel {
     private float green = 1.0f;
     private float blue = 1.0f;
     private float opacity = 1.0f;
+    private int tintColor = 0xFFFFFFFF; // white = no tint
+    private int light = -1;
+
+
 
     /**
      * Constructor for scripts creating NEW models: `var m = new Item()`
@@ -64,7 +69,6 @@ public final class ItemModel {
 
     @VynFunc
     public String getName() {
-        // Returns the registry ID (e.g., "minecraft:diamond_sword")
         return Registries.ITEM.getId(workingStack.getItem()).toString();
     }
 
@@ -118,38 +122,74 @@ public final class ItemModel {
     // ---------- Color API --------------
 
     @VynFunc
-    public void setColor(int r, int g, int b) {
+    public void setColor(final int r, final int g, final int b) {
+        modificationCheck(); // Add this
         this.red = MathHelper.clamp(r, 0, 255) / 255.0f;
         this.green = MathHelper.clamp(g, 0, 255) / 255.0f;
         this.blue = MathHelper.clamp(b, 0, 255) / 255.0f;
     }
 
     @VynFunc
-    public void setOpacity(double alpha) {
+    public void setLight(int light) {
+        modificationCheck();
+
+        if (light < -1) light = -1;
+        if (light > 15) light = 15;
+
+        if (light == -1) {
+            this.light = -1;
+        } else {
+            int blockPart = light << 4;
+            int skyPart = light << 16;
+
+            this.light = skyPart | blockPart;
+        }
+    }
+
+    @VynFunc
+    public void setTint(int color) {
+        modificationCheck(); // Add this
+        if ((color & 0xFF000000) == 0) {
+            color |= 0xFF000000;
+        }
+        this.tintColor = color;
+    }
+
+
+    @VynFunc
+    public void setOpacity(final double alpha) {
         this.opacity = (float) MathHelper.clamp(alpha, 0.0, 1.0);
     }
 
-    // ---------- Transform API ----------
-
     @VynFunc
-    public void translate(double x, double y, double z) {
-        this.x += x; this.y += y; this.z += z;
+    public void translate(double dx, double dy, double dz) {
+        this.x += dx;
+        this.y += dy;
+        this.z += dz;
     }
 
     @VynFunc
-    public void rotate(double x, double y, double z) {
-        this.rotX += (float) x;
-        this.rotY += (float) y;
-        this.rotZ += (float) z;
+    public void rotate(double dx, double dy, double dz) {
+        this.rotX += (float) dx;
+        this.rotY += (float) dy;
+        this.rotZ += (float) dz;
     }
 
     @VynFunc
-    public void scale(double x, double y, double z) {
-        this.sx *= x; this.sy *= y; this.sz *= z;
+    public void scale(double sx, double sy, double sz) {
+        this.sx *= sx;
+        this.sy *= sy;
+        this.sz *= sz;
     }
 
     @VynFunc
-    public void setPivot(double x, double y, double z) {
+    public double smooth(double current, double target, double speed) {
+        float dt = RenderTickHandler.normalizedDelta;
+        return current + (target - current) * (1.0 - Math.pow(1.0 - speed, dt));
+    }
+
+    @VynFunc
+    public void setPivot(final double x, final double y, final double z) {
         this.px = x; this.py = y; this.pz = z;
     }
 
@@ -159,7 +199,7 @@ public final class ItemModel {
 
     public ItemStack getFinalStack() { return workingStack; }
 
-    public void apply(MatrixStack matrices) {
+    public void apply(final MatrixStack matrices) {
         matrices.translate(x, y, z);
         matrices.translate(px, py, pz);
         if (rotX != 0) matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotX));
@@ -169,14 +209,46 @@ public final class ItemModel {
         matrices.scale((float) sx, (float) sy, (float) sz);
     }
 
-    public int getRenderColor() {
-        // Clamp all values to valid range
-        int a = (int) (MathHelper.clamp(opacity, 0.0f, 1.0f) * 255.0f);
-        int r = (int) (MathHelper.clamp(red, 0.0f, 1.0f) * 255.0f);
-        int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f);
-        int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f);
+    @VynFunc
+    public int getLight() {
+        return light;
+    }
 
-        // Pack into ARGB format (0xAARRGGBB)
+    private int getRenderColor() {
+        final int a = (int) (MathHelper.clamp(opacity, 0.0f, 1.0f) * 255.0f);
+        final int r = (int) (MathHelper.clamp(red, 0.0f, 1.0f) * 255.0f);
+        final int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f);
+        final int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f);
+
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
+
+    private int getTintColor() {
+        return tintColor;
+    }
+
+    public int getFinalColor() {
+        return multiplyColor(getRenderColor(), getTintColor());
+    }
+
+
+    private static int multiplyColor(final int c1, final int c2) {
+        final int a1 = (c1 >>> 24) & 0xFF;
+        final int r1 = (c1 >>> 16) & 0xFF;
+        final int g1 = (c1 >>> 8)  & 0xFF;
+        final int b1 =  c1         & 0xFF;
+
+        final int a2 = (c2 >>> 24) & 0xFF;
+        final int r2 = (c2 >>> 16) & 0xFF;
+        final int g2 = (c2 >>> 8)  & 0xFF;
+        final int b2 =  c2         & 0xFF;
+
+        final int a = (a1 * a2) / 255;
+        final int r = (r1 * r2) / 255;
+        final int g = (g1 * g2) / 255;
+        final int b = (b1 * b2) / 255;
+
+        return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
 }
