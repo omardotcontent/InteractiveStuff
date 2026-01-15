@@ -10,8 +10,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 
-import java.util.Objects;
-
 @VynType(name = "Player")
 public final class Player {
 
@@ -71,17 +69,19 @@ public final class Player {
 
     @VynFunc
     public double getVelocityX() {
-        return player.getVelocity().getX();
+        return player.getVelocity().getX() * 0.3333;
     }
 
     @VynFunc
     public double getVelocityY() {
-        return player.getVelocity().getY() == -0.0784000015258789 ? 0 : player.getVelocity().getY();
+        double y = player.getVelocity().getY();
+        if (Math.abs(y + 0.0784) < 0.001) return 0;
+        return y * 0.3333;
     }
 
     @VynFunc
     public double getVelocityZ() {
-        return player.getVelocity().getZ();
+        return player.getVelocity().getZ() * 0.3333;
     }
 
     @VynFunc
@@ -243,6 +243,18 @@ public final class Player {
     @VynFunc
     public boolean isOnGround() {
         return player != null && player.isOnGround();
+    }
+
+    @VynFunc
+    public boolean isMainHand(final ItemModel item) {
+        if (player == null || item == null) return false;
+        return player.getMainHandStack().equals(item.getFinalStack());
+    }
+
+    @VynFunc
+    public boolean isOffHand(final ItemModel item) {
+        if (player == null || item == null) return false;
+        return player.getOffHandStack().equals(item.getFinalStack());
     }
 
     @VynFunc
