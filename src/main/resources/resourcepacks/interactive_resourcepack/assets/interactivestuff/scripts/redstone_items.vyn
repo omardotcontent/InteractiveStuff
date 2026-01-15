@@ -2,14 +2,15 @@ task onItemUpdate takes itemRendered do
     check itemRendered.getName() == "minecraft:redstone_lamp" do
         check player.getSteppingBlock().getName() == "minecraft:redstone_block" do
             check player.isSneaking() do
-                itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:redstone_lamp_on")
+                itemRendered.setItemModel("interactivestuff:redstone_lamp_on")
+                itemRendered.setLight(15)
             end
         end
     end
     check itemRendered.getName() == "minecraft:redstone_torch" do
         check player.getSteppingBlock().getName() == "minecraft:redstone_block" do
             check player.isSneaking() do
-                itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:redstone_torch_off")
+                itemRendered.setItemModel("interactivestuff:redstone_torch_off")
             end
         end
     end

@@ -48,7 +48,7 @@ task onItemUpdate takes itemRendered do
 
 
     check vy < -0.1 do
-        make fallTarget = vy * -50
+        make fallTarget = vy * -100
         check fallTarget > 100 do
             make fallTarget = 100
         end
@@ -56,7 +56,7 @@ task onItemUpdate takes itemRendered do
 
 
     check itemRendered.getName() == "minecraft:piston" do
-        itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:piston_base")
+        itemRendered.setItemModel("interactivestuff:piston_base")
 
         make pistonTop = new ItemModel("minecraft:piston")
         pistonTop.setItemModel("interactivestuff:piston_top")
@@ -70,13 +70,13 @@ task onItemUpdate takes itemRendered do
             end
         end
 
-        make progress = progress + (currentTarget - progress) * 0.2
-
-        pistonTop.translate(0, 0.275 * (progress / 100), 0)
+        make progress = pistonTop.smooth(progress, currentTarget, 0.45)
+        pistonTop.setOpacity(0)
+        pistonTop.translate(0, 0.25 * (progress / 100), 0)
     end
 
     check itemRendered.getName() == "minecraft:sticky_piston" do
-        itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:piston_base")
+        itemRendered.setItemModel("interactivestuff:piston_base")
 
         make pistonTop = new ItemModel("minecraft:sticky_piston")
         pistonTop.setItemModel("interactivestuff:sticky_piston_top")
@@ -92,7 +92,7 @@ task onItemUpdate takes itemRendered do
         end
 
 
-        make stprogress = stprogress + (currentStTarget - stprogress) * 0.2
+        make stprogress = pistonTop.smooth(stprogress, currentTarget, 0.45)
 
         pistonTop.translate(0, 0.275 * (stprogress / 100), 0)
     end

@@ -40,9 +40,12 @@ end
 
 task processVibration takes position do
     make distance = player.getPosition().getDistanceTo(position)
+
+
     check player.isHoldingItem("minecraft:calibrated_sculk_sensor") do
         handleCalibratedSensor(distance)
     end
+
     check player.isHoldingItem("minecraft:sculk_sensor") do
         handleSensor(distance)
     end
@@ -73,6 +76,7 @@ task handleCalibratedSensor takes distance do
             pulse()
             wait COOLDOWN_CALIBRATED do
                 make calibratedVibrating = false
+
                 check player.isHoldingItem("minecraft:calibrated_sculk_sensor") do
                     player.playSound("minecraft:block.sculk_sensor.clicking_stop", 1.0, 1.0)
                 end
@@ -81,15 +85,23 @@ task handleCalibratedSensor takes distance do
     end
 end
 
-
 task onItemUpdate takes itemRendered do
-    check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do
-        itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:sculk_sensor_active")
-        itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
-    end
-    check calibratedVibrating && itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
-        itemRendered.setDataComponent("minecraft:item_model", "interactivestuff:calibrated_sculk_sensor_active")
-        itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
+
+    make isRightHand = player.isMainHand(itemRendered)
+    make isLeftHand = player.isOffHand(itemRendered)
+
+    check isRightHand || isLeftHand do
+
+        check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do
+            itemRendered.setItemModel("interactivestuff:sculk_sensor_active")
+            itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
+        end
+
+        check calibratedVibrating && itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
+            itemRendered.setItemModel("interactivestuff:calibrated_sculk_sensor_active")
+            itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
+        end
+
     end
 end
 
