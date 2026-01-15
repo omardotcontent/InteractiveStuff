@@ -2,6 +2,7 @@ package omar.projects.interactivestuff.scripts.variables;
 
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
+import net.minecraft.client.color.world.BiomeColors;
 
 @VynType(name = "World")
 public final class World {
@@ -42,13 +43,43 @@ public final class World {
     }
 
     @VynFunc
-    public String getBiomeAt(int x, int y, int z) {
+    public String getBiomeAt(final int x, final int y, final int z) {
         return sourceWorld.getBiome(new net.minecraft.util.math.BlockPos(x, y, z)).getIdAsString();
     }
 
     @VynFunc
-    public int getBiomeColorAt(int x, int y, int z) {
+    public int getBiomeColorAt(final int x, final int y, final int z) {
         return sourceWorld.getBlockColor(new net.minecraft.util.math.BlockPos(x, y, z));
+    }
+
+    @VynFunc
+    public String getBiomeAt(final Position position) {
+        return sourceWorld.getBiome(new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ())).getIdAsString();
+    }
+
+    @VynFunc
+    public int getGrassColor(final Position position) {
+        return BiomeColors.getGrassColor(sourceWorld,new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+    }
+
+    @VynFunc
+    public int getDryFoliageColor(final Position position) {
+        return BiomeColors.getDryFoliageColor(sourceWorld,new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+    }
+
+    @VynFunc
+    public int getFoliageColor(final Position position) {
+        return BiomeColors.getFoliageColor(sourceWorld,new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+    }
+
+    @VynFunc
+    public int getWaterColor(final Position position) {
+        return BiomeColors.getWaterColor(sourceWorld,new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+    }
+
+    @VynFunc
+    public int getBiomeColorAt(final Position position) {
+        return sourceWorld.getBlockColor(new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
