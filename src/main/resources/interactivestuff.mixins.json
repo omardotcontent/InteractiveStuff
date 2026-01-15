@@ -10,6 +10,7 @@
     "render.HeldItemRendererMixin",
     "render.ItemRenderStateAccessor",
     "render.ItemRenderStateLayerAccessor",
+    "render.GameRendererMixin",
     "render.InGameHudMixin"
   ],
   "injectors": {

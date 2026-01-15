@@ -83,13 +83,12 @@ public final class HeldItemRendererMixin {
         );
 
 
-        int renderColor = item.getRenderColor();
+        final int renderColor = item.getFinalColor();
         applyColorToState(state, renderColor);
 
         applyOpacity(state, renderColor);
 
-
-        state.render(matrices, queue, light, OverlayTexture.DEFAULT_UV, 0);
+        state.render(matrices, queue, item.getLight() == -1 ? light : item.getLight(), OverlayTexture.DEFAULT_UV, 0);
 
         matrices.pop();
     }
@@ -127,6 +126,5 @@ public final class HeldItemRendererMixin {
             layer.setInteractiveLayer(RenderLayer.getItemEntityTranslucentCull(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
         }
     }
-
 
 }
