@@ -1,0 +1,14 @@
+task onItemUpdate takes itemRendered do
+    check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
+        check player.isHoldingItem("minecraft:oak_sapling") && (player.isMainHand(itemRendered) || player.isOffHand(itemRendered)) do
+            check itemRendered.getName() == "minecraft:oak_sapling" do
+                itemRendered.setItemModel("interactivestuff:oak_sapling_wood")
+
+                make saplingLeaves = new ItemModel("minecraft:oak_sapling")
+                saplingLeaves.setItemModel("interactivestuff:oak_sapling_leaves")
+
+                saplingLeaves.setTint(player.getWorld().getFoliageColor(player.getSteppingBlock().getPosition()))
+            end
+        end
+    end
+end
