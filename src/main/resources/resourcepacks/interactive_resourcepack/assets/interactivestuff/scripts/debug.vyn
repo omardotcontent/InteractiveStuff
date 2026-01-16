@@ -16,4 +16,6 @@ task onTick do
     debugText("X Velocity: " + player.getVelocityX())
     debugText("Y Velocity: " + player.getVelocityY())
     debugText("Z Velocity: " + player.getVelocityZ())
+    debugText("Camera Pitch: " + player.getCameraPitch())
+    debugText("Camera Yaw: " + player.getCameraYaw())
 end

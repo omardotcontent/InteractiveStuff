@@ -4,11 +4,13 @@ import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.Camera;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
+import omar.projects.interactivestuff.handlers.CameraVelocityAccessor;
 
 @VynType(name = "Player")
 public final class Player {
@@ -82,6 +84,18 @@ public final class Player {
     @VynFunc
     public double getVelocityZ() {
         return player.getVelocity().getZ() * 0.3333;
+    }
+
+    @VynFunc
+    public float getCameraPitch() {
+        final Camera camera = client.gameRenderer.getCamera();
+        return (camera instanceof CameraVelocityAccessor acc) ? acc.interactivestuff$getPitchVelocity() : 0.0f;
+    }
+
+    @VynFunc
+    public float getCameraYaw() {
+        final Camera camera = client.gameRenderer.getCamera();
+        return (camera instanceof CameraVelocityAccessor acc) ? acc.interactivestuff$getYawVelocity() : 0.0f;
     }
 
     @VynFunc
