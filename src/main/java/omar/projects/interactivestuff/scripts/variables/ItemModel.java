@@ -37,6 +37,7 @@ public final class ItemModel {
     private float opacity = 1.0f;
     private int tintColor = 0xFFFFFFFF; // white = no tint
     private int light = -1;
+    private int glint = -1;
 
 
 
@@ -93,6 +94,16 @@ public final class ItemModel {
     @VynFunc
     public int getBobbingAnimationTime() { return workingStack.getBobbingAnimationTime(); }
 
+    @VynFunc
+    public int getLight() {
+        return light;
+    }
+
+    @VynFunc
+    public int getGlint() {
+        return glint;
+    }
+
     // ---------- Item Logic ----------
 
     @VynFunc
@@ -144,6 +155,16 @@ public final class ItemModel {
 
             this.light = skyPart | blockPart;
         }
+    }
+
+    @VynFunc
+    public void setGlint(int glint) {
+        modificationCheck();
+
+        if (glint < -1) glint = -1;
+        if (glint > 2) glint = 2;
+
+        this.glint = glint;
     }
 
     @VynFunc
@@ -207,11 +228,6 @@ public final class ItemModel {
         if (rotZ != 0) matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotZ));
         matrices.translate(-px, -py, -pz);
         matrices.scale((float) sx, (float) sy, (float) sz);
-    }
-
-    @VynFunc
-    public int getLight() {
-        return light;
     }
 
     private int getRenderColor() {

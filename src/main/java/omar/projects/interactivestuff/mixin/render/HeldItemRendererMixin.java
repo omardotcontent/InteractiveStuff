@@ -2,11 +2,9 @@ package omar.projects.interactivestuff.mixin.render;
 
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemDisplayContext;
@@ -85,9 +83,16 @@ public final class HeldItemRendererMixin {
 
         final int renderColor = item.getFinalColor();
         applyColorToState(state, renderColor);
-
-        applyOpacity(state, renderColor);
-
+        switch (item.getGlint()) {
+            case 2:
+                applyGlint(state, ItemRenderState.Glint.SPECIAL);
+                break;
+            case 1:
+                applyGlint(state, ItemRenderState.Glint.STANDARD);
+                break;
+            case 0:
+                applyGlint(state, ItemRenderState.Glint.NONE);
+        }
         state.render(matrices, queue, item.getLight() == -1 ? light : item.getLight(), OverlayTexture.DEFAULT_UV, 0);
 
         matrices.pop();
@@ -98,6 +103,7 @@ public final class HeldItemRendererMixin {
         final ItemRenderStateAccessor accessor = (ItemRenderStateAccessor) state;
         final int layerCount = accessor.getLayerCount();
         final ItemRenderState.LayerRenderState[] layers = accessor.getLayers();
+
 
         for (int i = 0; i < layerCount; i++) {
             final ItemRenderState.LayerRenderState layer = layers[i];
@@ -112,18 +118,18 @@ public final class HeldItemRendererMixin {
         }
     }
 
+
     @Unique
-    private void applyOpacity(final ItemRenderState state, final int argb) {
-        final int alpha = (argb >>> 24) & 0xFF;
-        if (alpha >= 250) return;
+    private void applyGlint(final ItemRenderState state, ItemRenderState.Glint glintType) {
+        // 1. Cast the state to your main accessor to get the layers
+        final ItemRenderStateAccessor stateAcc = (ItemRenderStateAccessor) state;
+        final ItemRenderState.LayerRenderState[] layers = stateAcc.getLayers();
+        final int count = stateAcc.getLayerCount();
 
-        final ItemRenderStateAccessor acc = (ItemRenderStateAccessor) state;
-        final var layers = acc.getLayers();
-        final int count = acc.getLayerCount();
-
+        // 2. Iterate through each layer and cast the layer itself to the LayerAccessor
         for (int i = 0; i < count; i++) {
-            final ItemRenderStateLayerAccessor layer = (ItemRenderStateLayerAccessor) layers[i];
-            layer.setInteractiveLayer(RenderLayer.getItemEntityTranslucentCull(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
+            final ItemRenderStateLayerAccessor layerAcc = (ItemRenderStateLayerAccessor) layers[i];
+            layerAcc.setInteractiveGlint(glintType);
         }
     }
 
