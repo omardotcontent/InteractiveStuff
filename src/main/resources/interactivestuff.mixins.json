@@ -4,14 +4,15 @@
   "package": "omar.projects.interactivestuff.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "player.ArmSwingMixin",
-    "sound.SoundListenerMixin",
     "client.MinecraftClientMixin",
+    "player.ArmSwingMixin",
+    "player.CameraMixin",
+    "render.GameRendererMixin",
     "render.HeldItemRendererMixin",
+    "render.InGameHudMixin",
     "render.ItemRenderStateAccessor",
     "render.ItemRenderStateLayerAccessor",
-    "render.GameRendererMixin",
-    "render.InGameHudMixin"
+    "sound.SoundListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
