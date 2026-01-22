@@ -4,6 +4,7 @@ import me.abdelaziz.api.annotation.VynConstructor;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -23,6 +24,8 @@ public final class ItemModel {
     private final ItemStack originalStack;
     private ItemStack workingStack;
     public boolean modified = false;
+
+    private ItemDisplayContext displayContext = ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
 
     // Transform State
     private float rotX, rotY, rotZ;
@@ -104,6 +107,39 @@ public final class ItemModel {
         return glint;
     }
 
+    // ---------- Display Context API ----------
+
+    public void setDisplayContext(final ItemDisplayContext context) {
+        this.displayContext = context;
+    }
+
+    public ItemDisplayContext getDisplayContext() {
+        return displayContext;
+    }
+
+    @VynFunc
+    public boolean isMainHand() {
+        return displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
+                || displayContext == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
+    }
+
+    @VynFunc
+    public boolean isOffHand() {
+        return displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                || displayContext == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
+    }
+
+    @VynFunc
+    public boolean isFirstPerson() {
+        return displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
+                || displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND;
+    }
+
+    @VynFunc
+    public String getDisplayContextName() {
+        return displayContext.name();
+    }
+
     // ---------- Item Logic ----------
 
     @VynFunc
@@ -114,6 +150,7 @@ public final class ItemModel {
 
     @VynFunc
     public void setBobbingTime(final int bobbingTime) {
+        modificationCheck();
         workingStack.setBobbingAnimationTime(bobbingTime);
     }
 
@@ -123,12 +160,7 @@ public final class ItemModel {
         ScriptItemHandler.apply(workingStack, key, value.toString());
     }
 
-    private void modificationCheck() {
-        if (!modified) {
-            workingStack = originalStack.copy();
-            modified = true;
-        }
-    }
+
 
     // ---------- Color API --------------
 
@@ -179,11 +211,13 @@ public final class ItemModel {
 
     @VynFunc
     public void setOpacity(final double alpha) {
+        modificationCheck();
         this.opacity = (float) MathHelper.clamp(alpha, 0.0, 1.0);
     }
 
     @VynFunc
     public void translate(double dx, double dy, double dz) {
+        modificationCheck();
         this.x += dx;
         this.y += dy;
         this.z += dz;
@@ -191,6 +225,7 @@ public final class ItemModel {
 
     @VynFunc
     public void rotate(double dx, double dy, double dz) {
+        modificationCheck();
         this.rotX += (float) dx;
         this.rotY += (float) dy;
         this.rotZ += (float) dz;
@@ -198,23 +233,33 @@ public final class ItemModel {
 
     @VynFunc
     public void scale(double sx, double sy, double sz) {
+        modificationCheck();
         this.sx *= sx;
         this.sy *= sy;
         this.sz *= sz;
     }
 
     @VynFunc
-    public double smooth(double current, double target, double speed) {
-        float dt = RenderTickHandler.normalizedDelta;
+    public double smooth(final double current, final double target, final double speed) {
+        modificationCheck();
+        final float dt = RenderTickHandler.normalizedDelta;
         return current + (target - current) * (1.0 - Math.pow(1.0 - speed, dt));
     }
 
     @VynFunc
     public void setPivot(final double x, final double y, final double z) {
+        modificationCheck();
         this.px = x; this.py = y; this.pz = z;
     }
 
     // ---------- Internal Helpers ----------
+
+    private void modificationCheck() {
+        if (!modified) {
+            workingStack = originalStack.copy();
+            modified = true;
+        }
+    }
 
     public int getUniqueSeed() { return seed; }
 
