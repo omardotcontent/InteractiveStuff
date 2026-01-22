@@ -29,12 +29,10 @@ public final class Player {
 
     @VynFunc
     public Block getSteppingBlock() {
-        if (player == null) {
+        if (player == null || client.world == null) {
             return null;
-        } else {
-            assert client.world != null;
-            return new Block(player.getSteppingPos(), client.world);
         }
+        return new Block(player.getSteppingPos(), client.world);
     }
 
     @VynFunc
@@ -306,39 +304,41 @@ public final class Player {
 
     @VynFunc
     public void playSoundWorld(final Position position, final String soundId, final double volume, final double pitch) {
-        if (player != null) {
-            assert client.world != null;
-            client.world.playSoundClient(
-                    position.getX(),
-                    position.getY(),
-                    position.getZ(),
-                    Registries.SOUND_EVENT.get(Identifier.of(soundId))
-                    , SoundCategory.BLOCKS,
-                    (float) volume,
-                    (float) pitch,
-                    true);
+        if (player == null || client.world == null) {
+            return;
         }
+        client.world.playSoundClient(
+                position.getX(),
+                position.getY(),
+                position.getZ(),
+                Registries.SOUND_EVENT.get(Identifier.of(soundId)),
+                SoundCategory.BLOCKS,
+                (float) volume,
+                (float) pitch,
+                true);
     }
 
     @VynFunc
     public void playSoundWorld(final Position position, final Sound sound) {
-        if (player != null) {
-            assert client.world != null;
-            client.world.playSoundClient(
-                    position.getX(),
-                    position.getY(),
-                    position.getZ(),
-                    Registries.SOUND_EVENT.get(Identifier.of(sound.getName()))
-                    , SoundCategory.BLOCKS,
-                    (float) sound.getVolume(),
-                    (float) sound.getPitch(),
-                    true);
+        if (player == null || client.world == null) {
+            return;
         }
+        client.world.playSoundClient(
+                position.getX(),
+                position.getY(),
+                position.getZ(),
+                Registries.SOUND_EVENT.get(Identifier.of(sound.getName())),
+                SoundCategory.BLOCKS,
+                (float) sound.getVolume(),
+                (float) sound.getPitch(),
+                true);
     }
 
     public void sendMessage(final String message) {
-        if (player != null)
-            player.sendMessage(Text.of("§e[InteractiveStuff] " + message), false);
+        if (player == null) {
+            return;
+        }
+        player.sendMessage(Text.of("§e[InteractiveStuff] " + message), false);
     }
 
     public ClientPlayerEntity getPlayer() {

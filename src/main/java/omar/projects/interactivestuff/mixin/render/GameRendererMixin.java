@@ -12,20 +12,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
-public class GameRendererMixin {
+public abstract class GameRendererMixin {
+
     @Unique
     private float prevTime;
 
     @Inject(method = "render", at = @At(value = "HEAD"))
-    private void deltaTime(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
-        float currentTime = (float) GLFW.glfwGetTime();
-        float deltaTime = currentTime - prevTime;
-        prevTime = currentTime;
+    private void deltaTime(final RenderTickCounter tickCounter, final boolean tick, final CallbackInfo ci) {
+        final float currentTime = (float) GLFW.glfwGetTime();
+        final float deltaTime = currentTime - prevTime;
+        this.prevTime = currentTime;
 
         if (MinecraftClient.getInstance().isPaused()) {
             RenderTickHandler.normalizedDelta = 0;
-        } else {
-            RenderTickHandler.normalizedDelta = (float) Math.min(0.05, deltaTime) * 60f;
+            return;
         }
+        RenderTickHandler.normalizedDelta = (float) Math.min(0.05, deltaTime) * 60f;
     }
 }

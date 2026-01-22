@@ -25,13 +25,14 @@ public abstract class InGameHudMixin {
             method = "render(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/render/RenderTickCounter;)V",
             at = @At("TAIL")
     )
-    private void debugText(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if(!debugTextHandler.getRenderedTexts().isEmpty() && ConfigHandler.INSTANCE.resourcePackDebugMode) {
-            int y = 10;
-            for (final String string : debugTextHandler.getRenderedTexts()) {
-                context.drawText(getTextRenderer(), string, 10, y, 0xFFFFFFFF, false);
-                y += 10;
-            }
+    private void debugText(final DrawContext context, final RenderTickCounter tickCounter, final CallbackInfo ci) {
+        if (debugTextHandler.getRenderedTexts().isEmpty() || !ConfigHandler.INSTANCE.resourcePackDebugMode) {
+            return;
+        }
+        int y = 10;
+        for (final String string : debugTextHandler.getRenderedTexts()) {
+            context.drawText(getTextRenderer(), string, 10, y, 0xFFFFFFFF, false);
+            y += 10;
         }
     }
 }

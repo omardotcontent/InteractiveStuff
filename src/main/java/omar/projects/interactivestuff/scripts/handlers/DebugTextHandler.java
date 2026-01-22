@@ -1,15 +1,16 @@
 package omar.projects.interactivestuff.scripts.handlers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public class DebugTextHandler {
+public final class DebugTextHandler {
 
-    public static DebugTextHandler INSTANCE;
+    public static volatile DebugTextHandler INSTANCE;
 
-    private final List<String> renderedTexts = new ArrayList<>();
-
-    private final List<String> textBuffer = new ArrayList<>();
+    private volatile List<String> renderedTexts = Collections.emptyList();
+    private final List<String> textBuffer = new CopyOnWriteArrayList<>();
 
     public DebugTextHandler() {
         INSTANCE = this;
@@ -23,10 +24,8 @@ public class DebugTextHandler {
         textBuffer.add(text);
     }
 
-
     public void onTickEnd() {
-        renderedTexts.clear();
-        renderedTexts.addAll(textBuffer);
+        this.renderedTexts = new ArrayList<>(textBuffer);
         textBuffer.clear();
     }
 }

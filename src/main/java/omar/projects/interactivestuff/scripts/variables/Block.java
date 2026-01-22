@@ -15,13 +15,12 @@ public final class Block {
     private final BlockState blockState;
     private final BlockPos sourceBlock;
     private final World world;
-    private final Position position;
+    private Position position;
 
     public Block(final BlockPos sourceBlock, final World world) {
         this.sourceBlock = sourceBlock;
         this.world = world;
-        blockState = world.getBlockState(sourceBlock);
-        this.position = new Position(sourceBlock.getX(), sourceBlock.getY(), sourceBlock.getZ());
+        this.blockState = world.getBlockState(sourceBlock);
     }
 
     @VynFunc
@@ -35,17 +34,20 @@ public final class Block {
                 .getRegistryEntry()
                 .streamTags()
                 .map(tag -> tag.id().toString())
-                .anyMatch(id -> id.toLowerCase(Locale.ROOT).contains(tagID));
+                .anyMatch(id -> id.toLowerCase(Locale.ROOT).contains(tagID.toLowerCase(Locale.ROOT)));
     }
 
     @VynFunc
     public Position getPosition() {
+        if (position == null) {
+            position = new Position(sourceBlock.getX(), sourceBlock.getY(), sourceBlock.getZ());
+        }
         return position;
     }
 
     @VynFunc
     public int getBlockLightLevel() {
-        return world.getLightLevel(LightType.SKY, sourceBlock);
+        return world.getLightLevel(LightType.BLOCK, sourceBlock);
     }
 
     @VynFunc

@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 
 @Mixin(value = HeldItemRenderer.class, priority = 2000)
-public final class HeldItemRendererMixin {
+public abstract class HeldItemRendererMixin {
 
     @Final
     @Shadow private ItemModelManager itemModelManager;
@@ -40,7 +40,7 @@ public final class HeldItemRendererMixin {
             final CallbackInfo ci) {
 
 
-        final ItemModel mainItem = ScriptInterpreter.itemUpdate(stack);
+        final ItemModel mainItem = ScriptInterpreter.itemUpdate(stack, renderMode);
 
 
         if (mainItem == null && ItemModelRenderRegistry.ACTIVE.isEmpty()) {
@@ -104,29 +104,24 @@ public final class HeldItemRendererMixin {
         final int layerCount = accessor.getLayerCount();
         final ItemRenderState.LayerRenderState[] layers = accessor.getLayers();
 
-
         for (int i = 0; i < layerCount; i++) {
             final ItemRenderState.LayerRenderState layer = layers[i];
-
-            int quadCount = layer.getQuads().size();
-
-            if (quadCount > 0) {
-                final int[] tints = layer.initTints(quadCount);
-
-                Arrays.fill(tints, argbColor);
+            final int quadCount = layer.getQuads().size();
+            if (quadCount <= 0) {
+                continue;
             }
+            final int[] tints = layer.initTints(quadCount);
+            Arrays.fill(tints, argbColor);
         }
     }
 
 
     @Unique
-    private void applyGlint(final ItemRenderState state, ItemRenderState.Glint glintType) {
-        // 1. Cast the state to your main accessor to get the layers
+    private void applyGlint(final ItemRenderState state, final ItemRenderState.Glint glintType) {
         final ItemRenderStateAccessor stateAcc = (ItemRenderStateAccessor) state;
         final ItemRenderState.LayerRenderState[] layers = stateAcc.getLayers();
         final int count = stateAcc.getLayerCount();
 
-        // 2. Iterate through each layer and cast the layer itself to the LayerAccessor
         for (int i = 0; i < count; i++) {
             final ItemRenderStateLayerAccessor layerAcc = (ItemRenderStateLayerAccessor) layers[i];
             layerAcc.setInteractiveGlint(glintType);

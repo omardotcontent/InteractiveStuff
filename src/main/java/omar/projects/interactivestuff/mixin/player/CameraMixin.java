@@ -22,7 +22,7 @@ public abstract class CameraMixin implements CameraVelocityAccessor {
     
     
     @Inject(method = "setRotation", at = @At("HEAD"))
-    private void capturePreviousRotation(float yaw, float pitch, CallbackInfo ci) {
+    private void capturePreviousRotation(final float yaw, final float pitch, final CallbackInfo ci) {
         this.lastYaw = this.yaw;
         this.lastPitch = this.pitch;
     }

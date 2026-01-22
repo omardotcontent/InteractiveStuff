@@ -20,20 +20,18 @@ public final class Position {
 
     @VynFunc
     public long getDistanceTo(final Position other) {
-        int dx = other.x - this.x;
-        int dy = other.y - this.y;
-        int dz = other.z - this.z;
-        double distSq = (double) dx * dx + (double) dy * dy + (double) dz * dz;
-        return (long) Math.sqrt(distSq);
+        final int dx = other.x - this.x;
+        final int dy = other.y - this.y;
+        final int dz = other.z - this.z;
+        return (long) Math.sqrt((double) dx * dx + (double) dy * dy + (double) dz * dz);
     }
 
     @VynFunc
     public long getDistanceTo(final int x, final int y, final int z) {
-        int dx = x - this.x;
-        int dy = y - this.y;
-        int dz = z - this.z;
-        double distSq = (double) dx * dx + (double) dy * dy + (double) dz * dz;
-        return (long) Math.sqrt(distSq);
+        final int dx = x - this.x;
+        final int dy = y - this.y;
+        final int dz = z - this.z;
+        return (long) Math.sqrt((double) dx * dx + (double) dy * dy + (double) dz * dz);
     }
 
     @VynFunc

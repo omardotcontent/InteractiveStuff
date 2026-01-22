@@ -5,16 +5,16 @@ import me.abdelaziz.api.annotation.VynType;
 import net.fabricmc.loader.api.FabricLoader;
 
 @VynType(name = "ModLoader")
-public class ModLoader {
+public final class ModLoader {
 
     private final FabricLoader loader;
 
-    public ModLoader(FabricLoader loader) {
+    public ModLoader(final FabricLoader loader) {
         this.loader = loader;
     }
 
     @VynFunc
-    public boolean isModLoaded(String modid) {
+    public boolean isModLoaded(final String modid) {
         return loader.isModLoaded(modid);
     }
 

@@ -90,6 +90,11 @@ public final class BackgroundLoopHandler {
         return loops.containsKey(name);
     }
 
+    public void clearAll() {
+        loops.values().forEach(BackgroundLoop::stop);
+        loops.clear();
+    }
+
     private static final class BackgroundLoop {
 
         private final Runnable task;

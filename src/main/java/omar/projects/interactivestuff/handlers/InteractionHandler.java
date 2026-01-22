@@ -20,15 +20,13 @@ public final class InteractionHandler {
 
     private static final InteractionHandler INSTANCE = new InteractionHandler();
     private static final String COOLDOWN_ID = "SwingSoundCooldown";
-    private static final Random random = new Random();
-    private InteractionHandler() {
-    }
+    private static final Random RANDOM = new Random();
+
+    private InteractionHandler() {}
 
     public static InteractionHandler getInstance() {
         return INSTANCE;
     }
-
-
 
     public void handleBlockInteraction(final MinecraftClient client, final Hand hand) {
         if (BackgroundLoopHandler.getInstance().isLoopRunning(COOLDOWN_ID)) {
@@ -36,13 +34,15 @@ public final class InteractionHandler {
         }
 
         final ClientPlayerEntity player = client.player;
-        assert player != null;
+        if (player == null) {
+            return;
+        }
+
         final StatusEffectInstance haste = player.getStatusEffect(StatusEffects.HASTE);
         final StatusEffectInstance conduit = player.getStatusEffect(StatusEffects.CONDUIT_POWER);
         final int amplifier = (haste != null ? haste.getAmplifier() + 1 : 0) + (conduit != null ? conduit.getAmplifier() + 1 : 0);
 
-        BackgroundLoopHandler.getInstance().waitTicks(COOLDOWN_ID, Math.max(0, (ConfigHandler.INSTANCE.HitCooldownTicks) - amplifier), () -> {
-        });
+        BackgroundLoopHandler.getInstance().waitTicks(COOLDOWN_ID, Math.max(0, (ConfigHandler.INSTANCE.HitCooldownTicks) - amplifier), () -> {});
 
         final ConfigHandler config = ConfigHandler.INSTANCE;
         ScriptInterpreter.onSwingHand();
@@ -56,23 +56,25 @@ public final class InteractionHandler {
         }
 
         final ItemStack stack = player.getStackInHand(hand);
-
         final InteractionMaterial material = config.getMaterial(stack.getItem());
-
         if (material == null) {
             return;
         }
 
-        if (client.world != null) {
-            try {
-                final BlockHitResult blockHit = (BlockHitResult) client.crosshairTarget;
-                assert blockHit != null;
-                if (config.isExcluded(client.world.getBlockState(blockHit.getBlockPos()).getBlock())) {
-                    return;
-                }
-            } catch (Exception ignored) {
+        if (client.world == null) {
+            return;
+        }
+
+        try {
+            final BlockHitResult blockHit = (BlockHitResult) client.crosshairTarget;
+            if (blockHit == null) {
                 return;
             }
+            if (config.isExcluded(client.world.getBlockState(blockHit.getBlockPos()).getBlock())) {
+                return;
+            }
+        } catch (final Exception ignored) {
+            return;
         }
 
         if (material.requiresBlockHit) {
@@ -82,13 +84,9 @@ public final class InteractionHandler {
         }
 
         final float basePitch = material.getPitch(stack);
-        final float pitch = material.randomPitch ? basePitch + (random.nextFloat() * 1.5F) : basePitch;
+        final float pitch = material.randomPitch ? basePitch + (RANDOM.nextFloat() * 1.5F) : basePitch;
 
-        if (client.world != null) {
-            client.world.playSoundClient(material.getSoundEvent(), SoundCategory.BLOCKS,material.volume, pitch);
-        }
+        client.world.playSoundClient(material.getSoundEvent(), SoundCategory.BLOCKS, material.volume, pitch);
     }
-
-
 
 }

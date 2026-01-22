@@ -3,11 +3,12 @@ package omar.projects.interactivestuff.scripts.variables;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.color.world.BiomeColors;
+import net.minecraft.util.math.BlockPos;
 
 @VynType(name = "World")
 public final class World {
 
-    private net.minecraft.world.World sourceWorld;
+    private final net.minecraft.world.World sourceWorld;
 
     public World(final net.minecraft.world.World sourceWorld) {
         this.sourceWorld = sourceWorld;
@@ -15,13 +16,14 @@ public final class World {
 
     @VynFunc
     public Block getBlock(final int x, final int y, final int z) {
-        return new Block(new net.minecraft.util.math.BlockPos(x, y, z), sourceWorld);
+        return new Block(new BlockPos(x, y, z), sourceWorld);
     }
 
     @VynFunc
     public String getDimension() {
         return sourceWorld.getRegistryKey().getValue().toString();
     }
+
     @VynFunc
     public boolean isDay() {
         return sourceWorld.isDay();
@@ -44,42 +46,42 @@ public final class World {
 
     @VynFunc
     public String getBiomeAt(final int x, final int y, final int z) {
-        return sourceWorld.getBiome(new net.minecraft.util.math.BlockPos(x, y, z)).getIdAsString();
+        return sourceWorld.getBiome(new BlockPos(x, y, z)).getIdAsString();
     }
 
     @VynFunc
     public int getBiomeColorAt(final int x, final int y, final int z) {
-        return sourceWorld.getBlockColor(new net.minecraft.util.math.BlockPos(x, y, z));
+        return sourceWorld.getBlockColor(new BlockPos(x, y, z));
     }
 
     @VynFunc
     public String getBiomeAt(final Position position) {
-        return sourceWorld.getBiome(new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ())).getIdAsString();
+        return sourceWorld.getBiome(new BlockPos(position.getX(), position.getY(), position.getZ())).getIdAsString();
     }
 
     @VynFunc
     public int getGrassColor(final Position position) {
-        return BiomeColors.getGrassColor(sourceWorld,new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+        return BiomeColors.getGrassColor(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getDryFoliageColor(final Position position) {
-        return BiomeColors.getDryFoliageColor(sourceWorld,new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+        return BiomeColors.getDryFoliageColor(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getFoliageColor(final Position position) {
-        return BiomeColors.getFoliageColor(sourceWorld,new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+        return BiomeColors.getFoliageColor(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getWaterColor(final Position position) {
-        return BiomeColors.getWaterColor(sourceWorld,new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+        return BiomeColors.getWaterColor(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getBiomeColorAt(final Position position) {
-        return sourceWorld.getBlockColor(new net.minecraft.util.math.BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld.getBlockColor(new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc

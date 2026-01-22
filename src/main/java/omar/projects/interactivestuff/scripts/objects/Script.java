@@ -11,7 +11,8 @@ import java.util.*;
 public final class Script {
 
     private State state;
-    private final String filename, code;
+    private final String filename;
+    private final String code;
     private Environment environment;
     private final Map<FunctionType, VynCallable> callables;
 
@@ -23,17 +24,15 @@ public final class Script {
 
     public void load(final Player playerVar, final Set<Script> globalScripts) {
         try {
-            environment = VynMain.loadLines(code);
+            this.environment = VynMain.loadLines(code);
 
             for (final FunctionType type : FunctionType.values()) {
                 try {
                     this.callables.put(type, environment.getFunction(type.getName()));
-                } catch (final Exception ignored) {
-
-                }
+                } catch (final Exception ignored) {}
             }
 
-            if(callables.isEmpty()) {
+            if (callables.isEmpty()) {
                 this.state = State.IMPORTABLE;
                 return;
             }
@@ -42,13 +41,9 @@ public final class Script {
             globalScripts.add(this);
         } catch (final Exception e) {
             this.state = State.ERROR;
-
             playerVar.sendMessage("§6(" + filename + ") §cError in script during loading: " + e.getMessage());
         }
-        System.out.println(
-                "Loaded .vyn script: " + filename +
-                        " (state=" + state + ")"
-        );
+        System.out.println("Loaded .vyn script: " + filename + " (state=" + state + ")");
     }
 
     public void call(final Player playerVar) {
@@ -60,14 +55,20 @@ public final class Script {
     }
 
     public void call(final Player playerVar, final FunctionType functionType, final List<Value> values) {
-        if (state != State.LOADED) return;
+        if (state != State.LOADED) {
+            return;
+        }
         try {
             final VynCallable callable = callables.get(functionType);
-            if (callable != null)
-                callable.call(environment, values);
+            if (callable == null) {
+                return;
+            }
+            callable.call(environment, values);
         } catch (final Exception e) {
-            state = State.ERROR;
-            if(playerVar != null) playerVar.sendMessage("§6(" + filename + ") §cError in script during "+ functionType.getName() + ": " + e.getMessage());
+            this.state = State.ERROR;
+            if (playerVar != null) {
+                playerVar.sendMessage("§6(" + filename + ") §cError in script during " + functionType.getName() + ": " + e.getMessage());
+            }
             e.printStackTrace();
         }
     }
@@ -102,7 +103,7 @@ public final class Script {
         ON_PLAY_SOUND("onPlaySound");
 
         private final String name;
-        
+
         FunctionType(final String name) {
             this.name = name;
         }

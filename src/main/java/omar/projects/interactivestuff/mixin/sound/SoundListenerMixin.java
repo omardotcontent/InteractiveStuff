@@ -27,7 +27,10 @@ public abstract class SoundListenerMixin {
         if (client.player == null || client.world == null) {
             return;
         }
-        if(sound.getSound() != null && sound.getCategory() != SoundCategory.UI && sound.getCategory() != SoundCategory.AMBIENT) ScriptInterpreter.onPlaySound(new Sound(
+        if (sound.getSound() == null || sound.getCategory() == SoundCategory.UI || sound.getCategory() == SoundCategory.AMBIENT) {
+            return;
+        }
+        ScriptInterpreter.onPlaySound(new Sound(
                 sound.getId().toString(),
                 sound.getVolume(),
                 sound.getPitch(),
