@@ -92,7 +92,7 @@ task onItemUpdate takes itemRendered do
         end
 
 
-        make stprogress = pistonTop.smooth(stprogress, currentTarget, 0.45)
+        make stprogress = pistonTop.smooth(stprogress, currentStTarget, 0.45)
 
         pistonTop.translate(0, 0.275 * (stprogress / 100), 0)
     end
