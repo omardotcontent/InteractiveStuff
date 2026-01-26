@@ -69,11 +69,17 @@ public final class Player {
 
     @VynFunc
     public double getVelocityX() {
-        return player.getVelocity().getX() * 0.3333;
+        if (player == null) return 0;
+        double vx = player.getVelocity().getX();
+        double vz = player.getVelocity().getZ();
+        double yawRad = Math.toRadians(player.getYaw());
+        // Rotate to get strafe velocity (left/right relative to player)
+        return (vx * Math.cos(yawRad) + vz * Math.sin(yawRad)) * 0.3333;
     }
 
     @VynFunc
     public double getVelocityY() {
+        if (player == null) return 0;
         double y = player.getVelocity().getY();
         if (Math.abs(y + 0.0784) < 0.001) return 0;
         return y * 0.3333;
@@ -81,17 +87,24 @@ public final class Player {
 
     @VynFunc
     public double getVelocityZ() {
-        return player.getVelocity().getZ() * 0.3333;
+        if (player == null) return 0;
+        double vx = player.getVelocity().getX();
+        double vz = player.getVelocity().getZ();
+        double yawRad = Math.toRadians(player.getYaw());
+        // Rotate to get forward velocity (forward/backward relative to player)
+        return (-vx * Math.sin(yawRad) + vz * Math.cos(yawRad)) * 0.3333;
     }
 
     @VynFunc
     public float getCameraPitch() {
+        if (client.gameRenderer == null) return 0.0f;
         final Camera camera = client.gameRenderer.getCamera();
         return (camera instanceof CameraVelocityAccessor acc) ? acc.interactivestuff$getPitchVelocity() : 0.0f;
     }
 
     @VynFunc
     public float getCameraYaw() {
+        if (client.gameRenderer == null) return 0.0f;
         final Camera camera = client.gameRenderer.getCamera();
         return (camera instanceof CameraVelocityAccessor acc) ? acc.interactivestuff$getYawVelocity() : 0.0f;
     }

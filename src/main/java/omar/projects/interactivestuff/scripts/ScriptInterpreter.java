@@ -13,6 +13,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import omar.projects.interactivestuff.handlers.BackgroundLoopHandler;
+import omar.projects.interactivestuff.scripts.Utilities.ItemModelCache;
 import omar.projects.interactivestuff.scripts.functions.DebugText;
 import omar.projects.interactivestuff.scripts.functions.ImportScript;
 import omar.projects.interactivestuff.scripts.functions.ExcludeScript;
@@ -87,8 +88,22 @@ public final class ScriptInterpreter {
         }
 
         if (!item.modified) {
+            final ItemModelCache.CachedResult cached = ItemModelCache.get(itemStack.getItem(), displayContext);
+            if (cached != null) {
+                // Restore extra models (e.g. leaves for saplings)
+                omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry.ACTIVE.addAll(cached.extras());
+                return cached.mainModel();
+            }
             return null;
         }
+
+        // Cache the modified item AND the extra models (side effects)
+        ItemModelCache.put(
+                itemStack.getItem(),
+                displayContext,
+                item,
+                omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry.ACTIVE
+        );
         return item;
     }
 
@@ -118,6 +133,7 @@ public final class ScriptInterpreter {
     public static void clearScripts() {
         globalScripts.clear();
         scripts.clear();
+        ItemModelCache.clear();
         BackgroundLoopHandler.getInstance().clearAll();
     }
 

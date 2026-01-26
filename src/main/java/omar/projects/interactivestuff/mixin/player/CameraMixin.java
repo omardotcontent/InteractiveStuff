@@ -2,6 +2,7 @@ package omar.projects.interactivestuff.mixin.player;
 
 import net.minecraft.client.render.Camera;
 import omar.projects.interactivestuff.handlers.CameraVelocityAccessor;
+import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,7 +20,16 @@ public abstract class CameraMixin implements CameraVelocityAccessor {
 
     @Unique
     private float lastYaw;
-    
+
+    @Unique
+    private float smoothedPitchVelocity;
+
+    @Unique
+    private float smoothedYawVelocity;
+
+    @Unique
+    private static final float SMOOTHING_SPEED = 0.3f;
+
     
     @Inject(method = "setRotation", at = @At("HEAD"))
     private void capturePreviousRotation(final float yaw, final float pitch, final CallbackInfo ci) {
@@ -27,13 +37,39 @@ public abstract class CameraMixin implements CameraVelocityAccessor {
         this.lastPitch = this.pitch;
     }
 
+    @Inject(method = "setRotation", at = @At("TAIL"))
+    private void calculateSmoothedVelocity(final float yaw, final float pitch, final CallbackInfo ci) {
+        float rawYawVelocity = this.yaw - this.lastYaw;
+        float rawPitchVelocity = this.pitch - this.lastPitch;
+
+        // Normalize velocity by delta time to make it FPS-independent
+        float dt = RenderTickHandler.normalizedDelta;
+        if (dt > 0) {
+            rawYawVelocity /= dt;
+            rawPitchVelocity /= dt;
+        }
+
+        // Apply FPS-independent smoothing using delta time
+        float smoothFactor = (float) (1.0 - Math.pow(1.0 - SMOOTHING_SPEED, dt));
+        this.smoothedYawVelocity = this.smoothedYawVelocity + (rawYawVelocity - this.smoothedYawVelocity) * smoothFactor;
+        this.smoothedPitchVelocity = this.smoothedPitchVelocity + (rawPitchVelocity - this.smoothedPitchVelocity) * smoothFactor;
+
+        // Small threshold to avoid tiny jitters
+        if (Math.abs(this.smoothedYawVelocity) < 0.01f) {
+            this.smoothedYawVelocity = 0.0f;
+        }
+        if (Math.abs(this.smoothedPitchVelocity) < 0.01f) {
+            this.smoothedPitchVelocity = 0.0f;
+        }
+    }
+
     @Override
     public float interactivestuff$getYawVelocity() {
-        return this.yaw - this.lastYaw;
+        return this.smoothedYawVelocity;
     }
 
     @Override
     public float interactivestuff$getPitchVelocity() {
-        return this.pitch - this.lastPitch;
+        return this.smoothedPitchVelocity;
     }
 }
