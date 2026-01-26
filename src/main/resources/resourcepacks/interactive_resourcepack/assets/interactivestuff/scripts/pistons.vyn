@@ -71,7 +71,6 @@ task onItemUpdate takes itemRendered do
         end
 
         make progress = pistonTop.smooth(progress, currentTarget, 0.45)
-        pistonTop.setOpacity(0)
         pistonTop.translate(0, 0.25 * (progress / 100), 0)
     end
 

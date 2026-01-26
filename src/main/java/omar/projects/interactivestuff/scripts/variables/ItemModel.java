@@ -33,11 +33,10 @@ public final class ItemModel {
     private double sx = 1, sy = 1, sz = 1;
     private double px = 0.5, py = 0.5, pz = 0.5;
 
-    // Color State (White / 100% Opacity)
+    // Color State (White)
     private float red = 1.0f;
     private float green = 1.0f;
     private float blue = 1.0f;
-    private float opacity = 1.0f;
     private int tintColor = 0xFFFFFFFF; // white = no tint
     private int light = -1;
     private int glint = -1;
@@ -166,53 +165,38 @@ public final class ItemModel {
 
     @VynFunc
     public void setColor(final int r, final int g, final int b) {
-        modificationCheck(); // Add this
+        modificationCheck();
         this.red = MathHelper.clamp(r, 0, 255) / 255.0f;
         this.green = MathHelper.clamp(g, 0, 255) / 255.0f;
         this.blue = MathHelper.clamp(b, 0, 255) / 255.0f;
     }
 
     @VynFunc
-    public void setLight(int light) {
+    public void setLight(final int light) {
         modificationCheck();
 
-        if (light < -1) light = -1;
-        if (light > 15) light = 15;
+        final int clampedLight = MathHelper.clamp(light, -1, 15);
 
-        if (light == -1) {
+        if (clampedLight == -1) {
             this.light = -1;
-        } else {
-            int blockPart = light << 4;
-            int skyPart = light << 16;
-
-            this.light = skyPart | blockPart;
+            return;
         }
+
+        final int blockPart = clampedLight << 4;
+        final int skyPart = clampedLight << 16;
+        this.light = skyPart | blockPart;
     }
 
     @VynFunc
-    public void setGlint(int glint) {
+    public void setGlint(final int glint) {
         modificationCheck();
-
-        if (glint < -1) glint = -1;
-        if (glint > 2) glint = 2;
-
-        this.glint = glint;
+        this.glint = MathHelper.clamp(glint, -1, 2);
     }
 
     @VynFunc
-    public void setTint(int color) {
-        modificationCheck(); // Add this
-        if ((color & 0xFF000000) == 0) {
-            color |= 0xFF000000;
-        }
-        this.tintColor = color;
-    }
-
-
-    @VynFunc
-    public void setOpacity(final double alpha) {
+    public void setTint(final int color) {
         modificationCheck();
-        this.opacity = (float) MathHelper.clamp(alpha, 0.0, 1.0);
+        this.tintColor = (color & 0xFF000000) == 0 ? color | 0xFF000000 : color;
     }
 
     @VynFunc
@@ -276,12 +260,11 @@ public final class ItemModel {
     }
 
     private int getRenderColor() {
-        final int a = (int) (MathHelper.clamp(opacity, 0.0f, 1.0f) * 255.0f);
         final int r = (int) (MathHelper.clamp(red, 0.0f, 1.0f) * 255.0f);
         final int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f);
         final int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f);
 
-        return (a << 24) | (r << 16) | (g << 8) | b;
+        return (255 << 24) | (r << 16) | (g << 8) | b;
     }
 
     private int getTintColor() {
