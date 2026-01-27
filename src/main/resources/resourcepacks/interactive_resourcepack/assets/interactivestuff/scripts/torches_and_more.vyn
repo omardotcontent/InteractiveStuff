@@ -32,28 +32,26 @@ end
 
 task onItemUpdate takes itemRendered do
     check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
-        check player.isMainHand(itemRendered) || player.isOffHand(itemRendered) do
-            check player.isSubmergedInWater() do
-                make isTheItem = false
-                check isWaterTorch(itemRendered) do
-                    itemRendered.setItemModel("interactivestuff:torch_off")
-                    make isTheItem = true
-                end
-                check isRedStoneTorch(itemRendered) do
-                    itemRendered.setItemModel("interactivestuff:redstone_torch_off")
-                    make isTheItem = true
-                end
-                check isWaterCampFire(itemRendered) do
-                    itemRendered.setItemModel("interactivestuff:campfire_off")
-                    make isTheItem = true
-                end
-                check isTheItem do
-                    itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
-                end
-            otherwise
-                check isHoldingHotItem(itemRendered) do
-                    itemRendered.setLight(15)
-                end
+        check player.isSubmergedInWater() do
+            make isTheItem = false
+            check isWaterTorch(itemRendered) do
+                itemRendered.setItemModel("interactivestuff:torch_off")
+                make isTheItem = true
+            end
+            check isRedStoneTorch(itemRendered) do
+                itemRendered.setItemModel("interactivestuff:redstone_torch_off")
+                make isTheItem = true
+            end
+            check isWaterCampFire(itemRendered) do
+                itemRendered.setItemModel("interactivestuff:campfire_off")
+                make isTheItem = true
+            end
+            check isTheItem do
+                itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
+            end
+        otherwise
+            check isHoldingHotItem(itemRendered) do
+                itemRendered.setLight(15)
             end
         end
     end
