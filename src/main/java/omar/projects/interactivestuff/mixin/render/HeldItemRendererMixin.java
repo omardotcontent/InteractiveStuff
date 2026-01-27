@@ -9,8 +9,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
+import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 import omar.projects.interactivestuff.scripts.ScriptInterpreter;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
+import omar.projects.interactivestuff.scripts.handlers.PivotDebugRenderer;
 import omar.projects.interactivestuff.scripts.variables.ItemModel;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,15 +51,35 @@ public abstract class HeldItemRendererMixin {
 
         ci.cancel();
 
+        final boolean debugMode = ConfigHandler.INSTANCE != null && ConfigHandler.INSTANCE.resourcePackDebugMode;
+        final PivotDebugRenderer pivotDebugRenderer = PivotDebugRenderer.INSTANCE;
+
         if (mainItem != null) {
             renderScriptItem(mainItem, entity, renderMode, matrices, queue, light);
+            if (debugMode) {
+                pivotDebugRenderer.addPivotPoint(
+                        mainItem.getPivotX(), mainItem.getPivotY(), mainItem.getPivotZ(),
+                        mainItem.getTranslateX(), mainItem.getTranslateY(), mainItem.getTranslateZ()
+                );
+            }
         }
 
         for (final ItemModel extraModel : ItemModelRenderRegistry.ACTIVE) {
             renderScriptItem(extraModel, entity, renderMode, matrices, queue, light);
+            if (debugMode) {
+                pivotDebugRenderer.addPivotPoint(
+                        extraModel.getPivotX(), extraModel.getPivotY(), extraModel.getPivotZ(),
+                        extraModel.getTranslateX(), extraModel.getTranslateY(), extraModel.getTranslateZ()
+                );
+            }
         }
 
         ItemModelRenderRegistry.clear();
+
+        // Render pivot debug points after all items
+        if (debugMode) {
+            pivotDebugRenderer.render(matrices);
+        }
     }
 
     @Unique

@@ -236,6 +236,15 @@ public final class ItemModel {
         this.px = x; this.py = y; this.pz = z;
     }
 
+    // ---------- Pivot Getters (for debug rendering) ----------
+
+    public double getPivotX() { return px; }
+    public double getPivotY() { return py; }
+    public double getPivotZ() { return pz; }
+    public double getTranslateX() { return x; }
+    public double getTranslateY() { return y; }
+    public double getTranslateZ() { return z; }
+
     // ---------- Internal Helpers ----------
 
     private void modificationCheck() {
