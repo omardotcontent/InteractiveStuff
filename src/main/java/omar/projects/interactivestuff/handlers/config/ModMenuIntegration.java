@@ -34,15 +34,18 @@ public final class ModMenuIntegration implements ModMenuApi {
         if (ConfigHandler.INSTANCE == null)
             ConfigHandler.INSTANCE = ConfigHandler.load();
         final ConfigHandler instance = ConfigHandler.INSTANCE;
-        final ConfigHandler defaults = new ConfigHandler();
+        final ConfigHandler defaults = ConfigHandler.loadDefaults();
         ModMenuIntegration.parent = parent;
 
         final YetAnotherConfigLib.Builder builder = YetAnotherConfigLib.createBuilder()
-                .title(Text.literal("InteractiveStuff Config §6§b(Beta)"))
+                .title(Text.literal("InteractiveStuff Config"))
                 .save(instance::save);
 
         // --------------------- General Settings ---------------------
         builder.category(createGeneralCategory(instance, defaults).build());
+
+        // --------------------- Resource Pack Settings ---------------------
+        builder.category(createRPSCategory(instance, defaults).build());
 
         // --------------------- Config Settings ---------------------
         builder.category(createConfigSettingsCategory().build());
@@ -116,15 +119,36 @@ public final class ModMenuIntegration implements ModMenuApi {
                 .controller(TickBoxControllerBuilder::create)
                 .build());
 
-        general.option(Option.<Boolean>createBuilder()
-                .name(Text.translatable("interactive_stuff.config.settings.general.resourcepack_debug"))
-                .description(OptionDescription.of(Text.translatable("interactive_stuff.config.settings.general.resourcepack_debug.tooltip")))
+        return general;
+    }
+
+    private ConfigCategory.Builder createRPSCategory(final ConfigHandler instance, final ConfigHandler defaults) {
+        final ConfigCategory.Builder rps = ConfigCategory.createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.rps"))
+                .tooltip(Text.translatable("interactive_stuff.config.settings.rps.tooltip"));
+
+        rps.option(Option.<Boolean>createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.rps.debug_mode"))
+                .description(OptionDescription.of(Text.translatable("interactive_stuff.config.settings.rps.debug_mode.tooltip")))
                 .binding(defaults.resourcePackDebugMode, () -> instance.resourcePackDebugMode, newVal -> instance.resourcePackDebugMode = newVal)
                 .controller(TickBoxControllerBuilder::create)
                 .build());
 
+        rps.option(Option.<Boolean>createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.rps.matrix"))
+                .description(OptionDescription.of(Text.translatable("interactive_stuff.config.settings.rps.matrix.tooltip")))
+                .binding(defaults.resourcePackMatrixEditing, () -> instance.resourcePackMatrixEditing, newVal -> instance.resourcePackMatrixEditing = newVal)
+                .controller(TickBoxControllerBuilder::create)
+                .build());
 
-        return general;
+        rps.option(Option.<Boolean>createBuilder()
+                .name(Text.translatable("interactive_stuff.config.settings.rps.color"))
+                .description(OptionDescription.of(Text.translatable("interactive_stuff.config.settings.rps.color.tooltip")))
+                .binding(defaults.resourcePackColorChanging, () -> instance.resourcePackColorChanging, newVal -> instance.resourcePackColorChanging = newVal)
+                .controller(TickBoxControllerBuilder::create)
+                .build());
+
+        return rps;
     }
 
 
@@ -189,7 +213,7 @@ public final class ModMenuIntegration implements ModMenuApi {
                                 .append(Text.translatable("interactive_stuff.config.settings.materials.details3"))
                                 .append("\n")
                                 .append(Text.translatable("interactive_stuff.config.settings.materials.details4")
-                        )))
+                                )))
                         .binding(
                                 defaults.materials.stream().map(m -> m.name).collect(Collectors.toList()),
                                 () -> instance.materials.stream().map(m -> m.name).collect(Collectors.toList()),
@@ -283,10 +307,10 @@ public final class ModMenuIntegration implements ModMenuApi {
 
         matCat.option(ButtonOption.createBuilder()
                 .name(Text.translatable("interactive_stuff.config.preview_sound"))
-                        .description(OptionDescription.of(Text.translatable("interactive_stuff.config.preview_sound.tooltip")))
-        .action((yaclScreen, thisOption) ->
-                MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(mat.getSoundEvent(),
-                        mat.randomPitch ? mat.pitch + (random.nextFloat() * 1.5F) : mat.pitch)))
+                .description(OptionDescription.of(Text.translatable("interactive_stuff.config.preview_sound.tooltip")))
+                .action((yaclScreen, thisOption) ->
+                        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(mat.getSoundEvent(),
+                                mat.randomPitch ? mat.pitch + (random.nextFloat() * 1.5F) : mat.pitch)))
                 .build()
         );
 

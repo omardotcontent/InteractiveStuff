@@ -11,6 +11,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
+import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
 import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
@@ -68,7 +69,7 @@ public final class ItemModel {
         this.workingStack = stack;
     }
 
-    // ---------- Item Utility Getters (Restored) ----------
+    // ---------- Item Utility Getters ----------
 
     @VynFunc
     public String getName() {
@@ -259,6 +260,7 @@ public final class ItemModel {
     public ItemStack getFinalStack() { return workingStack; }
 
     public void apply(final MatrixStack matrices) {
+        if (!ConfigHandler.INSTANCE.resourcePackMatrixEditing) return;
         matrices.translate(x, y, z);
         matrices.translate(px, py, pz);
         if (rotX != 0) matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotX));

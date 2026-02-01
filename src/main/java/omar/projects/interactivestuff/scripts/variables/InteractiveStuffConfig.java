@@ -44,4 +44,14 @@ public final class InteractiveStuffConfig {
     public boolean isSpecializedNoteblockHitsEnabled() {
         return ConfigHandler.INSTANCE.specializedNoteblockHits;
     }
+
+    @VynFunc
+    public boolean isResourcePackMatrixEditingEnabled() {
+        return ConfigHandler.INSTANCE.resourcePackMatrixEditing;
+    }
+
+    @VynFunc
+    public boolean isResourcePackColorChangingEnabled() {
+        return ConfigHandler.INSTANCE.resourcePackColorChanging;
+    }
 }

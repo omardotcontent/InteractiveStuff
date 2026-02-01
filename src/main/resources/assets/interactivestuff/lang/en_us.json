@@ -22,34 +22,50 @@
 
   "interactive_stuff.config.sound_id": "Sound Event ID",
   "interactive_stuff.config.sound_id.tooltip": "The SoundEvent ID to play.",
+
   "interactive_stuff.config.settings.general": "General Settings",
   "interactive_stuff.config.settings.general.tooltip": "Some editable general settings.",
+
   "interactive_stuff.config.settings.general.interactive_hits": "Enable Interactive Hits",
   "interactive_stuff.config.settings.general.interactive_hits.cooldown": "Hit Cooldown",
   "interactive_stuff.config.settings.general.interactive_hits.cooldown.tooltip": "Play the hit sound after how many ticks (helpful if you're using 1st person animations)",
   "interactive_stuff.config.settings.general.interactive_hits.tooltip": "Plays interaction sounds when hitting blocks with specific items.",
+
   "interactive_stuff.config.settings.general.sculk_sensor": "Enable Sculk Sensor in First-Person",
   "interactive_stuff.config.settings.general.sculk_sensor.tooltip": "Sculk Sensors will behave like the actual block in First-Person.",
+
   "interactive_stuff.config.settings.general.note_block": "Enable Note block Crouch",
   "interactive_stuff.config.settings.general.note_block.tooltip": "Crouching on a redstone block while holding a noteblock will play a note.",
+
   "interactive_stuff.config.settings.general.model_changes": "Enable Model Changes",
   "interactive_stuff.config.settings.general.model_changes.tooltip": "Changes Models/Textures of certain items/blocks when a specific event happens.",
+
   "interactive_stuff.config.settings.general.excluded_blocks": "Excluded Blocks",
   "interactive_stuff.config.settings.general.excluded_blocks.tooltip": "Block(s) that ignore interaction sounds.",
+
   "interactive_stuff.config.settings.materials": "Manage Materials",
   "interactive_stuff.config.settings.materials.tooltip": "Add, rename, reorder, or remove interaction materials.",
   "interactive_stuff.config.settings.materials.details1": "Use ➕ to add a new material.",
   "interactive_stuff.config.settings.materials.details2": "Rename by clicking on text.",
   "interactive_stuff.config.settings.materials.details3": "Reorder on the left.",
   "interactive_stuff.config.settings.materials.details4": "Remove by using the ✖ icon.",
+
   "interactive_stuff.config.settings.general.specialized_note_block": "Specialized Note Block Hits.",
   "interactive_stuff.config.settings.general.specialized_note_block.tooltip": "Plays specific Note Block Instrument depending on the block.",
+
   "interactive_stuff.config.settings.config": "Config Settings",
   "interactive_stuff.config.settings.config.tooltip": "Additional Settings about the Configuration File",
   "interactive_stuff.config.settings.config.export": "Open Config file's Directory.",
   "interactive_stuff.config.settings.config.reload": "Reload Configuration",
-  "interactive_stuff.config.settings.general.resourcepack_debug": "Resource Pack Debug Mode.",
-  "interactive_stuff.config.settings.general.resourcepack_debug.tooltip": "This shows the texts made for Resource pack devs to print on screen!"
+
+  "interactive_stuff.config.settings.rps": "Resource Pack Settings",
+  "interactive_stuff.config.settings.rps.tooltip": "Settings related to Resource Packs.",
+  "interactive_stuff.config.settings.rps.debug_mode": "Resource Pack Debug Mode.",
+  "interactive_stuff.config.settings.rps.debug_mode.tooltip": "This shows the texts made for Resource pack devs to print on screen!",
+  "interactive_stuff.config.settings.rps.matrix": "Resource Pack Matrix Mode.",
+  "interactive_stuff.config.settings.rps.matrix.tooltip": "Makes the Items Move,Scale & Rotate",
+  "interactive_stuff.config.settings.rps.color": "Resource Pack Color Rendering.",
+  "interactive_stuff.config.settings.rps.color.tooltip": "Allows the items to render with their modified colors. (Tints, etc)"
 
 
 }

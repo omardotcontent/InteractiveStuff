@@ -41,7 +41,6 @@ public abstract class HeldItemRendererMixin {
             final int light,
             final CallbackInfo ci) {
 
-
         final ItemModel mainItem = ScriptInterpreter.itemUpdate(stack, renderMode);
 
 
@@ -76,7 +75,6 @@ public abstract class HeldItemRendererMixin {
 
         ItemModelRenderRegistry.clear();
 
-        // Render pivot debug points after all items
         if (debugMode) {
             pivotDebugRenderer.render(matrices);
         }
@@ -102,9 +100,10 @@ public abstract class HeldItemRendererMixin {
                 entity, entity.getId() + mode.ordinal() + item.getUniqueSeed()
         );
 
-
-        final int renderColor = item.getFinalColor();
-        applyColorToState(state, renderColor);
+        if (ConfigHandler.INSTANCE.resourcePackColorChanging) {
+            final int renderColor = item.getFinalColor();
+            applyColorToState(state, renderColor);
+        }
         switch (item.getGlint()) {
             case 2:
                 applyGlint(state, ItemRenderState.Glint.SPECIAL);
@@ -129,7 +128,7 @@ public abstract class HeldItemRendererMixin {
         for (int i = 0; i < layerCount; i++) {
             final ItemRenderState.LayerRenderState layer = layers[i];
             final int quadCount = layer.getQuads().size();
-            if (quadCount <= 0) {
+            if (quadCount == 0) {
                 continue;
             }
             final int[] tints = layer.initTints(quadCount);

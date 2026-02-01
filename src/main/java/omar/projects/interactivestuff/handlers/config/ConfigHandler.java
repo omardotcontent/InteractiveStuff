@@ -33,7 +33,7 @@ public final class ConfigHandler {
             .create();
 
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("interactivestuff.json");
-    private static final String DEFAULT_CONFIG_PATH = "default_config.json";
+    private static final String DEFAULT_CONFIG_PATH = "/default_config.json";
 
 
     public boolean enableInteractiveHits = true;
@@ -41,8 +41,11 @@ public final class ConfigHandler {
     public boolean enableSculkSensorFeature = true;
     public boolean enableNoteBlockCrouchFeature = true;
     public boolean enableTextureChanges = true;
-    public boolean resourcePackDebugMode = false;
     public int HitCooldownTicks = 4;
+
+    public boolean resourcePackDebugMode = false;
+    public boolean resourcePackMatrixEditing = true;
+    public boolean resourcePackColorChanging = true;
 
     public @NotNull List<Item> excludedBlocks = new ArrayList<>();
     public List<InteractionMaterial> materials = new ArrayList<>();
@@ -59,7 +62,11 @@ public final class ConfigHandler {
 
         this.enableNoteBlockCrouchFeature = loaded.enableNoteBlockCrouchFeature;
         this.enableSculkSensorFeature = loaded.enableSculkSensorFeature;
+
+        this.resourcePackMatrixEditing = loaded.resourcePackMatrixEditing;
+        this.resourcePackColorChanging = loaded.resourcePackColorChanging;
         this.resourcePackDebugMode = loaded.resourcePackDebugMode;
+
         this.enableInteractiveHits = loaded.enableInteractiveHits;
         this.enableTextureChanges = loaded.enableTextureChanges;
         this.HitCooldownTicks = loaded.HitCooldownTicks;
@@ -97,26 +104,39 @@ public final class ConfigHandler {
             }
         }
 
+        ConfigHandler defaults = loadDefaults();
+        if (defaults != null) {
+            defaults.save();
+            return defaults;
+        }
+
+        return new ConfigHandler();
+    }
+
+    /**
+     * Loads the default configuration from the bundled default_config.json file.
+     * @return ConfigHandler with default values, or null if loading fails
+     */
+    public static ConfigHandler loadDefaults() {
         try (InputStream stream = ConfigHandler.class.getResourceAsStream(DEFAULT_CONFIG_PATH)) {
             if (stream == null) {
-                throw new RuntimeException("Default config not found in jar at: " + DEFAULT_CONFIG_PATH);
+                System.err.println("[InteractiveStuff] Default config not found in jar at: " + DEFAULT_CONFIG_PATH);
+                return null;
             }
 
             try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                 final ConfigHandler defaults = GSON.fromJson(reader, ConfigHandler.class);
                 if (defaults != null) {
-                    defaults.save();
                     defaults.refreshCache();
                     return defaults;
                 }
             }
         } catch (Exception e) {
-            System.err.println("[InteractiveStuff] CRITICAL: Failed to load default configuration from jar!");
+            System.err.println("[InteractiveStuff] Failed to load default configuration from jar!");
             e.printStackTrace();
         }
 
-
-        return new ConfigHandler();
+        return null;
     }
 
     public void save() {
