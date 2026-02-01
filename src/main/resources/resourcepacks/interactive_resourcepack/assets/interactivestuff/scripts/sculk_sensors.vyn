@@ -86,22 +86,14 @@ task handleCalibratedSensor takes distance do
 end
 
 task onItemUpdate takes itemRendered do
+    check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do
+        itemRendered.setItemModel("interactivestuff:sculk_sensor_active")
+        itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
+    end
 
-    make isRightHand = player.isMainHand(itemRendered)
-    make isLeftHand = player.isOffHand(itemRendered)
-
-    check isRightHand || isLeftHand do
-
-        check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do
-            itemRendered.setItemModel("interactivestuff:sculk_sensor_active")
-            itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
-        end
-
-        check calibratedVibrating && itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
-            itemRendered.setItemModel("interactivestuff:calibrated_sculk_sensor_active")
-            itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
-        end
-
+    check calibratedVibrating && itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
+        itemRendered.setItemModel("interactivestuff:calibrated_sculk_sensor_active")
+        itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
     end
 end
 
