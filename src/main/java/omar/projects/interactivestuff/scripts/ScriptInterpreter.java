@@ -13,7 +13,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import omar.projects.interactivestuff.handlers.BackgroundLoopHandler;
-import omar.projects.interactivestuff.scripts.Utilities.ItemModelCache;
 import omar.projects.interactivestuff.scripts.functions.DebugText;
 import omar.projects.interactivestuff.scripts.functions.ImportScript;
 import omar.projects.interactivestuff.scripts.functions.ExcludeScript;
@@ -71,6 +70,7 @@ public final class ScriptInterpreter {
         if (PLAYER_VAR.getPlayer() == null || client.isPaused() || client.world == null) {
             return;
         }
+
         for (final Script entry : globalScripts) {
             entry.call(PLAYER_VAR);
         }
@@ -87,24 +87,12 @@ public final class ScriptInterpreter {
             entry.call(PLAYER_VAR, Script.FunctionType.ON_ITEM_UPDATE, List.of(NativeBinder.toValue(entry.getEnvironment(), item)));
         }
 
+        // Remove the old caching logic - we don't cache ItemModels anymore
         if (!item.modified) {
-            final ItemModelCache.CachedResult cached = ItemModelCache.get(itemStack.getItem(), displayContext);
-            if (cached != null) {
-                // Restore extra models (e.g. leaves for saplings)
-                omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry.ACTIVE.addAll(cached.extras());
-                return cached.mainModel();
-            }
-            return null;
+            return null; // Just return null if not modified by scripts
         }
 
-        // Cache the modified item AND the extra models (side effects)
-        ItemModelCache.put(
-                itemStack.getItem(),
-                displayContext,
-                item,
-                omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry.ACTIVE
-        );
-        return item;
+        return item; // Return the modified item
     }
 
     public static void onSwingHand() {
@@ -133,7 +121,6 @@ public final class ScriptInterpreter {
     public static void clearScripts() {
         globalScripts.clear();
         scripts.clear();
-        ItemModelCache.clear();
         BackgroundLoopHandler.getInstance().clearAll();
     }
 
