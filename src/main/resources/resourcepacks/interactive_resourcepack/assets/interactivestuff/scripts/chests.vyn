@@ -10,11 +10,55 @@ task onItemUpdate takes itemRendered do
             make fallTarget = 100
         end
 
-    check itemRendered.getName() == "minecraft:chest" do
-        itemRendered.setItemModel("interactivestuff:chest_base")
+    check isHoldAnyChest() do
+        make chestTop = nothing
 
-        make chestTop = new ItemModel("minecraft:chest")
-        chestTop.setItemModel("interactivestuff:chest_top")
+        check itemRendered.getName() == "minecraft:chest" do
+            itemRendered.setItemModel("interactivestuff:chest_base")
+            make chestTop = new ItemModel("minecraft:chest")
+            chestTop.setItemModel("interactivestuff:chest_top")
+        end
+
+        check itemRendered.getName() == "minecraft:ender_chest" do
+            itemRendered.setItemModel("interactivestuff:ender_chest_base")
+            make chestTop = new ItemModel("minecraft:ender_chest")
+            chestTop.setItemModel("interactivestuff:ender_chest_top")
+        end
+
+        check itemRendered.getName() == "minecraft:trapped_chest" do
+            itemRendered.setItemModel("interactivestuff:trapped_chest_base")
+            make chestTop = new ItemModel("minecraft:trapped_chest")
+            chestTop.setItemModel("interactivestuff:trapped_chest_top")
+        end
+
+        check itemRendered.getName() == "minecraft:copper_chest" || itemRendered.getName() == "minecraft:waxed_copper_chest" do
+            itemRendered.setItemModel("interactivestuff:copper_chest_base")
+            make chestTop = new ItemModel("minecraft:copper_chest")
+            chestTop.setItemModel("interactivestuff:copper_chest_top")
+        end
+
+        check itemRendered.getName() == "minecraft:exposed_copper_chest" || itemRendered.getName() == "minecraft:waxed_exposed_copper_chest" do
+            itemRendered.setItemModel("interactivestuff:exposed_copper_chest_base")
+            make chestTop = new ItemModel("minecraft:exposed_copper_chest")
+            chestTop.setItemModel("interactivestuff:exposed_copper_chest_top")
+        end
+
+        check itemRendered.getName() == "minecraft:weathered_copper_chest" || itemRendered.getName() == "minecraft:waxed_weathered_copper_chest" do
+            itemRendered.setItemModel("interactivestuff:weathered_copper_chest_base")
+            make chestTop = new ItemModel("minecraft:weathered_copper_chest")
+            chestTop.setItemModel("interactivestuff:weathered_copper_chest_top")
+        end
+
+        check itemRendered.getName() == "minecraft:oxidized_copper_chest" || itemRendered.getName() == "minecraft:waxed_oxidized_copper_chest" do
+            itemRendered.setItemModel("interactivestuff:oxidized_copper_chest_base")
+            make chestTop = new ItemModel("minecraft:oxidized_copper_chest")
+            chestTop.setItemModel("interactivestuff:oxidized_copper_chest_top")
+        end
+
+
+        check chestTop == nothing do
+            reply nothing
+        end
 
         make progress = chestTop.smooth(progress,fallTarget,0.2)
         check itemRendered.isMainHand() do
@@ -25,4 +69,10 @@ task onItemUpdate takes itemRendered do
             chestTop.rotate(-30 * (progress / 100), 0, 45 * (progress / 100))
         end
     end
+end
+
+
+
+task isHoldAnyChest do
+    reply player.isHoldingItem("minecraft:waxed_copper_chest") || player.isHoldingItem("minecraft:waxed_exposed_copper_chest") || player.isHoldingItem("minecraft:waxed_weathered_copper_chest") || player.isHoldingItem("minecraft:waxed_oxidized_copper_chest") || player.isHoldingItem("minecraft:copper_chest") || player.isHoldingItem("minecraft:exposed_copper_chest") || player.isHoldingItem("minecraft:weathered_copper_chest") || player.isHoldingItem("minecraft:oxidized_copper_chest") || player.isHoldingItem("minecraft:chest") || player.isHoldingItem("minecraft:ender_chest") || player.isHoldingItem("minecraft:trapped_chest")
 end
