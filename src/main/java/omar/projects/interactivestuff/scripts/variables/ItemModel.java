@@ -10,11 +10,15 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
 import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
 import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
+import java.util.List;
+import java.util.Map;
 
 @VynType(name = "ItemModel")
 public final class ItemModel {
@@ -28,25 +32,18 @@ public final class ItemModel {
 
     private ItemDisplayContext displayContext = ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
 
-    // Transform State
-    private float rotX, rotY, rotZ;
     private double x, y, z;
     private double sx = 1, sy = 1, sz = 1;
     private double px = 0.5, py = 0.5, pz = 0.5;
+    private Quaternionf rotation = new Quaternionf();
 
-    // Color State (White)
     private float red = 1.0f;
     private float green = 1.0f;
     private float blue = 1.0f;
-    private int tintColor = 0xFFFFFFFF; // white = no tint
+    private int tintColor = 0xFFFFFFFF;
     private int light = -1;
     private int glint = -1;
 
-
-
-    /**
-     * Constructor for scripts creating NEW models: `var m = new Item()`
-     */
     @VynConstructor
     public ItemModel(final String itemId) {
         this(createStackFromId(itemId));
@@ -56,20 +53,15 @@ public final class ItemModel {
     private static ItemStack createStackFromId(final String itemId) {
         try {
             return new ItemStack(Registries.ITEM.get(Identifier.of(itemId)));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return new ItemStack(Items.AIR);
         }
     }
 
-    /**
-     * Internal constructor for wrapping existing items (like the hand item)
-     */
     public ItemModel(final ItemStack stack) {
         this.originalStack = stack;
         this.workingStack = stack;
     }
-
-    // ---------- Item Utility Getters ----------
 
     @VynFunc
     public String getName() {
@@ -77,25 +69,39 @@ public final class ItemModel {
     }
 
     @VynFunc
-    public boolean isDamaged() { return workingStack.isDamaged(); }
+    public boolean isDamaged() {
+        return workingStack.isDamaged();
+    }
 
     @VynFunc
-    public boolean isDamageable() { return workingStack.isDamageable(); }
+    public boolean isDamageable() {
+        return workingStack.isDamageable();
+    }
 
     @VynFunc
-    public boolean isEnchantable() { return workingStack.isEnchantable(); }
+    public boolean isEnchantable() {
+        return workingStack.isEnchantable();
+    }
 
     @VynFunc
-    public boolean isStackable() { return workingStack.isStackable(); }
+    public boolean isStackable() {
+        return workingStack.isStackable();
+    }
 
     @VynFunc
-    public int getCount() { return workingStack.getCount(); }
+    public int getCount() {
+        return workingStack.getCount();
+    }
 
     @VynFunc
-    public int getMaxCount() { return workingStack.getMaxCount(); }
+    public int getMaxCount() {
+        return workingStack.getMaxCount();
+    }
 
     @VynFunc
-    public int getBobbingAnimationTime() { return workingStack.getBobbingAnimationTime(); }
+    public int getBobbingAnimationTime() {
+        return workingStack.getBobbingAnimationTime();
+    }
 
     @VynFunc
     public int getLight() {
@@ -107,7 +113,6 @@ public final class ItemModel {
         return glint;
     }
 
-    // ---------- Display Context API ----------
 
     public void setDisplayContext(final ItemDisplayContext context) {
         this.displayContext = context;
@@ -140,7 +145,6 @@ public final class ItemModel {
         return displayContext.name();
     }
 
-    // ---------- Item Logic ----------
 
     @VynFunc
     public void setItemModel(final String model) {
@@ -160,9 +164,32 @@ public final class ItemModel {
         ScriptItemHandler.apply(workingStack, key, value.toString());
     }
 
+    @VynFunc
+    public String getDataComponent(final String key) {
+        return ScriptItemHandler.getComponent(workingStack, key);
+    }
 
+    @VynFunc
+    public boolean hasDataComponent(final String key) {
+        return ScriptItemHandler.hasComponent(workingStack, key);
+    }
 
-    // ---------- Color API --------------
+    @VynFunc
+    public List<String> getDataComponentIds() {
+        return ScriptItemHandler.getComponentIds(workingStack);
+    }
+
+    @VynFunc
+    public List<Map<String, String>> getDataComponents() {
+        return ScriptItemHandler.getComponents(workingStack);
+    }
+
+    @VynFunc
+    public void removeDataComponent(final String key) {
+        modificationCheck();
+        ScriptItemHandler.remove(workingStack, key);
+    }
+
 
     @VynFunc
     public void setColor(final int r, final int g, final int b) {
@@ -201,7 +228,7 @@ public final class ItemModel {
     }
 
     @VynFunc
-    public void translate(double dx, double dy, double dz) {
+    public void translate(final double dx, final double dy, final double dz) {
         modificationCheck();
         this.x += dx;
         this.y += dy;
@@ -209,18 +236,87 @@ public final class ItemModel {
     }
 
     @VynFunc
-    public void rotate(double dx, double dy, double dz) {
+    public void translateX(final double dx) {
         modificationCheck();
-        this.rotX += (float) dx;
-        this.rotY += (float) dy;
-        this.rotZ += (float) dz;
+        this.x += dx;
     }
 
     @VynFunc
-    public void scale(double sx, double sy, double sz) {
+    public void translateY(final double dy) {
+        modificationCheck();
+        this.y += dy;
+    }
+
+    @VynFunc
+    public void translateZ(final double dz) {
+        modificationCheck();
+        this.z += dz;
+    }
+
+    @VynFunc
+    public void rotateAxis(final double angle, final double axisX, final double axisY, final double axisZ) {
+        modificationCheck();
+        Vector3f axis = new Vector3f((float) axisX, (float) axisY, (float) axisZ).normalize();
+        Quaternionf delta = new Quaternionf().rotateAxis(
+                (float) Math.toRadians(angle),
+                axis
+        );
+        rotation.mul(delta);
+    }
+
+    @VynFunc
+    public void rotate(final double dx, final double dy, final double dz) {
+        modificationCheck();
+        Quaternionf delta = new Quaternionf().rotateXYZ(
+                (float) Math.toRadians(dx),
+                (float) Math.toRadians(dy),
+                (float) Math.toRadians(dz)
+        );
+        rotation.mul(delta);
+    }
+
+
+    @VynFunc
+    public void rotateX(final double angle) {
+        modificationCheck();
+        rotation.rotateX((float) Math.toRadians(angle));
+    }
+
+    @VynFunc
+    public void rotateY(final double angle) {
+        modificationCheck();
+        rotation.rotateY((float) Math.toRadians(angle));
+    }
+
+    @VynFunc
+    public void rotateZ(final double angle) {
+        modificationCheck();
+        rotation.rotateZ((float) Math.toRadians(angle));
+    }
+
+    @VynFunc
+    public void scale(final double sx, final double sy, final double sz) {
         modificationCheck();
         this.sx *= sx;
         this.sy *= sy;
+        this.sz *= sz;
+    }
+
+    @VynFunc
+    public void scaleX(final double sx) {
+        modificationCheck();
+        this.sx *= sx;
+    }
+
+    @VynFunc
+    public void scaleY(final double sy) {
+        modificationCheck();
+        this.sy *= sy;
+    }
+
+    @VynFunc
+    public void scaleZ(final double sz) {
+        modificationCheck();
         this.sz *= sz;
     }
 
@@ -234,38 +330,58 @@ public final class ItemModel {
     @VynFunc
     public void setPivot(final double x, final double y, final double z) {
         modificationCheck();
-        this.px = x; this.py = y; this.pz = z;
+        this.px = x;
+        this.py = y;
+        this.pz = z;
     }
 
-    // ---------- Pivot Getters (for debug rendering) ----------
+    public double getPivotX() {
+        return px;
+    }
 
-    public double getPivotX() { return px; }
-    public double getPivotY() { return py; }
-    public double getPivotZ() { return pz; }
-    public double getTranslateX() { return x; }
-    public double getTranslateY() { return y; }
-    public double getTranslateZ() { return z; }
+    public double getPivotY() {
+        return py;
+    }
 
-    // ---------- Internal Helpers ----------
+    public double getPivotZ() {
+        return pz;
+    }
+
+    public double getTranslateX() {
+        return x;
+    }
+
+    public double getTranslateY() {
+        return y;
+    }
+
+    public double getTranslateZ() {
+        return z;
+    }
 
     private void modificationCheck() {
-        if (!modified) {
-            workingStack = originalStack.copy();
-            modified = true;
+        if (modified) {
+            return;
         }
+        workingStack = originalStack.copy();
+        modified = true;
     }
 
-    public int getUniqueSeed() { return seed; }
+    public int getUniqueSeed() {
+        return seed;
+    }
 
-    public ItemStack getFinalStack() { return workingStack; }
+    public ItemStack getFinalStack() {
+        return workingStack;
+    }
 
     public void apply(final MatrixStack matrices) {
-        if (!ConfigHandler.INSTANCE.resourcePackMatrixEditing) return;
+        if (!ConfigHandler.INSTANCE.resourcePackMatrixEditing) {
+            return;
+        }
         matrices.translate(x, y, z);
         matrices.translate(px, py, pz);
-        if (rotX != 0) matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotX));
-        if (rotY != 0) matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotY));
-        if (rotZ != 0) matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotZ));
+        matrices.multiply(rotation);
         matrices.translate(-px, -py, -pz);
         matrices.scale((float) sx, (float) sy, (float) sz);
     }
