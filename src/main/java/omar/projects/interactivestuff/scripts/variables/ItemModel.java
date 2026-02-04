@@ -14,6 +14,7 @@ import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
 import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -35,7 +36,10 @@ public final class ItemModel {
     private double x, y, z;
     private double sx = 1, sy = 1, sz = 1;
     private double px = 0.5, py = 0.5, pz = 0.5;
-    private Quaternionf rotation = new Quaternionf();
+    private final Quaternionf rotation = new Quaternionf();
+    private float shXY = 0, shXZ = 0;
+    private float shYX = 0, shYZ = 0;
+    private float shZX = 0, shZY = 0;
 
     private float red = 1.0f;
     private float green = 1.0f;
@@ -256,23 +260,19 @@ public final class ItemModel {
     @VynFunc
     public void rotateAxis(final double angle, final double axisX, final double axisY, final double axisZ) {
         modificationCheck();
-        Vector3f axis = new Vector3f((float) axisX, (float) axisY, (float) axisZ).normalize();
-        Quaternionf delta = new Quaternionf().rotateAxis(
+        rotation.mul(new Quaternionf().rotateAxis(
                 (float) Math.toRadians(angle),
-                axis
-        );
-        rotation.mul(delta);
+                new Vector3f((float) axisX, (float) axisY, (float) axisZ).normalize()
+        ));
     }
 
     @VynFunc
     public void rotate(final double dx, final double dy, final double dz) {
         modificationCheck();
-        Quaternionf delta = new Quaternionf().rotateXYZ(
+        rotation.mul(new Quaternionf().rotateXYZ(
                 (float) Math.toRadians(dx),
                 (float) Math.toRadians(dy),
-                (float) Math.toRadians(dz)
-        );
-        rotation.mul(delta);
+                (float) Math.toRadians(dz)));
     }
 
 
@@ -321,10 +321,20 @@ public final class ItemModel {
     }
 
     @VynFunc
+    public void shear(final double xy, final double xz, final double yx, final double yz, final double zx, final double zy) {
+        modificationCheck();
+        this.shXY = (float) xy;
+        this.shXZ = (float) xz;
+        this.shYX = (float) yx;
+        this.shYZ = (float) yz;
+        this.shZX = (float) zx;
+        this.shZY = (float) zy;
+    }
+
+    @VynFunc
     public double smooth(final double current, final double target, final double speed) {
         modificationCheck();
-        final float dt = RenderTickHandler.normalizedDelta;
-        return current + (target - current) * (1.0 - Math.pow(1.0 - speed, dt));
+        return current + (target - current) * (1.0 - Math.pow(1.0 - speed, RenderTickHandler.normalizedDelta));
     }
 
     @VynFunc
@@ -379,6 +389,22 @@ public final class ItemModel {
         if (!ConfigHandler.INSTANCE.resourcePackMatrixEditing) {
             return;
         }
+
+        if (shXY != 0 || shXZ != 0 || shYX != 0 || shYZ != 0 || shZX != 0 || shZY != 0) {
+            final Matrix4f shearMatrix = new Matrix4f();
+
+            shearMatrix.m01(shXY);
+            shearMatrix.m02(shXZ);
+
+            shearMatrix.m10(shYX);
+            shearMatrix.m12(shYZ);
+
+            shearMatrix.m20(shZX);
+            shearMatrix.m21(shZY);
+
+            matrices.peek().getPositionMatrix().mul(shearMatrix);
+        }
+
         matrices.translate(x, y, z);
         matrices.translate(px, py, pz);
         matrices.multiply(rotation);

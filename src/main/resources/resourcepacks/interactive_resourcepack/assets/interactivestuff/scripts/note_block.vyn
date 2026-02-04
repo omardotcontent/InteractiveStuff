@@ -3,7 +3,7 @@ make wasSneaking = false
 make pitchIndex = -1
 
 lock song_pattern = new List
-song_pattern.add(0.5,0.5,0.5,0.5,0.75,0.6)
+song_pattern.add(0.5,0.5,0.5,0.5,0.75,0.6,0.6,0.6,0.75,0.6,0.8)
 
 task onTick do
     check player.getWorld() == nothing do
