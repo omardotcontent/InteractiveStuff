@@ -390,6 +390,9 @@ public final class ItemModel {
             return;
         }
 
+        matrices.translate(x, y, z);
+        matrices.translate(px, py, pz);
+
         if (shXY != 0 || shXZ != 0 || shYX != 0 || shYZ != 0 || shZX != 0 || shZY != 0) {
             final Matrix4f shearMatrix = new Matrix4f();
 
@@ -405,8 +408,6 @@ public final class ItemModel {
             matrices.peek().getPositionMatrix().mul(shearMatrix);
         }
 
-        matrices.translate(x, y, z);
-        matrices.translate(px, py, pz);
         matrices.multiply(rotation);
         matrices.translate(-px, -py, -pz);
         matrices.scale((float) sx, (float) sy, (float) sz);
