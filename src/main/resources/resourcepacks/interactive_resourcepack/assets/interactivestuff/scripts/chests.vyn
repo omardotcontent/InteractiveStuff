@@ -10,6 +10,10 @@ task onItemUpdate takes itemRendered do
         make fallTarget = 100
     end
 
+    check fallTarget < -7 do
+        make fallTarget = -7
+    end
+
     make chestTop = nothing
 
     check itemRendered.getName() == "minecraft:chest" do
