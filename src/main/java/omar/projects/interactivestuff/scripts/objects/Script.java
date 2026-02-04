@@ -29,7 +29,8 @@ public final class Script {
             for (final FunctionType type : FunctionType.values()) {
                 try {
                     this.callables.put(type, environment.getFunction(type.getName()));
-                } catch (final Exception ignored) {}
+                } catch (final Exception ignored) {
+                }
             }
 
             if (callables.isEmpty()) {

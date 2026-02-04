@@ -89,7 +89,9 @@ public abstract class HeldItemRendererMixin {
             final OrderedRenderCommandQueue queue,
             final int light) {
         final ItemStack stack = item.getFinalStack();
-        if (stack.isEmpty()) return;
+        if (stack.isEmpty()) {
+            return;
+        }
 
         matrices.push();
         item.apply(matrices);

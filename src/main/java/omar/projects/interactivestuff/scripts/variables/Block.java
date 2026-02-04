@@ -39,9 +39,10 @@ public final class Block {
 
     @VynFunc
     public Position getPosition() {
-        if (position == null) {
-            position = new Position(sourceBlock.getX(), sourceBlock.getY(), sourceBlock.getZ());
+        if (position != null) {
+            return position;
         }
+        position = new Position(sourceBlock.getX(), sourceBlock.getY(), sourceBlock.getZ());
         return position;
     }
 

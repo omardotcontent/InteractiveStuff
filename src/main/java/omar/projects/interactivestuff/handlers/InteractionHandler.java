@@ -22,7 +22,8 @@ public final class InteractionHandler {
     private static final String COOLDOWN_ID = "SwingSoundCooldown";
     private static final Random RANDOM = new Random();
 
-    private InteractionHandler() {}
+    private InteractionHandler() {
+    }
 
     public static InteractionHandler getInstance() {
         return INSTANCE;

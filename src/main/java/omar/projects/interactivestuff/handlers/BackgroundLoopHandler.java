@@ -11,36 +11,25 @@ public final class BackgroundLoopHandler {
 
     private final Map<String, BackgroundLoop> loops = new ConcurrentHashMap<>();
 
-    private BackgroundLoopHandler() {}
+    private BackgroundLoopHandler() {
+    }
 
     public static BackgroundLoopHandler getInstance() {
         return INSTANCE;
     }
 
     public void register() {
-
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-
             if (client.world == null) {
                 return;
             }
-
-
             if (client.isPaused()) {
                 return;
             }
-
-
             loops.values().forEach(BackgroundLoop::tick);
         });
     }
 
-    /**
-     * Starts a repeating task.
-     * @param name Unique ID for the loop
-     * @param task The code to run
-     * @param tickDelay How many ticks to wait between runs (20 ticks = 1 second)
-     */
     public void startLoop(final String name, final Runnable task, final int tickDelay) {
         if (loops.containsKey(name)) {
             endLoop(name);
@@ -48,14 +37,10 @@ public final class BackgroundLoopHandler {
         loops.put(name, new BackgroundLoop(task, tickDelay));
     }
 
-    /**
-     * schedules a task to run once after a specific delay.
-     */
     public void waitTicks(final String id, final int ticks, final Runnable task) {
         if (isLoopRunning(id)) {
             return;
         }
-
         startLoop(id, () -> {
             try {
                 task.run();
@@ -67,23 +52,26 @@ public final class BackgroundLoopHandler {
 
     public void pauseLoop(final String name) {
         final BackgroundLoop loop = loops.get(name);
-        if (loop != null) {
-            loop.pause();
+        if (loop == null) {
+            return;
         }
+        loop.pause();
     }
 
     public void resumeLoop(final String name) {
         final BackgroundLoop loop = loops.get(name);
-        if (loop != null) {
-            loop.resume();
+        if (loop == null) {
+            return;
         }
+        loop.resume();
     }
 
     public void endLoop(final String name) {
         final BackgroundLoop loop = loops.remove(name);
-        if (loop != null) {
-            loop.stop();
+        if (loop == null) {
+            return;
         }
+        loop.stop();
     }
 
     public boolean isLoopRunning(final String name) {
@@ -112,17 +100,15 @@ public final class BackgroundLoopHandler {
             if (!running.get() || paused.get()) {
                 return;
             }
-
             tickCounter++;
-
-            // Only run the task when the counter hits the delay
-            if (tickCounter >= tickDelay) {
-                tickCounter = 0; // Reset counter
-                try {
-                    task.run();
-                } catch (final Throwable t) {
-                    t.printStackTrace();
-                }
+            if (tickCounter < tickDelay) {
+                return;
+            }
+            tickCounter = 0;
+            try {
+                task.run();
+            } catch (final Throwable t) {
+                t.printStackTrace();
             }
         }
 

@@ -41,7 +41,8 @@ public final class PivotDebugRenderer {
     private final List<PivotPoint> pivotPoints = new CopyOnWriteArrayList<>();
     private int colorIndex = 0;
 
-    private PivotDebugRenderer() {}
+    private PivotDebugRenderer() {
+    }
 
     public void addPivotPoint(final double x, final double y, final double z, final double transX, final double transY, final double transZ) {
         final int color = PIVOT_COLORS[colorIndex % PIVOT_COLORS.length];
@@ -77,13 +78,13 @@ public final class PivotDebugRenderer {
         final float red = ((color >> 16) & 0xFF) / 255f;
         final float green = ((color >> 8) & 0xFF) / 255f;
         final float blue = (color & 0xFF) / 255f;
-        final float alpha = 0.8f;
+        final float alpha = 1.0f;
 
         final Matrix4f matrix = matrices.peek().getPositionMatrix();
         final float radius = MARKER_SIZE;
 
-        final int latitudes = 8;
-        final int longitudes = 8;
+        final int latitudes = 12;
+        final int longitudes = 12;
 
         final Tessellator tessellator = Tessellator.getInstance();
         final BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);

@@ -37,76 +37,103 @@ public final class Player {
 
     @VynFunc
     public Block getTargetBlock() {
-        if (!(client.crosshairTarget instanceof BlockHitResult blockHit)) { return null;}
-        if (player == null) {
-            return (null);
-        } else {
-            assert client.world != null;
-            return (new Block(blockHit.getBlockPos(), client.world));
+        if (!(client.crosshairTarget instanceof BlockHitResult blockHit)) {
+            return null;
         }
+        if (player == null) {
+            return null;
+        }
+        return new Block(blockHit.getBlockPos(), client.world);
     }
 
     @VynFunc
     public String getGamemode() {
-        if (player.getGameMode() == null) return null;
-        return player == null ? null : player.getGameMode().asString();
+        if (player == null || player.getGameMode() == null) {
+            return null;
+        }
+        return player.getGameMode().asString();
     }
 
     @VynFunc
     public Position getPosition() {
-        return player == null ? null : new Position((int) player.getX(), (int) player.getY(), (int) player.getZ());
+        if (player == null) {
+            return null;
+        }
+        return new Position((int) player.getX(), (int) player.getY(), (int) player.getZ());
     }
 
     @VynFunc
     public World getWorld() {
-        return client.world == null ? null : new World(client.world);
+        if (client.world == null) {
+            return null;
+        }
+        return new World(client.world);
     }
 
     @VynFunc
     public ItemModel getActiveItem() {
-        return player == null ? null : new ItemModel(player.getActiveItem());
+        if (player == null) {
+            return null;
+        }
+        return new ItemModel(player.getActiveItem());
     }
 
     @VynFunc
     public double getVelocityX() {
-        if (player == null) return 0;
-        double vx = player.getVelocity().getX();
-        double vz = player.getVelocity().getZ();
-        double yawRad = Math.toRadians(player.getYaw());
-        // Rotate to get strafe velocity (left/right relative to player)
+        if (player == null) {
+            return 0;
+        }
+        final double vx = player.getVelocity().getX();
+        final double vz = player.getVelocity().getZ();
+        final double yawRad = Math.toRadians(player.getYaw());
         return (vx * Math.cos(yawRad) + vz * Math.sin(yawRad)) * 0.3333;
     }
 
     @VynFunc
     public double getVelocityY() {
-        if (player == null) return 0;
-        double y = player.getVelocity().getY();
-        if (Math.abs(y + 0.0784) < 0.001) return 0;
+        if (player == null) {
+            return 0;
+        }
+        final double y = player.getVelocity().getY();
+        if (Math.abs(y + 0.0784) < 0.001) {
+            return 0;
+        }
         return y * 0.3333;
     }
 
     @VynFunc
     public double getVelocityZ() {
-        if (player == null) return 0;
-        double vx = player.getVelocity().getX();
-        double vz = player.getVelocity().getZ();
-        double yawRad = Math.toRadians(player.getYaw());
-        // Rotate to get forward velocity (forward/backward relative to player)
+        if (player == null) {
+            return 0;
+        }
+        final double vx = player.getVelocity().getX();
+        final double vz = player.getVelocity().getZ();
+        final double yawRad = Math.toRadians(player.getYaw());
         return (-vx * Math.sin(yawRad) + vz * Math.cos(yawRad)) * 0.3333;
     }
 
     @VynFunc
     public float getCameraPitch() {
-        if (client.gameRenderer == null) return 0.0f;
+        if (client.gameRenderer == null) {
+            return 0.0f;
+        }
         final Camera camera = client.gameRenderer.getCamera();
-        return (camera instanceof CameraVelocityAccessor acc) ? acc.interactivestuff$getPitchVelocity() : 0.0f;
+        if (camera instanceof CameraVelocityAccessor acc) {
+            return acc.interactivestuff$getPitchVelocity();
+        }
+        return 0.0f;
     }
 
     @VynFunc
     public float getCameraYaw() {
-        if (client.gameRenderer == null) return 0.0f;
+        if (client.gameRenderer == null) {
+            return 0.0f;
+        }
         final Camera camera = client.gameRenderer.getCamera();
-        return (camera instanceof CameraVelocityAccessor acc) ? acc.interactivestuff$getYawVelocity() : 0.0f;
+        if (camera instanceof CameraVelocityAccessor acc) {
+            return acc.interactivestuff$getYawVelocity();
+        }
+        return 0.0f;
     }
 
     @VynFunc
@@ -272,47 +299,59 @@ public final class Player {
 
     @VynFunc
     public boolean isMainHand(final ItemModel item) {
-        if (player == null || item == null) return false;
+        if (player == null || item == null) {
+            return false;
+        }
         return player.getMainHandStack().equals(item.getFinalStack());
     }
 
     @VynFunc
     public boolean isOffHand(final ItemModel item) {
-        if (player == null || item == null) return false;
+        if (player == null || item == null) {
+            return false;
+        }
         return player.getOffHandStack().equals(item.getFinalStack());
     }
 
     @VynFunc
     public boolean isHoldingItem(final String itemId) {
-        final ItemModel mainHandItem = getMainHandItem(),
-                offHandItem = getOffHandItem();
-
-        final String mainItemName = mainHandItem == null ? "AIR" : mainHandItem.getName(),
-                offItemName = offHandItem == null ? "AIR" : offHandItem.getName();
-
+        final ItemModel mainHandItem = getMainHandItem();
+        final ItemModel offHandItem = getOffHandItem();
+        final String mainItemName = mainHandItem == null ? "AIR" : mainHandItem.getName();
+        final String offItemName = offHandItem == null ? "AIR" : offHandItem.getName();
         return mainItemName.equals(itemId) || offItemName.equals(itemId);
     }
 
     @VynFunc
     public ItemModel getMainHandItem() {
-        return player == null ? null : new ItemModel(player.getMainHandStack());
+        if (player == null) {
+            return null;
+        }
+        return new ItemModel(player.getMainHandStack());
     }
 
     @VynFunc
     public ItemModel getOffHandItem() {
-        return player == null ? null : new ItemModel(player.getOffHandStack());
+        if (player == null) {
+            return null;
+        }
+        return new ItemModel(player.getOffHandStack());
     }
 
     @VynFunc
     public void playSound(final String soundId, final double volume, final double pitch) {
-        if (player != null)
-            player.playSound(Registries.SOUND_EVENT.get(Identifier.of(soundId)), (float) volume, (float) pitch);
+        if (player == null) {
+            return;
+        }
+        player.playSound(Registries.SOUND_EVENT.get(Identifier.of(soundId)), (float) volume, (float) pitch);
     }
 
     @VynFunc
     public void playSound(final Sound sound) {
-        if (player != null)
-            player.playSound(Registries.SOUND_EVENT.get(Identifier.of(sound.getName())), (float) sound.getVolume(), (float) sound.getPitch());
+        if (player == null) {
+            return;
+        }
+        player.playSound(Registries.SOUND_EVENT.get(Identifier.of(sound.getName())), (float) sound.getVolume(), (float) sound.getPitch());
     }
 
     @VynFunc

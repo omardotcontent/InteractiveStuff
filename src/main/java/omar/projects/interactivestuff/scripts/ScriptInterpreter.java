@@ -87,12 +87,11 @@ public final class ScriptInterpreter {
             entry.call(PLAYER_VAR, Script.FunctionType.ON_ITEM_UPDATE, List.of(NativeBinder.toValue(entry.getEnvironment(), item)));
         }
 
-        // Remove the old caching logic - we don't cache ItemModels anymore
         if (!item.modified) {
-            return null; // Just return null if not modified by scripts
+            return null;
         }
 
-        return item; // Return the modified item
+        return item;
     }
 
     public static void onSwingHand() {

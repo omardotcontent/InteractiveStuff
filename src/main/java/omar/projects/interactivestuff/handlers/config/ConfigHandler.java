@@ -37,7 +37,7 @@ public final class ConfigHandler {
 
 
     public boolean enableInteractiveHits = true;
-    public boolean specializedNoteblockHits = true; // overrides the interactive hits one.
+    public boolean specializedNoteblockHits = true;
     public boolean enableSculkSensorFeature = true;
     public boolean enableNoteBlockCrouchFeature = true;
     public boolean enableTextureChanges = true;
@@ -50,15 +50,13 @@ public final class ConfigHandler {
     public @NotNull List<Item> excludedBlocks = new ArrayList<>();
     public List<InteractionMaterial> materials = new ArrayList<>();
 
-
     private transient final Map<Item, InteractionMaterial> itemLookupCache = new HashMap<>();
 
     public ConfigHandler() {
-
     }
 
     public void reload() {
-        ConfigHandler loaded = load();
+        final ConfigHandler loaded = load();
 
         this.enableNoteBlockCrouchFeature = loaded.enableNoteBlockCrouchFeature;
         this.enableSculkSensorFeature = loaded.enableSculkSensorFeature;
@@ -76,35 +74,30 @@ public final class ConfigHandler {
         refreshCache();
     }
 
-
     public void openConfigDirectory() {
         try {
-            Util.getOperatingSystem().open(
-                    FabricLoader.getInstance().getConfigDir().toFile()
-            );
-        } catch (Exception e) {
+            Util.getOperatingSystem().open(FabricLoader.getInstance().getConfigDir().toFile());
+        } catch (final Exception e) {
             System.err.println("[InteractiveStuff] Failed to open config.");
             e.printStackTrace();
         }
     }
 
-
     public static ConfigHandler load() {
-
         if (Files.exists(CONFIG_PATH)) {
-            try (Reader reader = Files.newBufferedReader(CONFIG_PATH, StandardCharsets.UTF_8)) {
+            try (final Reader reader = Files.newBufferedReader(CONFIG_PATH, StandardCharsets.UTF_8)) {
                 final ConfigHandler loaded = GSON.fromJson(reader, ConfigHandler.class);
                 if (loaded != null) {
                     loaded.refreshCache();
                     return loaded;
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.err.println("[InteractiveStuff] Failed to load user config, falling back to defaults.");
                 e.printStackTrace();
             }
         }
 
-        ConfigHandler defaults = loadDefaults();
+        final ConfigHandler defaults = loadDefaults();
         if (defaults != null) {
             defaults.save();
             return defaults;
@@ -113,25 +106,21 @@ public final class ConfigHandler {
         return new ConfigHandler();
     }
 
-    /**
-     * Loads the default configuration from the bundled default_config.json file.
-     * @return ConfigHandler with default values, or null if loading fails
-     */
     public static ConfigHandler loadDefaults() {
-        try (InputStream stream = ConfigHandler.class.getResourceAsStream(DEFAULT_CONFIG_PATH)) {
+        try (final InputStream stream = ConfigHandler.class.getResourceAsStream(DEFAULT_CONFIG_PATH)) {
             if (stream == null) {
                 System.err.println("[InteractiveStuff] Default config not found in jar at: " + DEFAULT_CONFIG_PATH);
                 return null;
             }
 
-            try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            try (final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                 final ConfigHandler defaults = GSON.fromJson(reader, ConfigHandler.class);
                 if (defaults != null) {
                     defaults.refreshCache();
                     return defaults;
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.err.println("[InteractiveStuff] Failed to load default configuration from jar!");
             e.printStackTrace();
         }
@@ -140,9 +129,9 @@ public final class ConfigHandler {
     }
 
     public void save() {
-        try (Writer writer = Files.newBufferedWriter(CONFIG_PATH, StandardCharsets.UTF_8)) {
+        try (final Writer writer = Files.newBufferedWriter(CONFIG_PATH, StandardCharsets.UTF_8)) {
             GSON.toJson(this, writer);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.err.println("[InteractiveStuff] Failed to save config.");
             e.printStackTrace();
         }
@@ -150,10 +139,14 @@ public final class ConfigHandler {
 
     public void refreshCache() {
         itemLookupCache.clear();
-        if (materials == null) return;
+        if (materials == null) {
+            return;
+        }
 
         for (final InteractionMaterial material : materials) {
-            if (material == null || material.items == null) continue;
+            if (material == null || material.items == null) {
+                continue;
+            }
 
             for (final Item itemId : material.items) {
                 if (itemId != null) {
@@ -168,7 +161,9 @@ public final class ConfigHandler {
     }
 
     public boolean isExcluded(final Block block) {
-        if (block == null) return false;
+        if (block == null) {
+            return false;
+        }
         return excludedBlocks.contains(block.asItem());
     }
 }

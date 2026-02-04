@@ -42,19 +42,16 @@ public abstract class CameraMixin implements CameraVelocityAccessor {
         float rawYawVelocity = this.yaw - this.lastYaw;
         float rawPitchVelocity = this.pitch - this.lastPitch;
 
-        // Normalize velocity by delta time to make it FPS-independent
-        float dt = RenderTickHandler.normalizedDelta;
+        final float dt = RenderTickHandler.normalizedDelta;
         if (dt > 0) {
             rawYawVelocity /= dt;
             rawPitchVelocity /= dt;
         }
 
-        // Apply FPS-independent smoothing using delta time
-        float smoothFactor = (float) (1.0 - Math.pow(1.0 - SMOOTHING_SPEED, dt));
+        final float smoothFactor = (float) (1.0 - Math.pow(1.0 - SMOOTHING_SPEED, dt));
         this.smoothedYawVelocity = this.smoothedYawVelocity + (rawYawVelocity - this.smoothedYawVelocity) * smoothFactor;
         this.smoothedPitchVelocity = this.smoothedPitchVelocity + (rawPitchVelocity - this.smoothedPitchVelocity) * smoothFactor;
 
-        // Small threshold to avoid tiny jitters
         if (Math.abs(this.smoothedYawVelocity) < 0.01f) {
             this.smoothedYawVelocity = 0.0f;
         }
