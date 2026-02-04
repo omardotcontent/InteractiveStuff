@@ -62,9 +62,9 @@ task onItemUpdate takes itemRendered do
     make progress = chestTop.smooth(progress,fallTarget,0.2)
     check itemRendered.isMainHand() do
         chestTop.setPivot(0.12, 0.17, -0.063)
-        chestTop.rotate(-30 * (progress / 100), 0, -45 * (progress / 100))
+        chestTop.rotateAxis(-90 * (progress / 100), 1,0,1.25)
     otherwise
         chestTop.setPivot(-0.12, 0.17, -0.063)
-        chestTop.rotate(-30 * (progress / 100), 0, 45 * (progress / 100))
+        chestTop.rotateAxis(-90 * (progress / 100), 1,0,-1.25)
     end
 end
