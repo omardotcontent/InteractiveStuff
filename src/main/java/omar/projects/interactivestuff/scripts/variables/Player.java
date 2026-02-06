@@ -12,6 +12,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import omar.projects.interactivestuff.handlers.CameraVelocityAccessor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 @VynType(name = "Player")
 public final class Player {
 
@@ -33,6 +37,25 @@ public final class Player {
             return null;
         }
         return new Block(player.getSteppingPos(), client.world);
+    }
+
+    @VynFunc
+    public List<Block> getNearbyBlocks(final int blockRadius) {
+        if (player == null || client.world == null) {
+            return null;
+        }
+        final List<Block> blocks = new ArrayList<>();
+        for (int x = -blockRadius; x <= blockRadius; x++) {
+            for (int y = -blockRadius; y <= blockRadius; y++) {
+                for (int z = -blockRadius; z <= blockRadius; z++) {
+                    final Block block = new Block(player.getBlockPos().add(x, y, z), client.world);
+                    if (!Objects.equals(block.getName(), "minecraft:air")) {
+                        blocks.add(block);
+                    }
+                }
+            }
+        }
+        return blocks;
     }
 
     @VynFunc
