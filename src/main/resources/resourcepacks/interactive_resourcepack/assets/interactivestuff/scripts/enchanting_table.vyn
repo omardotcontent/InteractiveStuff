@@ -1,0 +1,37 @@
+make progress = 0
+make openingProgress = 0
+make bookshelfNearby = false
+
+task onItemUpdate takes itemRendered do
+
+    make blocks = player.getNearbyBlocks(2)
+
+
+    cycle i from 0 to blocks.size() -1 do
+        make block = blocks.get(i)
+        check block.getName() == "minecraft:bookshelf" do
+            make bookshelfNearby = true
+            escape
+        end
+    end
+
+    check bookshelfNearby do
+        make progress = 100
+    otherwise
+        make progress = 0
+    end
+    make bookshelfNearby = false
+
+
+    check itemRendered.getName() == "minecraft:enchanting_table" do
+        make openingProgress = itemRendered.smooth(openingProgress, progress, 0.2)
+        make book_left = new ItemModel("minecraft:book")
+        make book_right = new ItemModel("minecraft:book")
+        book_right.setPivot(0, 0.13, 0)
+        book_left.setPivot(0.0, 0.13, 0.0)
+        book_right.rotate(0, 0, -60 * (openingProgress / 100))
+        book_left.rotate(0, 0, 60 * (openingProgress / 100))
+        book_left.setItemModel("interactivestuff:book_left")
+        book_right.setItemModel("interactivestuff:book_right")
+    end
+end
