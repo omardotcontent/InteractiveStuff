@@ -1,9 +1,13 @@
 {
   "enableInteractiveHits": true,
+  "specializedNoteblockHits": true,
   "enableSculkSensorFeature": true,
   "enableNoteBlockCrouchFeature": true,
   "enableTextureChanges": true,
   "HitCooldownTicks": 4,
+  "resourcePackDebugMode": false,
+  "resourcePackMatrixEditing": true,
+  "resourcePackColorChanging": true,
   "excludedBlocks": [
     "minecraft:pink_wool",
     "minecraft:magenta_wool",
@@ -451,8 +455,8 @@
         "minecraft:crafting_table"
       ],
       "sound": "minecraft:block.wood.break",
-      "pitch": 1.1,
-      "volume": 0.25,
+      "pitch": 1.25,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": false,
       "customPitches": [
@@ -1048,8 +1052,8 @@
         "minecraft:polished_blackstone_button"
       ],
       "sound": "minecraft:block.stone.break",
-      "pitch": 1.1,
-      "volume": 0.25,
+      "pitch": 1.35,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": false,
       "customPitches": [
@@ -1415,8 +1419,8 @@
         "minecraft:tuff_brick_wall"
       ],
       "sound": "minecraft:block.deepslate.break",
-      "pitch": 1.1,
-      "volume": 0.25,
+      "pitch": 1.4,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": false,
       "customPitches": [
@@ -1513,8 +1517,8 @@
         "minecraft:flower_pot"
       ],
       "sound": "minecraft:block.decorated_pot.place",
-      "pitch": 1.2,
-      "volume": 0.3,
+      "pitch": 1.7,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": [
@@ -1540,8 +1544,8 @@
         "minecraft:pale_oak_leaves"
       ],
       "sound": "minecraft:block.grass.break",
-      "pitch": 1.2,
-      "volume": 0.2,
+      "pitch": 1.45,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -1598,7 +1602,7 @@
       ],
       "sound": "minecraft:block.grass.hit",
       "pitch": 1.6,
-      "volume": 0.2,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -1615,8 +1619,8 @@
         "minecraft:clay"
       ],
       "sound": "minecraft:block.gravel.break",
-      "pitch": 1.1,
-      "volume": 0.25,
+      "pitch": 1.45,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -1634,8 +1638,8 @@
         "minecraft:moss_carpet"
       ],
       "sound": "minecraft:block.grass.break",
-      "pitch": 1.1,
-      "volume": 0.25,
+      "pitch": 1.35,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -1648,8 +1652,8 @@
         "minecraft:suspicious_sand"
       ],
       "sound": "minecraft:block.sand.break",
-      "pitch": 1.1,
-      "volume": 0.25,
+      "pitch": 1.35,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -1661,8 +1665,8 @@
         "minecraft:suspicious_gravel"
       ],
       "sound": "minecraft:block.gravel.break",
-      "pitch": 1.1,
-      "volume": 0.25,
+      "pitch": 1.4,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -1724,7 +1728,7 @@
       ],
       "sound": "minecraft:block.glass.break",
       "pitch": 1.8,
-      "volume": 0.25,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": [
@@ -1833,18 +1837,6 @@
           "pitch": 2.0
         }
       ]
-    },
-    {
-      "name": "NOTEBLOCK",
-      "items": [
-        "minecraft:note_block"
-      ],
-      "sound": "minecraft:block.note_block.basedrum",
-      "pitch": 1.1,
-      "volume": 0.3,
-      "requiresBlockHit": true,
-      "randomPitch": true,
-      "customPitches": []
     },
     {
       "name": "WOOL_CARPET",
@@ -2056,8 +2048,8 @@
         "minecraft:magma_block"
       ],
       "sound": "minecraft:block.netherrack.break",
-      "pitch": 1.1,
-      "volume": 0.25,
+      "pitch": 1.6,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -2071,7 +2063,7 @@
       ],
       "sound": "minecraft:block.glass.break",
       "pitch": 1.65,
-      "volume": 0.25,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -2090,7 +2082,7 @@
       ],
       "sound": "minecraft:block.bone_block.break",
       "pitch": 1.2,
-      "volume": 0.25,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
@@ -2105,7 +2097,7 @@
       ],
       "sound": "minecraft:block.stone.break",
       "pitch": 1.4,
-      "volume": 0.25,
+      "volume": 0.05,
       "requiresBlockHit": true,
       "randomPitch": true,
       "customPitches": []
