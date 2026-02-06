@@ -14,7 +14,8 @@ import java.util.Map;
 
 public final class ScriptLoader {
 
-    private ScriptLoader() {}
+    private ScriptLoader() {
+    }
 
     public static void register() {
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
@@ -28,13 +29,11 @@ public final class ScriptLoader {
             public void reload(final ResourceManager manager) {
                 ScriptInterpreter.clearScripts();
 
-                final Map<Identifier, Resource> foundResources = manager.findResources(
+                for (final Identifier id : manager.findResources(
                         "scripts",
                         id -> id.getNamespace().equals(IS.MOD_ID)
                                 && id.getPath().endsWith(".vyn")
-                );
-
-                for (final Identifier id : foundResources.keySet()) {
+                ).keySet()) {
                     try {
                         for (final Resource resource : manager.getAllResources(id)) {
                             try (final InputStream stream = resource.getInputStream()) {

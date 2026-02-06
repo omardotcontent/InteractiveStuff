@@ -86,5 +86,10 @@
       <option name="name" value="maven4" />
       <option name="url" value="https://maven.enjarai.dev/mirrors" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven3" />
+      <option name="name" value="maven3" />
+      <option name="url" value="https://jitpack.io" />
+    </remote-repository>
   </component>
 </project>
