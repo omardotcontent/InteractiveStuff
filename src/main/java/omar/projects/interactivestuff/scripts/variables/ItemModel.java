@@ -18,6 +18,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public final class ItemModel {
     public boolean modified = false;
 
     private ItemDisplayContext displayContext = ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
+    private final Map<Integer, Integer> indexTints = new HashMap<>(); //
 
     private double x, y, z;
     private double sx = 1, sy = 1, sz = 1;
@@ -41,6 +43,7 @@ public final class ItemModel {
     private float shYX = 0, shYZ = 0;
     private float shZX = 0, shZY = 0;
 
+    private float alpha = 1.0f;
     private float red = 1.0f;
     private float green = 1.0f;
     private float blue = 1.0f;
@@ -204,6 +207,12 @@ public final class ItemModel {
     }
 
     @VynFunc
+    public void setOpacity(final double opacity) {
+        modificationCheck(); //
+        this.alpha = (float) MathHelper.clamp(opacity, 0.0, 1.0); //
+    }
+
+    @VynFunc
     public void setLight(final int light) {
         modificationCheck();
 
@@ -226,9 +235,11 @@ public final class ItemModel {
     }
 
     @VynFunc
-    public void setTint(final int color) {
-        modificationCheck();
-        this.tintColor = (color & 0xFF000000) == 0 ? color | 0xFF000000 : color;
+    public void setTint(final int index, final int color) {
+        modificationCheck(); //
+        // Ensure the alpha is 255 if not specified
+        int finalColor = (color & 0xFF000000) == 0 ? color | 0xFF000000 : color; //
+        this.indexTints.put(index, finalColor); //
     }
 
     @VynFunc
@@ -414,21 +425,22 @@ public final class ItemModel {
     }
 
     private int getRenderColor() {
-        final int r = (int) (MathHelper.clamp(red, 0.0f, 1.0f) * 255.0f);
-        final int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f);
-        final int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f);
+        final int a = (int) (this.alpha * 255.0f); // New: use the alpha field
+        final int r = (int) (MathHelper.clamp(red, 0.0f, 1.0f) * 255.0f); //
+        final int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f); //
+        final int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f); //
 
-        return (255 << 24) | (r << 16) | (g << 8) | b;
+        return (a << 24) | (r << 16) | (g << 8) | b; //
     }
 
     private int getTintColor() {
         return tintColor;
     }
 
-    public int getFinalColor() {
-        return multiplyColor(getRenderColor(), getTintColor());
+    public int getFinalColorForIndex(int tintIndex) {
+        int baseTint = indexTints.getOrDefault(tintIndex, this.tintColor); //
+        return multiplyColor(getRenderColor(), baseTint); //
     }
-
 
     private static int multiplyColor(final int c1, final int c2) {
         final int a1 = (c1 >>> 24) & 0xFF;
