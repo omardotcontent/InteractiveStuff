@@ -58,7 +58,7 @@ task handleSensor takes distance do
             make vibrating = true
             player.playSound("minecraft:block.sculk_sensor.clicking", 1.0, 1.0)
             pulse()
-            wait COOLDOWN_NORMAL do
+            wait 40 do
                 make vibrating = false
                 check player.isHoldingItem("minecraft:sculk_sensor") do
                     player.playSound("minecraft:block.sculk_sensor.clicking_stop", 1.0, 1.0)

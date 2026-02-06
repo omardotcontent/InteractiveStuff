@@ -29,13 +29,14 @@ task onItemUpdate takes itemRendered do
 
 
             make lootModel = new ItemModel(currentLootItem)
-            check lootModel.isMainHand() do
+            check itemRendered.isMainHand() do
                 lootModel.setPivot(0.02, 0.05, 0.02)
+                lootModel.translate(-0.05, 0.15, 0)
             otherwise
-                lootModel.setPivot(0.02, 0.05, -0.02)
+                lootModel.setPivot(-0.02, 0.05, 0.02)
+                lootModel.translate(0.05, 0.15, 0)
             end
             lootModel.scale(0.3, 0.3, 0.3)
-            lootModel.translate(-0.05, 0.15, 0)
             lootModel.rotateAxis((now * 0.25) % 360, 0, 1, 0)
             lootModel.rotateX(25)
         end
