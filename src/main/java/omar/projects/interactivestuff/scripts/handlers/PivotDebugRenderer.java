@@ -1,127 +1,81 @@
 package omar.projects.interactivestuff.scripts.handlers;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4f;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class PivotDebugRenderer {
 
     public static final PivotDebugRenderer INSTANCE = new PivotDebugRenderer();
-
     private static final float MARKER_SIZE = 0.02f;
 
+    private int colorIndex = 0;
+    private long lastFrameTime = 0; // Internal tracker
+
     private static final int[] PIVOT_COLORS = {
-            0xFFFF0000,
-            0xFF00FF00,
-            0xFF0000FF,
-            0xFFFFFF00,
-            0xFFFF00FF,
-            0xFF00FFFF,
-            0xFFFF8000,
-            0xFF8000FF,
+            0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00,
+            0xFFFF00FF, 0xFF00FFFF, 0xFFFF8000, 0xFF8000FF,
     };
 
-    private static final RenderLayer DEBUG_SPHERE_LAYER = RenderLayer.of(
-            "pivot_debug_sphere",
-            1536,
-            false,
-            true,
-            RenderPipelines.DEBUG_QUADS,
-            RenderLayer.MultiPhaseParameters.builder()
-                    .build(false)
-    );
+    private PivotDebugRenderer() {}
 
-    private final List<PivotPoint> pivotPoints = new CopyOnWriteArrayList<>();
-    private int colorIndex = 0;
+    /**
+     * Call this in the Mixin. It automatically resets the color cycle
+     * if it's being called in a new frame.
+     */
+    public void submit(MatrixStack matrices, OrderedRenderCommandQueue queue) {
+        // AUTOMATIC RESET LOGIC
+        // Using System.currentTimeMillis() or Util.getMeasuringTimeMs()
+        // If more than 10ms passed, we assume it's a new frame/render pass
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastFrameTime > 10) {
+            this.colorIndex = 0;
+        }
+        lastFrameTime = currentTime;
 
-    private PivotDebugRenderer() {
-    }
-
-    public void addPivotPoint(final double x, final double y, final double z, final double transX, final double transY, final double transZ) {
         final int color = PIVOT_COLORS[colorIndex % PIVOT_COLORS.length];
         colorIndex++;
-        pivotPoints.add(new PivotPoint(
-                (float) (x + transX),
-                (float) (y + transY),
-                (float) (z + transZ),
-                color
-        ));
+
+        // Capture Matrix State
+        MatrixStack copyStack = new MatrixStack();
+        copyStack.peek().getPositionMatrix().set(matrices.peek().getPositionMatrix());
+
+        queue.submitCustom(copyStack, RenderLayer.getLines(), (entry, buffer) -> {
+            this.renderSphereDirect(entry.getPositionMatrix(), buffer, color);
+        });
     }
 
-    public void render(final MatrixStack matrices) {
-        if (pivotPoints.isEmpty()) {
-            return;
-        }
+    public void renderSphereDirect(Matrix4f matrix, VertexConsumer buffer, int color) {
+        final float r = ((color >> 16) & 0xFF) / 255f;
+        final float g = ((color >> 8) & 0xFF) / 255f;
+        final float b = (color & 0xFF) / 255f;
 
-        final List<PivotPoint> pointsToRender = new ArrayList<>(pivotPoints);
-        pivotPoints.clear();
-        colorIndex = 0;
+        final int segments = 6;
+        for (int lat = 0; lat < segments; lat++) {
+            float theta1 = (float) (lat * Math.PI / segments);
+            float theta2 = (float) ((lat + 1) * Math.PI / segments);
 
-        for (final PivotPoint point : pointsToRender) {
-            matrices.push();
-            matrices.translate(point.x, point.y, point.z);
+            for (int lon = 0; lon < segments; lon++) {
+                float phi1 = (float) (lon * 2 * Math.PI / segments);
+                float phi2 = (float) ((lon + 1) * 2 * Math.PI / segments);
 
-            renderSphere(matrices, point.color);
-
-            matrices.pop();
-        }
-    }
-
-    private void renderSphere(final MatrixStack matrices, final int color) {
-        final float red = ((color >> 16) & 0xFF) / 255f;
-        final float green = ((color >> 8) & 0xFF) / 255f;
-        final float blue = (color & 0xFF) / 255f;
-        final float alpha = 1.0f;
-
-        final Matrix4f matrix = matrices.peek().getPositionMatrix();
-        final float radius = MARKER_SIZE;
-
-        final int latitudes = 12;
-        final int longitudes = 12;
-
-        final Tessellator tessellator = Tessellator.getInstance();
-        final BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-
-        for (int lat = 0; lat < latitudes; lat++) {
-            final float theta1 = (float) (lat * Math.PI / latitudes);
-            final float theta2 = (float) ((lat + 1) * Math.PI / latitudes);
-
-            for (int lon = 0; lon < longitudes; lon++) {
-                final float phi1 = (float) (lon * 2 * Math.PI / longitudes);
-                final float phi2 = (float) ((lon + 1) * 2 * Math.PI / longitudes);
-
-                final float x1 = radius * MathHelper.sin(theta1) * MathHelper.cos(phi1);
-                final float y1 = radius * MathHelper.cos(theta1);
-                final float z1 = radius * MathHelper.sin(theta1) * MathHelper.sin(phi1);
-
-                final float x2 = radius * MathHelper.sin(theta1) * MathHelper.cos(phi2);
-                final float y2 = radius * MathHelper.cos(theta1);
-                final float z2 = radius * MathHelper.sin(theta1) * MathHelper.sin(phi2);
-
-                final float x3 = radius * MathHelper.sin(theta2) * MathHelper.cos(phi2);
-                final float y3 = radius * MathHelper.cos(theta2);
-                final float z3 = radius * MathHelper.sin(theta2) * MathHelper.sin(phi2);
-
-                final float x4 = radius * MathHelper.sin(theta2) * MathHelper.cos(phi1);
-                final float y4 = radius * MathHelper.cos(theta2);
-                final float z4 = radius * MathHelper.sin(theta2) * MathHelper.sin(phi1);
-
-                buffer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha);
-                buffer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha);
-                buffer.vertex(matrix, x3, y3, z3).color(red, green, blue, alpha);
-                buffer.vertex(matrix, x4, y4, z4).color(red, green, blue, alpha);
+                addVertex(buffer, matrix, theta1, phi1, r, g, b);
+                addVertex(buffer, matrix, theta1, phi2, r, g, b);
+                addVertex(buffer, matrix, theta1, phi1, r, g, b);
+                addVertex(buffer, matrix, theta2, phi1, r, g, b);
             }
         }
-
-        DEBUG_SPHERE_LAYER.draw(buffer.end());
     }
 
-    private record PivotPoint(float x, float y, float z, int color) {}
+    private void addVertex(VertexConsumer buffer, Matrix4f matrix, float theta, float phi, float r, float g, float b) {
+        float x = MARKER_SIZE * (float)(Math.sin(theta) * Math.cos(phi));
+        float y = MARKER_SIZE * (float)Math.cos(theta);
+        float z = MARKER_SIZE * (float)(Math.sin(theta) * Math.sin(phi));
+
+        // .normal(0, 1, 0) fixes the "Missing elements in vertex: Normal" crash
+        buffer.vertex(matrix, x, y, z)
+                .color(r, g, b, 1.0f)
+                .normal(0, 1, 0);
+    }
 }
