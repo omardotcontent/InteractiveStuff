@@ -33,23 +33,26 @@ public final class ItemModel {
     public boolean modified = false;
 
     private ItemDisplayContext displayContext = ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
-    private final Map<Integer, Integer> indexTints = new HashMap<>(); //
+    private final Map<Integer, Integer> indexTints = new HashMap<>();
 
     private double x, y, z;
     private double sx = 1, sy = 1, sz = 1;
     private double px = 0.5, py = 0.5, pz = 0.5;
-    private final Quaternionf rotation = new Quaternionf();
     private float shXY = 0, shXZ = 0;
     private float shYX = 0, shYZ = 0;
     private float shZX = 0, shZY = 0;
+    private final Quaternionf rotation = new Quaternionf();
 
-    private float alpha = 1.0f;
+    private int glint = -1;
+    private int light = -1;
+    private int quadEnd = 0;
     private float red = 1.0f;
+    private float alpha = 1.0f;
     private float green = 1.0f;
     private float blue = 1.0f;
-    private int tintColor = 0xFFFFFFFF;
-    private int light = -1;
-    private int glint = -1;
+    private int quadStart = 0;
+    private int selectionColor = 0xFFFFFFFF;
+    private boolean useSelectionColor = false;
 
     @VynConstructor
     public ItemModel(final String itemId) {
@@ -197,6 +200,12 @@ public final class ItemModel {
         ScriptItemHandler.remove(workingStack, key);
     }
 
+    @VynFunc
+    public void setQuads(int start, int end) {
+        modificationCheck();
+        this.quadStart = Math.max(0, start);
+        this.quadEnd = Math.max(0, end);
+    }
 
     @VynFunc
     public void setColor(final int r, final int g, final int b) {
@@ -209,7 +218,7 @@ public final class ItemModel {
     @VynFunc
     public void setOpacity(final double opacity) {
         modificationCheck(); //
-        this.alpha = (float) MathHelper.clamp(opacity, 0.0, 1.0); //
+        this.alpha = (float) MathHelper.clamp(opacity, 0.0, 1.0);
     }
 
     @VynFunc
@@ -236,10 +245,20 @@ public final class ItemModel {
 
     @VynFunc
     public void setTint(final int index, final int color) {
-        modificationCheck(); //
-        // Ensure the alpha is 255 if not specified
-        int finalColor = (color & 0xFF000000) == 0 ? color | 0xFF000000 : color; //
-        this.indexTints.put(index, finalColor); //
+        modificationCheck();
+        this.indexTints.put(index, (color & 0xFF000000) == 0 ? color | 0xFF000000 : color);
+    }
+
+    @VynFunc
+    public void setTint(final int color) {
+        setTint(-1,color);
+    }
+
+    @VynFunc
+    public void setQuadColor(final int color) {
+        modificationCheck();
+        this.selectionColor = (color & 0xFF000000) == 0 ? color | 0xFF000000 : color;
+        this.useSelectionColor = true;
     }
 
     @VynFunc
@@ -426,20 +445,28 @@ public final class ItemModel {
 
     private int getRenderColor() {
         final int a = (int) (this.alpha * 255.0f); // New: use the alpha field
-        final int r = (int) (MathHelper.clamp(red, 0.0f, 1.0f) * 255.0f); //
-        final int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f); //
-        final int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f); //
+        final int r = (int) (MathHelper.clamp(red, 0.0f, 1.0f) * 255.0f);
+        final int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f);
+        final int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f);
 
-        return (a << 24) | (r << 16) | (g << 8) | b; //
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
-    private int getTintColor() {
-        return tintColor;
+    public int getFinalColorForIndex(final int tintIndex) {
+
+        int baseColor = getRenderColor();
+        int tintColor = indexTints.getOrDefault(tintIndex, 0xFFFFFFFF);
+        int result = multiplyColor(baseColor, tintColor);
+
+        return result;
     }
 
-    public int getFinalColorForIndex(int tintIndex) {
-        int baseTint = indexTints.getOrDefault(tintIndex, this.tintColor); //
-        return multiplyColor(getRenderColor(), baseTint); //
+    public boolean getUseSelectionColor() {
+        return useSelectionColor;
+    }
+
+    public int getSelectionColor() {
+        return selectionColor;
     }
 
     private static int multiplyColor(final int c1, final int c2) {
@@ -460,5 +487,12 @@ public final class ItemModel {
 
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
+
+    public boolean isPartialSelection() {
+        return quadStart > 0 || quadEnd > 0;
+    }
+
+    public int getQuadStart() { return quadStart; }
+    public int getQuadEnd() { return quadEnd; }
 
 }
