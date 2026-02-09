@@ -3,7 +3,6 @@ package omar.projects.interactivestuff.mixin.render;
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.render.item.ItemRenderState;
@@ -19,7 +18,6 @@ import omar.projects.interactivestuff.scripts.ScriptInterpreter;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
 import omar.projects.interactivestuff.scripts.handlers.PivotDebugRenderer;
 import omar.projects.interactivestuff.scripts.variables.ItemModel;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -104,7 +102,7 @@ public abstract class HeldItemRendererMixin {
             final int listSize = allQuads.size();
 
             if (!item.isPartialSelection()) {
-                this.renderQuadRange(allQuads, layer, layerAccessor, mode, matrices, queue, light, item, true);
+                this.renderQuadRange(allQuads, layerAccessor, mode, matrices, queue, light, item, true);
                 continue;
             }
 
@@ -115,15 +113,15 @@ public abstract class HeldItemRendererMixin {
             if (start > end) start = end;
 
             if (start > 0) {
-                this.renderQuadRange(allQuads.subList(0, start), layer, layerAccessor, mode, matrices, queue, light, item, false);
+                this.renderQuadRange(allQuads.subList(0, start), layerAccessor, mode, matrices, queue, light, item, false);
             }
 
             if (end > start) {
-                this.renderQuadRange(allQuads.subList(start, end), layer, layerAccessor, mode, matrices, queue, light, item, true);
+                this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light, item, true);
             }
 
             if (end < listSize) {
-                this.renderQuadRange(allQuads.subList(end, listSize), layer, layerAccessor, mode, matrices, queue, light, item, false);
+                this.renderQuadRange(allQuads.subList(end, listSize), layerAccessor, mode, matrices, queue, light, item, false);
             }
         }
     }
@@ -131,7 +129,6 @@ public abstract class HeldItemRendererMixin {
     @Unique
     private void renderQuadRange(
             final List<BakedQuad> quads,
-            final ItemRenderState.LayerRenderState layer,
             final ItemRenderStateLayerAccessor layerAccessor,
             final ItemDisplayContext mode,
             final MatrixStack matrices,
@@ -189,7 +186,7 @@ public abstract class HeldItemRendererMixin {
         );
 
         if (isSelectedRange && ConfigHandler.INSTANCE != null && ConfigHandler.INSTANCE.resourcePackDebugMode) {
-            PivotDebugRenderer.INSTANCE.submit(matrices, queue);
+            PivotDebugRenderer.INSTANCE.submit(matrices, queue, item.getPivotX(), item.getPivotY(), item.getPivotZ());
         }
 
         matrices.pop();

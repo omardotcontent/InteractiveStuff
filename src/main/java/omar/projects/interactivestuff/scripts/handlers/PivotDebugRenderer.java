@@ -8,7 +8,7 @@ import org.joml.Matrix4f;
 public final class PivotDebugRenderer {
 
     public static final PivotDebugRenderer INSTANCE = new PivotDebugRenderer();
-    private static final float MARKER_SIZE = 0.02f;
+    private static final float MARKER_SIZE = 0.05f;
 
     private int colorIndex = 0;
     private long lastFrameTime = 0; // Internal tracker
@@ -24,10 +24,7 @@ public final class PivotDebugRenderer {
      * Call this in the Mixin. It automatically resets the color cycle
      * if it's being called in a new frame.
      */
-    public void submit(MatrixStack matrices, OrderedRenderCommandQueue queue) {
-        // AUTOMATIC RESET LOGIC
-        // Using System.currentTimeMillis() or Util.getMeasuringTimeMs()
-        // If more than 10ms passed, we assume it's a new frame/render pass
+    public void submit(MatrixStack matrices, OrderedRenderCommandQueue queue, double pivotX, double pivotY, double pivotZ) {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastFrameTime > 10) {
             this.colorIndex = 0;
@@ -37,9 +34,10 @@ public final class PivotDebugRenderer {
         final int color = PIVOT_COLORS[colorIndex % PIVOT_COLORS.length];
         colorIndex++;
 
-        // Capture Matrix State
+
         MatrixStack copyStack = new MatrixStack();
         copyStack.peek().getPositionMatrix().set(matrices.peek().getPositionMatrix());
+        copyStack.translate(pivotX, pivotY, pivotZ);
 
         queue.submitCustom(copyStack, RenderLayer.getLines(), (entry, buffer) -> {
             this.renderSphereDirect(entry.getPositionMatrix(), buffer, color);
@@ -73,7 +71,6 @@ public final class PivotDebugRenderer {
         float y = MARKER_SIZE * (float)Math.cos(theta);
         float z = MARKER_SIZE * (float)(Math.sin(theta) * Math.sin(phi));
 
-        // .normal(0, 1, 0) fixes the "Missing elements in vertex: Normal" crash
         buffer.vertex(matrix, x, y, z)
                 .color(r, g, b, 1.0f)
                 .normal(0, 1, 0);
