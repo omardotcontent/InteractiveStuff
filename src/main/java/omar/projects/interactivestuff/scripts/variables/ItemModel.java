@@ -414,8 +414,33 @@ public final class ItemModel {
 
     @VynFunc
     public void setParent(final ItemModel parent) {
+        if (parent == this) {
+            System.err.println("InteractiveStuff Error: Cannot set item as its own parent.");
+            return;
+        }
+
+        ItemModel currentChecker = parent;
+        while (currentChecker != null) {
+            if (currentChecker == this) {
+                System.err.println("InteractiveStuff Error: Circular dependency detected in parent hierarchy.");
+                return;
+            }
+            currentChecker = currentChecker.getParent();
+        }
+
         modificationCheck();
         this.parent = parent;
+    }
+
+    @VynFunc
+    public void detach() {
+        modificationCheck();
+        this.parent = null;
+    }
+
+    @VynFunc
+    public boolean hasParent() {
+        return this.parent != null;
     }
 
     public ItemModel getParent() {
@@ -443,12 +468,10 @@ public final class ItemModel {
             return;
         }
 
-        // Apply parent transforms first (hierarchical/relative transforms)
         if (parent != null) {
             parent.apply(matrices);
         }
 
-        // Then apply local transforms
         matrices.translate(x, y, z);
         matrices.translate(px, py, pz);
 
