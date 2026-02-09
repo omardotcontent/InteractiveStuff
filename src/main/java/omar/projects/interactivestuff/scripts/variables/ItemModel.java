@@ -34,6 +34,7 @@ public final class ItemModel {
 
     private ItemDisplayContext displayContext = ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
     private final Map<Integer, Integer> indexTints = new HashMap<>();
+    private ItemModel parent = null;
 
     private double x, y, z;
     private double sx = 1, sy = 1, sz = 1;
@@ -115,12 +116,24 @@ public final class ItemModel {
 
     @VynFunc
     public int getLight() {
-        return light;
+        if (light != -1) {
+            return light;
+        }
+        if (parent != null) {
+            return parent.getLight();
+        }
+        return -1;
     }
 
     @VynFunc
     public int getGlint() {
-        return glint;
+        if (glint != -1) {
+            return glint;
+        }
+        if (parent != null) {
+            return parent.getGlint();
+        }
+        return -1;
     }
 
 
@@ -399,6 +412,16 @@ public final class ItemModel {
         return z;
     }
 
+    @VynFunc
+    public void setParent(final ItemModel parent) {
+        modificationCheck();
+        this.parent = parent;
+    }
+
+    public ItemModel getParent() {
+        return parent;
+    }
+
     private void modificationCheck() {
         if (modified) {
             return;
@@ -420,6 +443,12 @@ public final class ItemModel {
             return;
         }
 
+        // Apply parent transforms first (hierarchical/relative transforms)
+        if (parent != null) {
+            parent.apply(matrices);
+        }
+
+        // Then apply local transforms
         matrices.translate(x, y, z);
         matrices.translate(px, py, pz);
 
@@ -449,24 +478,48 @@ public final class ItemModel {
         final int g = (int) (MathHelper.clamp(green, 0.0f, 1.0f) * 255.0f);
         final int b = (int) (MathHelper.clamp(blue, 0.0f, 1.0f) * 255.0f);
 
-        return (a << 24) | (r << 16) | (g << 8) | b;
+        int color = (a << 24) | (r << 16) | (g << 8) | b;
+
+        // Combine with parent color if parent exists
+        if (parent != null) {
+            color = multiplyColor(color, parent.getRenderColor());
+        }
+
+        return color;
     }
 
     public int getFinalColorForIndex(final int tintIndex) {
-
         int baseColor = getRenderColor();
+
+        // Get tint from this model, or inherit from parent if not set
         int tintColor = indexTints.getOrDefault(tintIndex, 0xFFFFFFFF);
+        if (tintColor == 0xFFFFFFFF && parent != null && parent.indexTints.containsKey(tintIndex)) {
+            tintColor = parent.indexTints.get(tintIndex);
+        }
+
         int result = multiplyColor(baseColor, tintColor);
 
         return result;
     }
 
     public boolean getUseSelectionColor() {
-        return useSelectionColor;
+        if (useSelectionColor) {
+            return true;
+        }
+        if (parent != null) {
+            return parent.getUseSelectionColor();
+        }
+        return false;
     }
 
     public int getSelectionColor() {
-        return selectionColor;
+        if (useSelectionColor) {
+            return selectionColor;
+        }
+        if (parent != null) {
+            return parent.getSelectionColor();
+        }
+        return 0xFFFFFFFF;
     }
 
     private static int multiplyColor(final int c1, final int c2) {
@@ -489,10 +542,31 @@ public final class ItemModel {
     }
 
     public boolean isPartialSelection() {
-        return quadStart > 0 || quadEnd > 0;
+        boolean hasSelection = quadStart > 0 || quadEnd > 0;
+        if (!hasSelection && parent != null) {
+            return parent.isPartialSelection();
+        }
+        return hasSelection;
     }
 
-    public int getQuadStart() { return quadStart; }
-    public int getQuadEnd() { return quadEnd; }
+    public int getQuadStart() {
+        if (quadStart > 0 || quadEnd > 0) {
+            return quadStart;
+        }
+        if (parent != null) {
+            return parent.getQuadStart();
+        }
+        return 0;
+    }
+
+    public int getQuadEnd() {
+        if (quadStart > 0 || quadEnd > 0) {
+            return quadEnd;
+        }
+        if (parent != null) {
+            return parent.getQuadEnd();
+        }
+        return 0;
+    }
 
 }
