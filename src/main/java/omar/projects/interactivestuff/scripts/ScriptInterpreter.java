@@ -1,6 +1,5 @@
 package omar.projects.interactivestuff.scripts;
 
-
 import me.abdelaziz.main.VynMain;
 
 import me.abdelaziz.parser.Parser;
@@ -16,6 +15,7 @@ import omar.projects.interactivestuff.handlers.BackgroundLoopHandler;
 import omar.projects.interactivestuff.scripts.functions.DebugText;
 import omar.projects.interactivestuff.scripts.functions.ImportScript;
 import omar.projects.interactivestuff.scripts.functions.ExcludeScript;
+import omar.projects.interactivestuff.scripts.functions.GetDelta;
 import omar.projects.interactivestuff.scripts.handlers.WaitHandler;
 import omar.projects.interactivestuff.scripts.objects.PackScripts;
 import omar.projects.interactivestuff.scripts.objects.Script;
@@ -38,6 +38,7 @@ public final class ScriptInterpreter {
     private static final NativeFunction IMPORT_SCRIPT_FUNCTION = new ImportScript(scripts);
     private static final NativeFunction EXCLUDE_SCRIPT_FUNCTION = new ExcludeScript(scripts);
     private static final NativeFunction DEBUG_TEXT_FUNCTION = new DebugText();
+    private static final NativeFunction GET_DELTA_FUNCTION = new GetDelta();
 
     static {
         PLAYER_VAR = new Player(MinecraftClient.getInstance().player, MinecraftClient.getInstance());
@@ -45,7 +46,8 @@ public final class ScriptInterpreter {
                 .register((handler, sender, client) -> PLAYER_VAR.setPlayer(client.player));
     }
 
-    private ScriptInterpreter() {}
+    private ScriptInterpreter() {
+    }
 
     public static void register() {
         VynMain.init(true);
@@ -62,6 +64,7 @@ public final class ScriptInterpreter {
             listener.defineFunction("importScript", IMPORT_SCRIPT_FUNCTION);
             listener.defineFunction("excludeScript", EXCLUDE_SCRIPT_FUNCTION);
             listener.defineFunction("debugText", DEBUG_TEXT_FUNCTION);
+            listener.defineFunction("getDelta", GET_DELTA_FUNCTION);
         });
         ClientTickEvents.START_CLIENT_TICK.register(ScriptInterpreter::tick);
     }
@@ -84,7 +87,8 @@ public final class ScriptInterpreter {
         item.setDisplayContext(displayContext);
 
         for (final Script entry : globalScripts) {
-            entry.call(PLAYER_VAR, Script.FunctionType.ON_ITEM_UPDATE, List.of(NativeBinder.toValue(entry.getEnvironment(), item)));
+            entry.call(PLAYER_VAR, Script.FunctionType.ON_ITEM_UPDATE,
+                    List.of(NativeBinder.toValue(entry.getEnvironment(), item)));
         }
 
         if (!item.modified) {
@@ -102,7 +106,8 @@ public final class ScriptInterpreter {
 
     public static void onPlaySound(final Sound sound) {
         for (final Script entry : globalScripts) {
-            entry.call(PLAYER_VAR, Script.FunctionType.ON_PLAY_SOUND, List.of(NativeBinder.toValue(entry.getEnvironment(), sound)));
+            entry.call(PLAYER_VAR, Script.FunctionType.ON_PLAY_SOUND,
+                    List.of(NativeBinder.toValue(entry.getEnvironment(), sound)));
         }
     }
 
