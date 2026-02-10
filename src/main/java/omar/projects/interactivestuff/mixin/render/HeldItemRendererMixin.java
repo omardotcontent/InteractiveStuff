@@ -35,9 +35,7 @@ public abstract class HeldItemRendererMixin {
     @Shadow
     private ItemModelManager itemModelManager;
 
-    @Inject(method = "renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;I)V",
-            at = @At("HEAD"),
-            cancellable = true)
+    @Inject(method = "renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;I)V", at = @At("HEAD"), cancellable = true)
     private void interactivestuff$renderItem(
             final LivingEntity entity,
             final ItemStack stack,
@@ -81,7 +79,8 @@ public abstract class HeldItemRendererMixin {
         }
 
         final ItemRenderState state = new ItemRenderState();
-        this.itemModelManager.clearAndUpdate(state, stack, mode, entity.getEntityWorld(), entity, entity.getId() + mode.ordinal() + item.getUniqueSeed());
+        this.itemModelManager.clearAndUpdate(state, stack, mode, entity.getEntityWorld(), entity,
+                entity.getId() + mode.ordinal() + item.getUniqueSeed());
 
         switch (item.getGlint()) {
             case 2 -> this.applyGlint(state, ItemRenderState.Glint.SPECIAL);
@@ -96,8 +95,10 @@ public abstract class HeldItemRendererMixin {
             final ItemRenderStateLayerAccessor layerAccessor = (ItemRenderStateLayerAccessor) layer;
             final List<BakedQuad> allQuads = layer.getQuads();
 
-            if (layerAccessor.getRenderLayer() == null) continue;
-            if (allQuads.isEmpty()) continue;
+            if (layerAccessor.getRenderLayer() == null)
+                continue;
+            if (allQuads.isEmpty())
+                continue;
 
             final int listSize = allQuads.size();
 
@@ -110,18 +111,22 @@ public abstract class HeldItemRendererMixin {
             final int rawEnd = item.getQuadEnd();
             int end = (rawEnd == 0) ? listSize : MathHelper.clamp(rawEnd, 0, listSize);
 
-            if (start > end) start = end;
+            if (start > end)
+                start = end;
 
             if (start > 0) {
-                this.renderQuadRange(allQuads.subList(0, start), layerAccessor, mode, matrices, queue, light, item, false);
+                this.renderQuadRange(allQuads.subList(0, start), layerAccessor, mode, matrices, queue, light, item,
+                        false);
             }
 
             if (end > start) {
-                this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light, item, true);
+                this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light, item,
+                        true);
             }
 
             if (end < listSize) {
-                this.renderQuadRange(allQuads.subList(end, listSize), layerAccessor, mode, matrices, queue, light, item, false);
+                this.renderQuadRange(allQuads.subList(end, listSize), layerAccessor, mode, matrices, queue, light, item,
+                        false);
             }
         }
     }
@@ -140,7 +145,14 @@ public abstract class HeldItemRendererMixin {
         matrices.push();
 
         if (isSelectedRange) {
-            item.apply(matrices);
+            item.applyParentChain(matrices);
+
+            if (ConfigHandler.INSTANCE != null && ConfigHandler.INSTANCE.resourcePackDebugMode) {
+                PivotDebugRenderer.INSTANCE.submit(matrices, queue, item.getPivotX(), item.getPivotY(),
+                        item.getPivotZ());
+            }
+
+            item.applySelf(matrices);
         }
 
         layerAccessor.getTransform().apply(mode.isLeftHand(), matrices.peek());
@@ -161,13 +173,13 @@ public abstract class HeldItemRendererMixin {
                 continue;
             }
 
-            // This calculates the color based on the index found in the quad
-            tints[i] = item.getFinalColorForIndex(quadTintIndex);
+             tints[i] = item.getFinalColorForIndex(quadTintIndex);
         }
 
         RenderLayer finalLayer = layerAccessor.getRenderLayer();
-        // Check transparent color on index -1 (Base) if no specific selection color is used
-        final int checkColor = isSelectedRange && item.getUseSelectionColor() ? item.getSelectionColor() : item.getFinalColorForIndex(-1);
+
+        final int checkColor = isSelectedRange && item.getUseSelectionColor() ? item.getSelectionColor()
+                : item.getFinalColorForIndex(-1);
 
         if (((checkColor >> 24) & 0xFF) < 255) {
             finalLayer = RenderLayer.getEntityTranslucent(Identifier.of("minecraft", "textures/atlas/blocks.png"));
@@ -182,12 +194,7 @@ public abstract class HeldItemRendererMixin {
                 tints,
                 quads,
                 finalLayer,
-                layerAccessor.getGlint()
-        );
-
-        if (isSelectedRange && ConfigHandler.INSTANCE != null && ConfigHandler.INSTANCE.resourcePackDebugMode) {
-            PivotDebugRenderer.INSTANCE.submit(matrices, queue, item.getPivotX(), item.getPivotY(), item.getPivotZ());
-        }
+                layerAccessor.getGlint());
 
         matrices.pop();
     }

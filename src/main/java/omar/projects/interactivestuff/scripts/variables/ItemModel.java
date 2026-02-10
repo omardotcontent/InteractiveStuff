@@ -37,11 +37,11 @@ public final class ItemModel {
     private ItemModel parent = null;
 
     private double x, y, z;
-    private double sx = 1, sy = 1, sz = 1;
-    private double px = 0.5, py = 0.5, pz = 0.5;
     private float shXY = 0, shXZ = 0;
     private float shYX = 0, shYZ = 0;
     private float shZX = 0, shZY = 0;
+    private double sx = 1, sy = 1, sz = 1;
+    private double px = 0.5, py = 0.5, pz = 0.5;
     private final Quaternionf rotation = new Quaternionf();
 
     private int glint = -1;
@@ -136,7 +136,6 @@ public final class ItemModel {
         return -1;
     }
 
-
     public void setDisplayContext(final ItemDisplayContext context) {
         this.displayContext = context;
     }
@@ -167,7 +166,6 @@ public final class ItemModel {
     public String getDisplayContextName() {
         return displayContext.name();
     }
-
 
     @VynFunc
     public void setItemModel(final String model) {
@@ -264,7 +262,7 @@ public final class ItemModel {
 
     @VynFunc
     public void setTint(final int color) {
-        setTint(-1,color);
+        setTint(-1, color);
     }
 
     @VynFunc
@@ -305,8 +303,7 @@ public final class ItemModel {
         modificationCheck();
         rotation.mul(new Quaternionf().rotateAxis(
                 (float) Math.toRadians(angle),
-                new Vector3f((float) axisX, (float) axisY, (float) axisZ).normalize()
-        ));
+                new Vector3f((float) axisX, (float) axisY, (float) axisZ).normalize()));
     }
 
     @VynFunc
@@ -317,7 +314,6 @@ public final class ItemModel {
                 (float) Math.toRadians(dy),
                 (float) Math.toRadians(dz)));
     }
-
 
     @VynFunc
     public void rotateX(final double angle) {
@@ -364,7 +360,8 @@ public final class ItemModel {
     }
 
     @VynFunc
-    public void shear(final double xy, final double xz, final double yx, final double yz, final double zx, final double zy) {
+    public void shear(final double xy, final double xz, final double yx, final double yz, final double zx,
+            final double zy) {
         modificationCheck();
         this.shXY = (float) xy;
         this.shXZ = (float) xz;
@@ -467,11 +464,17 @@ public final class ItemModel {
         if (!ConfigHandler.INSTANCE.resourcePackMatrixEditing) {
             return;
         }
+        applyParentChain(matrices);
+        applySelf(matrices);
+    }
 
+    public void applyParentChain(final MatrixStack matrices) {
         if (parent != null) {
             parent.apply(matrices);
         }
+    }
 
+    public void applySelf(final MatrixStack matrices) {
         matrices.translate(x, y, z);
         matrices.translate(px, py, pz);
 
@@ -548,13 +551,13 @@ public final class ItemModel {
     private static int multiplyColor(final int c1, final int c2) {
         final int a1 = (c1 >>> 24) & 0xFF;
         final int r1 = (c1 >>> 16) & 0xFF;
-        final int g1 = (c1 >>> 8)  & 0xFF;
-        final int b1 =  c1         & 0xFF;
+        final int g1 = (c1 >>> 8) & 0xFF;
+        final int b1 = c1 & 0xFF;
 
         final int a2 = (c2 >>> 24) & 0xFF;
         final int r2 = (c2 >>> 16) & 0xFF;
-        final int g2 = (c2 >>> 8)  & 0xFF;
-        final int b2 =  c2         & 0xFF;
+        final int g2 = (c2 >>> 8) & 0xFF;
+        final int b2 = c2 & 0xFF;
 
         final int a = (a1 * a2) / 255;
         final int r = (r1 * r2) / 255;

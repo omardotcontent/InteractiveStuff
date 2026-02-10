@@ -4,14 +4,20 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
+import org.joml.Vector4f;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public final class PivotDebugRenderer {
 
     public static final PivotDebugRenderer INSTANCE = new PivotDebugRenderer();
     private static final float MARKER_SIZE = 0.05f;
+    private static final float POSITION_EPSILON = 0.001f; // Threshold for considering positions as "same"
 
     private int colorIndex = 0;
-    private long lastFrameTime = 0; // Internal tracker
+    private long lastFrameTime = 0;
+    private final Set<PositionKey> renderedPositions = new HashSet<>();
 
     private static final int[] PIVOT_COLORS = {
             0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00,
@@ -21,25 +27,40 @@ public final class PivotDebugRenderer {
     private PivotDebugRenderer() {}
 
     /**
-     * Call this in the Mixin. It automatically resets the color cycle
-     * if it's being called in a new frame.
+     * Call this in the Mixin. It automatically resets the color cycle and deduplicates
+     * positions if it's being called in a new frame.
      */
     public void submit(MatrixStack matrices, OrderedRenderCommandQueue queue, double pivotX, double pivotY, double pivotZ) {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastFrameTime > 10) {
             this.colorIndex = 0;
+            this.renderedPositions.clear();
         }
         lastFrameTime = currentTime;
+
+        // Calculate world position of the pivot
+        Matrix4f positionMatrix = matrices.peek().getPositionMatrix();
+        Vector4f pivotPos = new Vector4f((float)pivotX, (float)pivotY, (float)pivotZ, 1.0f);
+        positionMatrix.transform(pivotPos);
+
+        // Create a position key for deduplication
+        PositionKey key = new PositionKey(pivotPos.x, pivotPos.y, pivotPos.z);
+
+        // Skip if we've already rendered a marker at this position
+        if (renderedPositions.contains(key)) {
+            return;
+        }
+        renderedPositions.add(key);
 
         final int color = PIVOT_COLORS[colorIndex % PIVOT_COLORS.length];
         colorIndex++;
 
+        // Create a new matrix stack and apply the transformation to the pivot point
+        MatrixStack renderStack = new MatrixStack();
+        renderStack.peek().getPositionMatrix().set(positionMatrix);
+        renderStack.translate(pivotX, pivotY, pivotZ);
 
-        MatrixStack copyStack = new MatrixStack();
-        copyStack.peek().getPositionMatrix().set(matrices.peek().getPositionMatrix());
-        copyStack.translate(pivotX, pivotY, pivotZ);
-
-        queue.submitCustom(copyStack, RenderLayer.getLines(), (entry, buffer) -> {
+        queue.submitCustom(renderStack, RenderLayer.getLines(), (entry, buffer) -> {
             this.renderSphereDirect(entry.getPositionMatrix(), buffer, color);
         });
     }
@@ -74,5 +95,40 @@ public final class PivotDebugRenderer {
         buffer.vertex(matrix, x, y, z)
                 .color(r, g, b, 1.0f)
                 .normal(0, 1, 0);
+    }
+
+    /**
+     * Helper class to deduplicate pivot positions within a frame.
+     * Uses epsilon comparison to handle floating point precision issues.
+     */
+    private static class PositionKey {
+        private final float x;
+        private final float y;
+        private final float z;
+
+        public PositionKey(float x, float y, float z) {
+            // Round to epsilon precision for consistent hashing
+            this.x = Math.round(x / POSITION_EPSILON) * POSITION_EPSILON;
+            this.y = Math.round(y / POSITION_EPSILON) * POSITION_EPSILON;
+            this.z = Math.round(z / POSITION_EPSILON) * POSITION_EPSILON;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof PositionKey)) return false;
+            PositionKey other = (PositionKey) obj;
+            return Float.compare(this.x, other.x) == 0 &&
+                    Float.compare(this.y, other.y) == 0 &&
+                    Float.compare(this.z, other.z) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Float.floatToIntBits(x);
+            result = 31 * result + Float.floatToIntBits(y);
+            result = 31 * result + Float.floatToIntBits(z);
+            return result;
+        }
     }
 }
