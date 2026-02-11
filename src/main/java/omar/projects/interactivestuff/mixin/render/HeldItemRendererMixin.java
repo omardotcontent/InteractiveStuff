@@ -108,25 +108,27 @@ public abstract class HeldItemRendererMixin {
             }
 
             int start = MathHelper.clamp(item.getQuadStart(), 0, listSize);
-            final int rawEnd = item.getQuadEnd();
-            int end = (rawEnd == 0) ? listSize : MathHelper.clamp(rawEnd, 0, listSize);
+            int end = (item.getQuadEnd() == 0) ? listSize : MathHelper.clamp(item.getQuadEnd(), 0, listSize);
 
             if (start > end)
                 start = end;
 
-            if (start > 0) {
-                this.renderQuadRange(allQuads.subList(0, start), layerAccessor, mode, matrices, queue, light, item,
-                        false);
-            }
+            if (item.isExclusive()) {
+                if (end > start) {
+                    this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light, item, true);
+                }
+            } else {
+                if (start > 0) {
+                    this.renderQuadRange(allQuads.subList(0, start), layerAccessor, mode, matrices, queue, light, item, false);
+                }
 
-            if (end > start) {
-                this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light, item,
-                        true);
-            }
+                if (end > start) {
+                    this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light, item, true);
+                }
 
-            if (end < listSize) {
-                this.renderQuadRange(allQuads.subList(end, listSize), layerAccessor, mode, matrices, queue, light, item,
-                        false);
+                if (end < listSize) {
+                    this.renderQuadRange(allQuads.subList(end, listSize), layerAccessor, mode, matrices, queue, light, item, false);
+                }
             }
         }
     }

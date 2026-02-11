@@ -25,35 +25,41 @@ import java.util.Map;
 @VynType(name = "ItemModel")
 public final class ItemModel {
 
-    private static int NEXT_SEED = 1;
-    private final int seed = NEXT_SEED++;
-
-    private final ItemStack originalStack;
-    private ItemStack workingStack;
-    public boolean modified = false;
-
-    private ItemDisplayContext displayContext = ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
-    private final Map<Integer, Integer> indexTints = new HashMap<>();
-    private ItemModel parent = null;
-
-    private double x, y, z;
-    private float shXY = 0, shXZ = 0;
-    private float shYX = 0, shYZ = 0;
-    private float shZX = 0, shZY = 0;
-    private double sx = 1, sy = 1, sz = 1;
-    private double px = 0.5, py = 0.5, pz = 0.5;
-    private final Quaternionf rotation = new Quaternionf();
-
     private int glint = -1;
     private int light = -1;
     private int quadEnd = 0;
+    private int quadStart = 0;
+    private static int NEXT_SEED = 1;
+    private final int seed = NEXT_SEED++;
+    private int selectionColor = 0xFFFFFFFF;
+
+    private final ItemStack originalStack;
+    private ItemStack workingStack;
+
+    public boolean modified = false;
+    private boolean exclusive = false;
+    private boolean useSelectionColor = false;
+
+    private ItemModel parent = null;
+
+    private ItemDisplayContext displayContext = ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
+
+    private final Map<Integer, Integer> indexTints = new HashMap<>();
+
+    private double x, y, z;
+    private double sx = 1, sy = 1, sz = 1;
+    private double px = 0.5, py = 0.5, pz = 0.5;
+
+    private float shXY = 0, shXZ = 0;
+    private float shYX = 0, shYZ = 0;
+    private float shZX = 0, shZY = 0;
+
+    private final Quaternionf rotation = new Quaternionf();
+
     private float red = 1.0f;
     private float alpha = 1.0f;
     private float green = 1.0f;
     private float blue = 1.0f;
-    private int quadStart = 0;
-    private int selectionColor = 0xFFFFFFFF;
-    private boolean useSelectionColor = false;
 
     @VynConstructor
     public ItemModel(final String itemId) {
@@ -92,6 +98,11 @@ public final class ItemModel {
     @VynFunc
     public boolean isEnchantable() {
         return workingStack.isEnchantable();
+    }
+
+    @VynFunc
+    public boolean isExclusive() {
+        return exclusive;
     }
 
     @VynFunc
@@ -427,6 +438,20 @@ public final class ItemModel {
 
         modificationCheck();
         this.parent = parent;
+    }
+
+    @VynFunc
+    public void select(final int quadStart, final int quadEnd) {
+        this.setQuads(quadStart, quadEnd);
+        this.exclusive = true;
+    }
+
+    @VynFunc
+    public ItemModel copy() {
+        final ItemModel copy = new ItemModel(this.workingStack.copy());
+        copy.displayContext = this.displayContext;
+        ItemModelRenderRegistry.ACTIVE.add(copy);
+        return copy;
     }
 
     @VynFunc
