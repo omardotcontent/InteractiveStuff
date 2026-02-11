@@ -70,6 +70,10 @@ public final class ScriptInterpreter {
     }
 
     private static void tick(final MinecraftClient client) {
+        if (client.player != null && client.player != PLAYER_VAR.getPlayer()) {
+            PLAYER_VAR.setPlayer(client.player);
+        }
+
         if (PLAYER_VAR.getPlayer() == null || client.isPaused() || client.world == null) {
             return;
         }
