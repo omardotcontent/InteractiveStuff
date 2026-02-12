@@ -19,5 +19,5 @@ task onItemUpdate takes itemRendered do
 end
 
 task isFrame takes item do
-    reply item.getName() == "minecraft:item_frame" || item.getName() == "minecraft:painting"
+    reply item.getName() == "minecraft:item_frame" || item.getName() == "minecraft:painting" || item.getName() == "minecraft:glow_item_frame" || item.getName() == "minecraft:oak_hanging_sign" || item.getName() == "minecraft:spruce_hanging_sign" || item.getName() == "minecraft:birch_hanging_sign" || item.getName() == "minecraft:jungle_hanging_sign" || item.getName() == "minecraft:acacia_hanging_sign" || item.getName() == "minecraft:dark_oak_hanging_sign" || item.getName() == "minecraft:crimson_hanging_sign" || item.getName() == "minecraft:warped_hanging_sign" || item.getName() == "minecraft:cherry_hanging_sign" || item.getName() == "minecraft:mangrove_hanging_sign" || item.getName() == "minecraft:pale_oak_hanging_sign" || item.getName() == "minecraft:bamboo_hanging_sign"
 end
