@@ -1,0 +1,23 @@
+importScript("interactivestuff:interactive_resourcepack","physics_lib")
+
+task onItemUpdate takes itemRendered do
+    check player.getGamemode() != "spectator" && isFrame(itemRendered) do
+        check !modLoader.isModLoaded("holdmyitems") do
+            runPhysicsEngine(0.01, 0.1, 0.6, 0.3, 0.2, 0.8, 60, 0)
+            itemRendered.setPivot(0, 0.4, 0)
+            itemRendered.rotate(angleX, 0, -angleZ)
+
+            check itemRendered.isMainHand() do
+                itemRendered.rotateY(65)
+                itemRendered.rotateX(25)
+            otherwise
+                itemRendered.rotateY(-65)
+                itemRendered.rotateX(25)
+            end
+        end
+    end
+end
+
+task isFrame takes item do
+    reply item.getName() == "minecraft:item_frame" || item.getName() == "minecraft:painting"
+end
