@@ -1,4 +1,5 @@
 task onTick do
+    debugText("§6Game version: " + modLoader.getRawGameVersion())
     debugText("§aMain Hand Item: " + player.getMainHandItem().getName())
     debugText("§aStepping Block: " + player.getSteppingBlock().getName())
     check player.getTargetBlock() != nothing do
