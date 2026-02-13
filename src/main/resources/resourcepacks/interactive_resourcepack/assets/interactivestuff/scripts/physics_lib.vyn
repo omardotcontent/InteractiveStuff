@@ -8,8 +8,17 @@ make prevMoveX = 0
 make prevMoveY = 0
 make prevMoveZ = 0
 make isFirstFrame = 1
+make lastUpdateTime = -1
 
 task runPhysicsEngine takes stiffness, damping, moveRes, lookRes, vertRes, inertial, maxAngle, windMult do
+    make now = time()
+
+    check lastUpdateTime == now do
+        reply 0
+    end
+
+    make lastUpdateTime = now
+
     make dt = getDelta()
 
     check dt > 5.0 do
@@ -23,7 +32,6 @@ task runPhysicsEngine takes stiffness, damping, moveRes, lookRes, vertRes, inert
         make dt = 3.0
     end
 
-    make now = time()
     make currCamPitch = player.getCameraPitch()
     make currCamYaw = player.getCameraYaw()
     make currMoveX = -player.getVelocityX()
