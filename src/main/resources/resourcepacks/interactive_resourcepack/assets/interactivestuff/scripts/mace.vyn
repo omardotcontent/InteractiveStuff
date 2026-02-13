@@ -1,0 +1,21 @@
+importScript("interactivestuff:interactive_resourcepack","physics_lib")
+
+make smoothFallLean = 0
+
+task onItemUpdate takes itemRendered do
+    check player.getGamemode() != "spectator" && itemRendered.getName() == "minecraft:mace" do
+
+        runPhysicsEngine(0.01, 0.2, 0.1, 0.2, 0.4, 1.0, 45, 0)
+
+
+        make targetLean = player.getVelocityY() * -20
+
+
+        make smoothFallLean = smoothFallLean + (targetLean - smoothFallLean) * 0.1
+
+        itemRendered.setPivot(0, -0.1, 0)
+
+        itemRendered.rotateX(angleX + smoothFallLean)
+        itemRendered.rotateZ(angleZ)
+    end
+end
