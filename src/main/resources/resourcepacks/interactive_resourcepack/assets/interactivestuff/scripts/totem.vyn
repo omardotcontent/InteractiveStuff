@@ -1,0 +1,9 @@
+make smoothFallLean = 0
+
+task onItemUpdate takes itemRendered do
+    check player.getGamemode() != "spectator" && itemRendered.getName() == "minecraft:totem_of_undying" do
+        make intensity = (20 - player.getHealth()) / 10
+        itemRendered.translate(((random() - 0.5) * intensity / 250), ((random() - 0.5) * intensity / 250), 0)
+        itemRendered.rotateAxis(((random() - 0.5) * intensity / 250), 1,1,1)
+    end
+end

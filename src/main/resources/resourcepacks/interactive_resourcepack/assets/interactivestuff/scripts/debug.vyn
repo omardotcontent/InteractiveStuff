@@ -1,6 +1,7 @@
 task onTick do
     debugText("§6Game version: " + modLoader.getRawGameVersion())
     debugText("§aMain Hand Item: " + player.getMainHandItem().getName())
+    debugText("§cHealth: " + player.getHealth())
     debugText("§aStepping Block: " + player.getSteppingBlock().getName())
     check player.getTargetBlock() != nothing do
         debugText("§aTarget Block: " + player.getTargetBlock().getName())
@@ -18,6 +19,6 @@ task onTick do
     debugText("§bX Velocity: " + player.getVelocityX())
     debugText("§bY Velocity: " + player.getVelocityY())
     debugText("§bZ Velocity: " + player.getVelocityZ())
-    debugText("§bCamera Pitch: " + player.getCameraPitch())
-    debugText("§bCamera Yaw: " + player.getCameraYaw())
+    debugText("§bCamera Pitch: " + player.getCameraPitchVelocity())
+    debugText("§bCamera Yaw: " + player.getCameraYawVelocity())
 end
