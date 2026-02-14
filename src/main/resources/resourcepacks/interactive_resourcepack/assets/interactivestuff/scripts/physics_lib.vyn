@@ -32,8 +32,8 @@ task runPhysicsEngine takes stiffness, damping, moveRes, lookRes, vertRes, inert
         make dt = 3.0
     end
 
-    make currCamPitch = player.getCameraPitch()
-    make currCamYaw = player.getCameraYaw()
+    make currCamPitch = player.getCameraPitchVelocity()
+    make currCamYaw = player.getCameraYawVelocity()
     make currMoveX = -player.getVelocityX()
     make currMoveY = player.getVelocityY()
     make currMoveZ = -player.getVelocityZ()

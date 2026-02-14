@@ -71,34 +71,62 @@ public final class Player {
 
     @VynFunc
     public String getGamemode() {
-        if (player == null || player.getGameMode() == null) {
-            return null;
-        }
-        return player.getGameMode().asString();
+        return (player != null && player.getGameMode() != null) ? player.getGameMode().asString() : null;
     }
 
     @VynFunc
     public Position getPosition() {
-        if (player == null) {
-            return null;
-        }
-        return new Position((int) player.getX(), (int) player.getY(), (int) player.getZ());
+        return (player != null) ? new Position((int) player.getX(), (int) player.getY(), (int) player.getZ()) : null;
     }
 
     @VynFunc
     public World getWorld() {
-        if (client.world == null) {
-            return null;
-        }
-        return new World(client.world);
+        return (client.world != null) ? new World(client.world) : null;
     }
 
     @VynFunc
     public ItemModel getActiveItem() {
-        if (player == null) {
-            return null;
-        }
-        return new ItemModel(player.getActiveItem());
+        return (player != null) ? new ItemModel(player.getActiveItem()) : null;
+    }
+
+    @VynFunc
+    public ItemModel getMainHandItem() {
+        return (player != null) ? new ItemModel(player.getMainHandStack()) : null;
+    }
+
+    @VynFunc
+    public ItemModel getOffHandItem() {
+        return (player != null) ? new ItemModel(player.getOffHandStack()) : null;
+    }
+
+    @VynFunc
+    public double getHealth() {
+        return (player != null) ? player.getHealth() : -1;
+    }
+
+    @VynFunc
+    public double getFoodLevel() {
+        return (player != null) ? player.getHungerManager().getFoodLevel() : -1;
+    }
+
+    @VynFunc
+    public double getSaturationLevel() {
+        return (player != null) ? player.getHungerManager().getSaturationLevel() : -1;
+    }
+
+    @VynFunc
+    public float getNauseaIntensity() {
+        return player != null ? player.nauseaIntensity : 0.0f;
+    }
+
+    @VynFunc
+    public int getExperienceLevel() {
+        return player != null ? player.experienceLevel : -1;
+    }
+
+    @VynFunc
+    public double getExperienceProgress() {
+        return player != null ? player.experienceProgress : -1f;
     }
 
     @VynFunc
@@ -114,14 +142,9 @@ public final class Player {
 
     @VynFunc
     public double getVelocityY() {
-        if (player == null) {
-            return 0;
-        }
+        if (player == null) return 0;
         final double y = player.getVelocity().getY();
-        if (Math.abs(y + 0.0784) < 0.001) {
-            return 0;
-        }
-        return y * 0.3333;
+        return (Math.abs(y + 0.0784) < 0.001) ? 0 : y * 0.3333;
     }
 
     @VynFunc
@@ -136,7 +159,7 @@ public final class Player {
     }
 
     @VynFunc
-    public float getCameraPitch() {
+    public float getCameraPitchVelocity() {
         if (client.gameRenderer == null) {
             return 0.0f;
         }
@@ -148,7 +171,7 @@ public final class Player {
     }
 
     @VynFunc
-    public float getCameraYaw() {
+    public float getCameraYawVelocity() {
         if (client.gameRenderer == null) {
             return 0.0f;
         }
@@ -321,19 +344,63 @@ public final class Player {
     }
 
     @VynFunc
+    public boolean showsDeathScreen() {
+        return player != null && player.showsDeathScreen();
+    }
+
+    @VynFunc
+    public boolean isHorizontalCollision() {
+        return player != null && player.horizontalCollision;
+    }
+
+    @VynFunc
+    public boolean isInSneakingPose() {
+        return player != null && player.isInSneakingPose();
+    }
+
+    @VynFunc
+    public boolean shouldSlowDown() {
+        return player != null && player.shouldSlowDown();
+    }
+
+    @VynFunc
+    public boolean isRidingJumpable() {
+        return player != null && player.getJumpingMount() != null;
+    }
+
+    @VynFunc
+    public float getMountJumpStrength() {
+        return player != null ? player.getMountJumpStrength() : 0.0f;
+    }
+
+    @VynFunc
+    public boolean isCamera() {
+        return player != null && client.getCameraEntity() == player;
+    }
+
+    @VynFunc
+    public int getPermissionLevel() {
+        return player != null ? player.getPermissionLevel() : 0;
+    }
+
+    @VynFunc
+    public boolean isMainPlayer() {
+        return player != null && player.isMainPlayer();
+    }
+
+    @VynFunc
+    public float getMoodPercentage() {
+        return player != null ? player.getMoodPercentage() : 0.0f;
+    }
+
+    @VynFunc
     public boolean isMainHand(final ItemModel item) {
-        if (player == null || item == null) {
-            return false;
-        }
-        return player.getMainHandStack().equals(item.getFinalStack());
+        return player != null && item != null && player.getMainHandStack().equals(item.getFinalStack());
     }
 
     @VynFunc
     public boolean isOffHand(final ItemModel item) {
-        if (player == null || item == null) {
-            return false;
-        }
-        return player.getOffHandStack().equals(item.getFinalStack());
+        return player != null && item != null && player.getOffHandStack().equals(item.getFinalStack());
     }
 
     @VynFunc
@@ -346,27 +413,10 @@ public final class Player {
     }
 
     @VynFunc
-    public ItemModel getMainHandItem() {
-        if (player == null) {
-            return null;
-        }
-        return new ItemModel(player.getMainHandStack());
-    }
-
-    @VynFunc
-    public ItemModel getOffHandItem() {
-        if (player == null) {
-            return null;
-        }
-        return new ItemModel(player.getOffHandStack());
-    }
-
-    @VynFunc
     public void playSound(final String soundId, final double volume, final double pitch) {
-        if (player == null) {
-            return;
+        if (player != null) {
+            player.playSound(Registries.SOUND_EVENT.get(Identifier.of(soundId)), (float) volume, (float) pitch);
         }
-        player.playSound(Registries.SOUND_EVENT.get(Identifier.of(soundId)), (float) volume, (float) pitch);
     }
 
     @VynFunc
