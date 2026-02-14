@@ -4,6 +4,7 @@ import me.abdelaziz.main.VynMain;
 import me.abdelaziz.runtime.Environment;
 import me.abdelaziz.runtime.Value;
 import me.abdelaziz.runtime.function.VynCallable;
+import omar.projects.interactivestuff.scripts.exceptions.DelayedScriptException;
 import omar.projects.interactivestuff.scripts.variables.Player;
 
 import java.util.*;
@@ -22,7 +23,7 @@ public final class Script {
         this.callables = new HashMap<>();
     }
 
-    public void load(final Player playerVar, final Set<Script> globalScripts) {
+    public void load(final Player playerVar, final Set<Script> globalScripts, final Deque<Script> delayedScripts) {
         try {
             this.environment = VynMain.loadLines(code);
 
@@ -41,6 +42,12 @@ public final class Script {
             this.state = State.LOADED;
             globalScripts.add(this);
         } catch (final Exception e) {
+
+            if (e instanceof DelayedScriptException) {
+                delayedScripts.add(this);
+                return;
+            }
+
             this.state = State.ERROR;
             playerVar.sendMessage("§6(" + filename + ") §cError in script during loading: " + e.getMessage());
         }

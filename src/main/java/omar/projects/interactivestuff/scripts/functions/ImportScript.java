@@ -2,6 +2,7 @@ package omar.projects.interactivestuff.scripts.functions;
 
 import me.abdelaziz.runtime.function.nat.NativeFunction;
 import me.abdelaziz.util.Importer;
+import omar.projects.interactivestuff.scripts.exceptions.DelayedScriptException;
 import omar.projects.interactivestuff.scripts.objects.PackScripts;
 import omar.projects.interactivestuff.scripts.objects.Script;
 
@@ -23,11 +24,13 @@ public final class ImportScript extends NativeFunction {
             if (script == null) {
                 throw new RuntimeException("No script named '" + name + "' found in pack ID: " + packId);
             }
+
             if (script.getState() != Script.State.IMPORTABLE) {
-                throw new RuntimeException("Script '" + name + "' in pack ID: " + packId + " is not Importable.");
+                throw new DelayedScriptException("Script '" + name + "' in pack ID: " + packId + " is not Importable.");
             }
             Importer.loadFromLines(script.getCode(), env);
             return null;
         });
     }
 }
+

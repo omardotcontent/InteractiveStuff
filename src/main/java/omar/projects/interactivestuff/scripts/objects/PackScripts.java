@@ -3,6 +3,7 @@ package omar.projects.interactivestuff.scripts.objects;
 
 import omar.projects.interactivestuff.scripts.variables.Player;
 
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -18,9 +19,9 @@ public final class PackScripts {
        scripts.put(fileName, new Script(code, fileName));
     }
 
-    public void loadScripts(final Player playerVar, final Set<Script> globalScripts) {
+    public void loadScripts(final Player playerVar, final Set<Script> globalScripts, final Deque<Script> delayedScripts) {
         for (final Script script: scripts.values()) {
-            script.load(playerVar, globalScripts);
+            script.load(playerVar, globalScripts, delayedScripts);
         }
     }
 

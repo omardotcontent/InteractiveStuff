@@ -121,8 +121,12 @@ public final class ScriptInterpreter {
     }
 
     public static void loadScripts() {
+        final Deque<Script> delayedScripts = new ArrayDeque<>();
         for (final PackScripts packScripts : scripts.values()) {
-            packScripts.loadScripts(PLAYER_VAR, globalScripts);
+            packScripts.loadScripts(PLAYER_VAR, globalScripts, delayedScripts);
+        }
+        while (!delayedScripts.isEmpty()) {
+            delayedScripts.pop().load(PLAYER_VAR, globalScripts, delayedScripts);
         }
     }
 
