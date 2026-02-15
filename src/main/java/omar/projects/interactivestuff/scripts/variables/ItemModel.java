@@ -147,6 +147,21 @@ public final class ItemModel {
         return -1;
     }
 
+    @VynFunc
+    public double getRotationX() {
+        return rotation.x;
+    }
+
+    @VynFunc
+    public double getRotationY() {
+        return rotation.y;
+    }
+
+    @VynFunc
+    public double getRotationZ() {
+        return rotation.z;
+    }
+
     public void setDisplayContext(final ItemDisplayContext context) {
         this.displayContext = context;
     }
