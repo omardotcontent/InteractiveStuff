@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import omar.projects.interactivestuff.handlers.BackgroundLoopHandler;
@@ -105,6 +106,15 @@ public final class ScriptInterpreter {
     public static void onSwingHand() {
         for (final Script entry : globalScripts) {
             entry.call(PLAYER_VAR, Script.FunctionType.ON_SWING_HAND);
+        }
+    }
+
+    public static void onDamage(final DamageSource source, final float amount, final Boolean returnValue) {
+        for (final Script entry : globalScripts) {
+            entry.call(PLAYER_VAR, Script.FunctionType.ON_DAMAGE,
+                    List.of(NativeBinder.toValue(entry.getEnvironment(), source.toString()),
+                            NativeBinder.toValue(entry.getEnvironment(), amount),
+                            NativeBinder.toValue(entry.getEnvironment(), returnValue)));
         }
     }
 
