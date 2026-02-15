@@ -108,7 +108,8 @@ public final class Script {
         ON_TICK("onTick"),
         ON_ITEM_UPDATE("onItemUpdate"),
         ON_SWING_HAND("onSwingHand"),
-        ON_PLAY_SOUND("onPlaySound");
+        ON_PLAY_SOUND("onPlaySound"),
+        ON_DAMAGE("onDamage");
 
         private final String name;
 
