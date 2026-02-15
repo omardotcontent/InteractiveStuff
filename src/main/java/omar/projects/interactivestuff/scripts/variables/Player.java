@@ -5,6 +5,7 @@ import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
@@ -21,10 +22,12 @@ public final class Player {
 
     private ClientPlayerEntity player;
     private final MinecraftClient client;
+    private LivingEntity livingEntity;
 
     public Player(final ClientPlayerEntity player, final MinecraftClient client) {
         this.player = player;
         this.client = client;
+        this.livingEntity = player.getEntity();
     }
 
     public void setPlayer(final ClientPlayerEntity player) {
@@ -100,6 +103,21 @@ public final class Player {
     }
 
     @VynFunc
+    public ItemModel getBlockingItem() {
+        return (livingEntity != null) ? new ItemModel(livingEntity.getBlockingItem()) : null;
+    }
+
+    @VynFunc
+    public ItemModel getWeaponItem() {
+        return (livingEntity != null) ? new ItemModel(livingEntity.getWeaponStack()) : null;
+    }
+
+    @VynFunc
+    public ItemModel getPickBlockItem() {
+        return (livingEntity != null) ? new ItemModel(livingEntity.getPickBlockStack()) : null;
+    }
+
+    @VynFunc
     public double getHealth() {
         return (player != null) ? player.getHealth() : -1;
     }
@@ -122,6 +140,51 @@ public final class Player {
     @VynFunc
     public int getExperienceLevel() {
         return player != null ? player.experienceLevel : -1;
+    }
+
+    @VynFunc
+    public int getItemUseTime() {
+        return (livingEntity != null) ? livingEntity.getItemUseTime() : -1;
+    }
+
+    @VynFunc
+    public int getItemUseTimeLeft() {
+        return (livingEntity != null) ? livingEntity.getItemUseTimeLeft() : -1;
+    }
+
+    @VynFunc
+    public int getArmor() {
+        return (livingEntity != null) ? livingEntity.getArmor() : -1;
+    }
+
+    @VynFunc
+    public double getEyePosX() {
+        return (livingEntity != null) ? livingEntity.getEyePos().x : 0;
+    }
+
+    @VynFunc
+    public double getEyePosY() {
+        return (livingEntity != null) ? livingEntity.getEyePos().y : 0;
+    }
+
+    @VynFunc
+    public double getEyePosZ() {
+        return (livingEntity != null) ? livingEntity.getEyePos().z : 0;
+    }
+
+    @VynFunc
+    public double getHeadYaw() {
+        return (livingEntity != null) ? livingEntity.getHeadYaw() : 0;
+    }
+
+    @VynFunc
+    public double getDamageTiltYaw() {
+        return (livingEntity != null) ? livingEntity.getDamageTiltYaw() : 0;
+    }
+
+    @VynFunc
+    public double getStepHeight() {
+        return (livingEntity != null) ? livingEntity.getStepHeight() : 0;
     }
 
     @VynFunc
@@ -391,6 +454,82 @@ public final class Player {
     @VynFunc
     public float getMoodPercentage() {
         return player != null ? player.getMoodPercentage() : 0.0f;
+    }
+
+
+    @VynFunc
+    public boolean canBreatheInWater() {
+        return livingEntity != null && livingEntity.canBreatheInWater();
+    }
+
+    @VynFunc
+    public boolean hasLandedInFluid() {
+        return livingEntity != null && livingEntity.hasLandedInFluid();
+    }
+
+    @VynFunc
+    public boolean isBaby() {
+        return livingEntity != null && livingEntity.isBaby();
+    }
+
+    @VynFunc
+    public float getScaleFactor() {
+        return livingEntity != null ? livingEntity.getScaleFactor() : 1.0f;
+    }
+
+    @VynFunc
+    public float getScale() {
+        return livingEntity != null ? livingEntity.getScale() : 1.0f;
+    }
+
+    @VynFunc
+    public boolean shouldSwimInFluids() {
+        return livingEntity != null && livingEntity.shouldSwimInFluids();
+    }
+
+    @VynFunc
+    public boolean canTakeDamage() {
+        return livingEntity != null && livingEntity.canTakeDamage();
+    }
+
+    @VynFunc
+    public boolean isPartOfGame() {
+        return livingEntity != null && livingEntity.isPartOfGame();
+    }
+
+    @VynFunc
+    public boolean isDead() {
+        return livingEntity != null && livingEntity.isDead();
+    }
+
+    @VynFunc
+    public float getLuck() {
+        return livingEntity != null ? livingEntity.getLuck() : 0.0f;
+    }
+
+    @VynFunc
+    public float getAbsorptionAmount() {
+        return livingEntity != null ? livingEntity.getAbsorptionAmount() : 0.0f;
+    }
+
+    @VynFunc
+    public float getMaxAbsorption() {
+        return livingEntity != null ? livingEntity.getMaxAbsorption() : 0.0f;
+    }
+
+    @VynFunc
+    public int getStuckArrowCount() {
+        return livingEntity != null ? livingEntity.getStuckArrowCount() : 0;
+    }
+
+    @VynFunc
+    public int getStingerCount() {
+        return livingEntity != null ? livingEntity.getStingerCount() : 0;
+    }
+
+    @VynFunc
+    public boolean hasNoDrag() {
+        return livingEntity != null && livingEntity.hasNoDrag();
     }
 
     @VynFunc
