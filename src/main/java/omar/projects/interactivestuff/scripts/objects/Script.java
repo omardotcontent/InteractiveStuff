@@ -97,6 +97,10 @@ public final class Script {
         return environment;
     }
 
+    public String getFilename() {
+        return filename;
+    }
+
     public enum State {
         LOADED,
         IMPORTABLE,

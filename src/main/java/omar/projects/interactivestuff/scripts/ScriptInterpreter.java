@@ -34,10 +34,10 @@ public final class ScriptInterpreter {
     private static final Key KEY = new Key();
 
     private static final Set<Script> globalScripts = new CopyOnWriteArraySet<>();
-    private static final Map<String, PackScripts> scripts = new ConcurrentHashMap<>();
+    private static final Map<String, PackScripts> packScripts = new ConcurrentHashMap<>();
 
-    private static final NativeFunction IMPORT_SCRIPT_FUNCTION = new ImportScript(scripts);
-    private static final NativeFunction EXCLUDE_SCRIPT_FUNCTION = new ExcludeScript(scripts);
+    private static final NativeFunction IMPORT_SCRIPT_FUNCTION = new ImportScript(packScripts);
+    private static final NativeFunction EXCLUDE_SCRIPT_FUNCTION = new ExcludeScript(packScripts);
     private static final NativeFunction DEBUG_TEXT_FUNCTION = new DebugText();
     private static final NativeFunction GET_DELTA_FUNCTION = new GetDelta();
 
@@ -77,6 +77,10 @@ public final class ScriptInterpreter {
 
         if (PLAYER_VAR.getPlayer() == null || client.isPaused() || client.world == null) {
             return;
+        }
+
+        if (PLAYER_VAR.getLivingEntity() == null) {
+            PLAYER_VAR.setLivingEntity(client.player.getEntity());
         }
 
         for (final Script entry : globalScripts) {
@@ -126,13 +130,13 @@ public final class ScriptInterpreter {
     }
 
     public static void addScript(final String packId, final String name, final String content) {
-        scripts.computeIfAbsent(packId, k -> new PackScripts())
+        packScripts.computeIfAbsent(packId, k -> new PackScripts())
                 .addScript(content, name);
     }
 
     public static void loadScripts() {
         final Deque<Script> delayedScripts = new ArrayDeque<>();
-        for (final PackScripts packScripts : scripts.values()) {
+        for (final PackScripts packScripts : packScripts.values()) {
             packScripts.loadScripts(PLAYER_VAR, globalScripts, delayedScripts);
         }
         while (!delayedScripts.isEmpty()) {
@@ -142,8 +146,16 @@ public final class ScriptInterpreter {
 
     public static void clearScripts() {
         globalScripts.clear();
-        scripts.clear();
+        packScripts.clear();
         BackgroundLoopHandler.getInstance().clearAll();
     }
+
+    public static Set<Script> getGlobalScripts() {
+        return globalScripts;
+    }
+
+        public static Map<String, PackScripts> getPackScripts() {
+            return packScripts;
+        }
 
 }
