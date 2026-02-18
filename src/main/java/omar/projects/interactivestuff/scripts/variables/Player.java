@@ -27,7 +27,14 @@ public final class Player {
     public Player(final ClientPlayerEntity player, final MinecraftClient client) {
         this.player = player;
         this.client = client;
-        this.livingEntity = player.getEntity();
+    }
+
+    public void setLivingEntity(final LivingEntity entity) {
+        this.livingEntity = entity;
+    }
+
+    public LivingEntity getLivingEntity() {
+        return livingEntity;
     }
 
     public void setPlayer(final ClientPlayerEntity player) {
@@ -66,7 +73,7 @@ public final class Player {
         if (!(client.crosshairTarget instanceof BlockHitResult blockHit)) {
             return null;
         }
-        if (player == null) {
+        if (player == null || client.world == null) {
             return null;
         }
         return new Block(blockHit.getBlockPos(), client.world);
