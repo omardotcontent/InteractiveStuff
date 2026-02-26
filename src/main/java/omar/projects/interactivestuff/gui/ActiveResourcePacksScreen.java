@@ -21,7 +21,7 @@ public class ActiveResourcePacksScreen extends Screen {
 
     @Override
     protected void init() {
-        DirectionalLayoutWidget header = this.layout.addHeader(
+        final DirectionalLayoutWidget header = this.layout.addHeader(
                 DirectionalLayoutWidget.vertical().spacing(8)
         );
 

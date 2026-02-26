@@ -3,10 +3,7 @@ package omar.projects.interactivestuff.scripts.objects;
 
 import omar.projects.interactivestuff.scripts.variables.Player;
 
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public final class PackScripts {
     private final Map<String, Script> scripts;
@@ -30,6 +27,13 @@ public final class PackScripts {
     }
 
 
+    public Map<String, Script> getScripts() {
+        return Collections.unmodifiableMap(scripts);
+    }
+
+    public int getScriptCount() {
+        return scripts.size();
+    }
 
     public Script getScript(final String fileName) {
         return scripts.get(fileName);
