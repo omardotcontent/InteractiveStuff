@@ -115,19 +115,23 @@ public abstract class HeldItemRendererMixin {
 
             if (item.isExclusive()) {
                 if (end > start) {
-                    this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light, item, true);
+                    this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light,
+                            item, true);
                 }
             } else {
                 if (start > 0) {
-                    this.renderQuadRange(allQuads.subList(0, start), layerAccessor, mode, matrices, queue, light, item, false);
+                    this.renderQuadRange(allQuads.subList(0, start), layerAccessor, mode, matrices, queue, light, item,
+                            false);
                 }
 
                 if (end > start) {
-                    this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light, item, true);
+                    this.renderQuadRange(allQuads.subList(start, end), layerAccessor, mode, matrices, queue, light,
+                            item, true);
                 }
 
                 if (end < listSize) {
-                    this.renderQuadRange(allQuads.subList(end, listSize), layerAccessor, mode, matrices, queue, light, item, false);
+                    this.renderQuadRange(allQuads.subList(end, listSize), layerAccessor, mode, matrices, queue, light,
+                            item, false);
                 }
             }
         }
@@ -175,7 +179,7 @@ public abstract class HeldItemRendererMixin {
                 continue;
             }
 
-             tints[i] = item.getFinalColorForIndex(quadTintIndex);
+            tints[i] = item.getFinalColorForIndex(quadTintIndex);
         }
 
         RenderLayer finalLayer = layerAccessor.getRenderLayer();
