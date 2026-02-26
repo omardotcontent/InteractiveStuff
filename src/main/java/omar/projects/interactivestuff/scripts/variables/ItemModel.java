@@ -10,7 +10,6 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
 import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @VynType(name = "ItemModel")
+@SuppressWarnings("unused")
 public final class ItemModel {
 
     private int glint = -1;
@@ -501,9 +501,6 @@ public final class ItemModel {
     }
 
     public void apply(final MatrixStack matrices) {
-        if (!ConfigHandler.INSTANCE.resourcePackMatrixEditing) {
-            return;
-        }
         applyParentChain(matrices);
         applySelf(matrices);
     }
@@ -563,9 +560,7 @@ public final class ItemModel {
             tintColor = parent.indexTints.get(tintIndex);
         }
 
-        int result = multiplyColor(baseColor, tintColor);
-
-        return result;
+        return multiplyColor(baseColor, tintColor);
     }
 
     public boolean getUseSelectionColor() {

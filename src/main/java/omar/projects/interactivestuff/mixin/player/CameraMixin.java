@@ -1,7 +1,7 @@
 package omar.projects.interactivestuff.mixin.player;
 
 import net.minecraft.client.render.Camera;
-import omar.projects.interactivestuff.handlers.CameraVelocityAccessor;
+import omar.projects.interactivestuff.acessor.CameraVelocityAccessor;
 import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

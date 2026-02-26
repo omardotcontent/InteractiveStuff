@@ -1,4 +1,4 @@
-package omar.projects.interactivestuff.handlers;
+package omar.projects.interactivestuff.acessor;
 
 public interface CameraVelocityAccessor {
     float interactivestuff$getPitchVelocity();

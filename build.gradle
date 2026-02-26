@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.14-SNAPSHOT'
+    id 'fabric-loom' version '1.15-SNAPSHOT'
     id 'java'
     id 'maven-publish'
     id "io.github.goooler.shadow" version "8.1.7"
@@ -33,9 +33,7 @@ dependencies {
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
     modCompileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 
-    // --- VYN ---
-    implementation files("libs/Vyn.jar")
-    shadow files("libs/Vyn.jar")
+    modImplementation "studio.meraki:VynAPI:1.0.0"
 
 }
 

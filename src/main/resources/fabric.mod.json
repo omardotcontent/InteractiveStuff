@@ -21,7 +21,7 @@
       "omar.projects.interactivestuff.IS"
     ],
     "modmenu": [
-      "omar.projects.interactivestuff.handlers.config.ModMenuIntegration"
+      "omar.projects.interactivestuff.gui.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -31,7 +31,8 @@
     "fabricloader": ">=${loader_version}",
     "minecraft": "~${minecraft_version}",
     "fabric": "*",
-    "fabric-api": "*"
+    "fabric-api": "*",
+    "vynapi": "*"
   },
   "suggests": {
     "modmenu": "*"

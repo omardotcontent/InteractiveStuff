@@ -13,8 +13,7 @@ import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import omar.projects.interactivestuff.handlers.config.ConfigHandler;
-import omar.projects.interactivestuff.scripts.ScriptInterpreter;
+import omar.projects.interactivestuff.helpers.ItemModelHelper;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
 import omar.projects.interactivestuff.scripts.handlers.PivotDebugRenderer;
 import omar.projects.interactivestuff.scripts.variables.ItemModel;
@@ -25,6 +24,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import studio.meraki.vynapi.handler.script.ScriptHandler;
 
 import java.util.List;
 
@@ -44,7 +44,8 @@ public abstract class HeldItemRendererMixin {
             final OrderedRenderCommandQueue queue,
             final int light,
             final CallbackInfo ci) {
-        final ItemModel mainItem = ScriptInterpreter.itemUpdate(stack, renderMode);
+
+        final ItemModel mainItem = ItemModelHelper.itemUpdate(stack, renderMode);
 
         if (mainItem == null && ItemModelRenderRegistry.ACTIVE.isEmpty()) {
             return;
@@ -55,7 +56,6 @@ public abstract class HeldItemRendererMixin {
         if (mainItem != null) {
             this.renderScriptItem(mainItem, entity, renderMode, matrices, queue, light);
         }
-
         for (final ItemModel extraModel : ItemModelRenderRegistry.ACTIVE) {
             this.renderScriptItem(extraModel, entity, renderMode, matrices, queue, light);
         }
@@ -152,12 +152,6 @@ public abstract class HeldItemRendererMixin {
 
         if (isSelectedRange) {
             item.applyParentChain(matrices);
-
-            if (ConfigHandler.INSTANCE != null && ConfigHandler.INSTANCE.resourcePackDebugMode) {
-                PivotDebugRenderer.INSTANCE.submit(matrices, queue, item.getPivotX(), item.getPivotY(),
-                        item.getPivotZ());
-            }
-
             item.applySelf(matrices);
         }
 
@@ -169,7 +163,7 @@ public abstract class HeldItemRendererMixin {
             final BakedQuad quad = quads.get(i);
             final int quadTintIndex = quad.tintIndex();
 
-            if (!isSelectedRange || !ConfigHandler.INSTANCE.resourcePackColorChanging) {
+            if (!isSelectedRange) {
                 tints[i] = 0xFFFFFFFF;
                 continue;
             }

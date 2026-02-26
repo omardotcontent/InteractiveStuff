@@ -6,8 +6,6 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import omar.projects.interactivestuff.handlers.config.ConfigHandler;
-
 public class InteractiveStuffConfigScreen extends Screen {
 
     private final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this, 61, 33);
@@ -29,9 +27,6 @@ public class InteractiveStuffConfigScreen extends Screen {
     public InteractiveStuffConfigScreen(final Screen parent) {
         super(TITLE);
         this.parent = parent;
-        if (ConfigHandler.INSTANCE == null) {
-            ConfigHandler.INSTANCE = ConfigHandler.load();
-        }
     }
 
     @Override
@@ -52,11 +47,6 @@ public class InteractiveStuffConfigScreen extends Screen {
                 .alignHorizontalCenter();
 
         final GridWidget.Adder adder = gridWidget.createAdder(2);
-        adder.add(
-                ButtonWidget.builder(SCRIPTED_PACKS_TITLE, button -> this.client.setScreen(new ActiveResourcePacksScreen(this)))
-                        .tooltip(Tooltip.of(SCRIPTED_PACKS_TITLE_TOOLTIP))
-                        .build()
-        );
 
         adder.add(
                 ButtonWidget.builder(CONFIG_TITLE, button -> System.out.println("Open config screen")

@@ -1,8 +1,7 @@
-package omar.projects.interactivestuff.handlers.config;
+package omar.projects.interactivestuff.gui;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import omar.projects.interactivestuff.gui.InteractiveStuffConfigScreen;
 
 public final class ModMenuIntegration implements ModMenuApi {
 
