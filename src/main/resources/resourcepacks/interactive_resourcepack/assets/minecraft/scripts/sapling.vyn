@@ -1,0 +1,17 @@
+task onItemUpdate takes itemRendered do
+    check player.getGameMode() != "spectator" do
+        check isItemSapling(itemRendered) do
+            make name = replace(itemRendered.getName(),"minecraft:","")
+            itemRendered.setItemModel("interactivestuff:" + name + "_wood")
+
+            make saplingLeaves = new ItemModel("minecraft:oak_sapling")
+            saplingLeaves.setItemModel("interactivestuff:" + name + "_leaves")
+
+            saplingLeaves.setTint(0,player.getWorld().getFoliageColor(player.getSteppingBlock().getPosition()))
+        end
+    end
+end
+
+task isItemSapling takes item do
+    reply item.getName() == "minecraft:oak_sapling" || item.getName() == "minecraft:spruce_sapling" || item.getName() == "minecraft:jungle_sapling" || item.getName() == "minecraft:acacia_sapling" || item.getName() == "minecraft:dark_oak_sapling"
+end
