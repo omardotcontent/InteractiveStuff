@@ -14,23 +14,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = ItemInHandRenderer.class, priority = 9999)
 public abstract class HeldItemRendererMixin {
 
-    @Inject(
-            method = "renderItem",
-            at = @At("HEAD"),
-            cancellable  = true
-    )
-    private void IS$renderItem(
-            final LivingEntity pEntity,
-            final ItemStack pItemStack,
-            final ItemDisplayContext pDisplayContext,
-            final boolean pLeftHand,
-            final PoseStack pPoseStack,
-            final MultiBufferSource pBuffer,
-            final int pSeed, CallbackInfo ci) {
-        System.out.println(pItemStack.getDisplayName().getString());
-
+//    @Inject(
+//            method = "renderItem",
+//            at = @At("HEAD"),
+//            cancellable  = true
+//    )
+//    private void IS$renderItem(
+//            final LivingEntity pEntity,
+//            final ItemStack pItemStack,
+//            final ItemDisplayContext pDisplayContext,
+//            final boolean pLeftHand,
+//            final PoseStack pPoseStack,
+//            final MultiBufferSource pBuffer,
+//            final int pSeed, CallbackInfo ci) {
+//        System.out.println(pItemStack.getDisplayName().getString());
+//
 
     }
-
-
-}
