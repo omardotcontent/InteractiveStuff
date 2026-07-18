@@ -17,13 +17,13 @@ neoForge {
     runs {
         configureEach {
             systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
-            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})"
         }
         client {
             client()
         }
-        data {
-            data()
+        clientData {
+            type = "clientData"
         }
         server {
             server()
@@ -38,12 +38,7 @@ neoForge {
 
 dependencies {
     implementation 'me.abdelaziz:Vyn-Script:1.0-SNAPSHOT'
-    jarJar(implementation('me.abdelaziz:Vyn-Script:1.0-SNAPSHOT')) {
-        version {
-            strictly '1.0-SNAPSHOT'
-            prefer '1.0-SNAPSHOT'
-        }
-    }
+    jarJar(implementation('me.abdelaziz:Vyn-Script:1.0-SNAPSHOT'))
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
