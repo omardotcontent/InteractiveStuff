@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.llamalad7/mixinextras-common/0.3.5/5de895137aa0478675b6ecf7602d9652b05dc37e/mixinextras-common-0.3.5.jar" />
+        </processorPath>
+        <module name="InteractiveStuff.common.main" />
+      </profile>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5-SNAPSHOT/98b6c982030c7e9d79d3e78b31d86b285f292146/mixin-0.8.5-SNAPSHOT-processor.jar" />
+        </processorPath>
+        <module name="InteractiveStuff.forge.main" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel target="21" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="InteractiveStuff.fabric" options="-AoutRefMapFile=D:\Projects\Java\InteractiveStuff\fabric\build\classes\java\main\interactivestuff.refmap.json -AdefaultObfuscationEnv=named:intermediary -Aquiet=true -AoutMapFileNamedIntermediary=D:\Projects\Java\InteractiveStuff\fabric\build\loom-cache\mixin-map-loom.mappings.1_21_5.layered+hash.208643325-v2.main.tiny -AinMapFileNamedIntermediary=C:\Users\omart\.gradle\caches\fabric-loom\1.21.5\loom.mappings.1_21_5.layered+hash.208643325-v2\mappings.tiny" />
+      <module name="InteractiveStuff.fabric.main" options="-AoutRefMapFile=D:\Projects\Java\InteractiveStuff\fabric\build\classes\java\main\interactivestuff.refmap.json -AdefaultObfuscationEnv=named:intermediary -Aquiet=true -AoutMapFileNamedIntermediary=D:\Projects\Java\InteractiveStuff\fabric\build\loom-cache\mixin-map-loom.mappings.1_21_5.layered+hash.208643325-v2.main.tiny -AinMapFileNamedIntermediary=C:\Users\omart\.gradle\caches\fabric-loom\1.21.5\loom.mappings.1_21_5.layered+hash.208643325-v2\mappings.tiny" />
+      <module name="InteractiveStuff.fabric.test" options="-AoutRefMapFile=D:\Projects\Java\InteractiveStuff\fabric\build\classes\java\test\test-interactivestuff.refmap.json -AdefaultObfuscationEnv=named:intermediary -Aquiet=true -AoutMapFileNamedIntermediary=D:\Projects\Java\InteractiveStuff\fabric\build\loom-cache\mixin-map-loom.mappings.1_21_5.layered+hash.208643325-v2.test.tiny -AinMapFileNamedIntermediary=C:\Users\omart\.gradle\caches\fabric-loom\1.21.5\loom.mappings.1_21_5.layered+hash.208643325-v2\mappings.tiny" />
+    </option>
+  </component>
+</project>
