@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting Started — InteractiveStuff Docs</title>
+<meta name="description" content="Learn Vyn, the scripting language built into InteractiveStuff: where scripts live, the language basics, events, types and the notes that trip people up.">
+<meta name="theme-color" content="#0b100c">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Getting Started — InteractiveStuff Docs">
+<meta property="og:description" content="Learn Vyn, the scripting language built into InteractiveStuff: where scripts live, the language basics, events, types and the notes that trip people up.">
+<meta property="og:image" content="https://cdn.modrinth.com/data/KDfqMm8K/images/2714b211092aad9f171b34830bcf641bb069ca6e.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Getting Started — InteractiveStuff Docs">
+<meta name="twitter:description" content="Learn Vyn, the scripting language built into InteractiveStuff: where scripts live, the language basics, events, types and the notes that trip people up.">
+<meta name="twitter:image" content="https://cdn.modrinth.com/data/KDfqMm8K/images/2714b211092aad9f171b34830bcf641bb069ca6e.png">
+<link rel="icon" href="https://cdn.modrinth.com/data/KDfqMm8K/1983deb62ee8b3c0f8719d00bdf77f9fb32c6efd.png">
+<link rel="apple-touch-icon" href="https://cdn.modrinth.com/data/KDfqMm8K/1983deb62ee8b3c0f8719d00bdf77f9fb32c6efd.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <img src="https://cdn.modrinth.com/data/KDfqMm8K/1983deb62ee8b3c0f8719d00bdf77f9fb32c6efd.png" alt="InteractiveStuff logo">
+      <span>Interactive<em>Stuff</em></span>
+    </a>
+    <nav class="nav-links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="features.html">Features</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="install.html">Install</a>
+      <a href="docs.html">Docs</a>
+      <a href="api.html">API</a>
+      <a href="physics.html">Physics</a>
+      <a href="faq.html">FAQ</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="icon-btn nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <button class="icon-btn" data-theme-toggle aria-label="Switch to light mode"></button>
+      <a class="btn btn-primary btn-sm" href="https://modrinth.com/mod/interactivestuff" target="_blank" rel="noopener">Download</a>
+    </div>
+  </div>
+</header>
+<main>
+
+<section class="section" style="padding-top:50px">
+  <div class="wrap">
+    <div class="docs-layout">
+
+      <aside class="docs-side">
+        <h4>Getting Started</h4>
+        <a href="#overview">What is Vyn?</a>
+        <a href="#where">Where scripts live</a>
+        <a href="#first">Your first script</a>
+        <a href="#language">Language basics</a>
+        <a href="#events">Events</a>
+        <a href="#types">Types</a>
+        <a href="#notes">Notes to take care of</a>
+        <a href="#next">Next steps</a>
+        <h4>Reference</h4>
+        <a href="api.html">Full API reference</a>
+        <a href="physics.html">Physics Library</a>
+        <a href="https://github.com/Abdelaziz1586/Vyn" target="_blank" rel="noopener">Vyn engine ↗</a>
+        <a href="https://github.com/omardotcontent/InteractiveStuff/wiki" target="_blank" rel="noopener">Official wiki ↗</a>
+      </aside>
+
+      <div class="docs-main">
+
+        <h2 id="overview">What is Vyn?</h2>
+        <p>Starting in <strong>0.7</strong>, InteractiveStuff ships with <strong>Vyn</strong> — a built-in
+        scripting engine that lets resource pack creators script item rendering and behaviour any way they
+        want, <strong>with no Java required</strong>. Every built-in interaction in the mod is itself a Vyn
+        script, which means the whole feature set is readable and remixable.</p>
+        <p>Scripts interact with the game through <strong>VynTypes</strong> — objects that represent in-game
+        data like the player, blocks, sounds and the world. Each type exposes a set of
+        <strong>VynFunctions</strong> you call in your scripts. Vyn uses <code>make</code> to declare
+        variables, <code>check</code> for conditionals, <code>cycle</code> for loops and <code>task</code>
+        for functions.</p>
+        <div class="code-block"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="file">example.vyn</span></div><pre><code class="language-vyn">~ Basic example: tint the held item based on the block you&#x27;re standing on
+make block player.getSteppingBlock()
+make item player.getMainHandItem()
+check block.hasBlockTag(&quot;minecraft:logs&quot;) do
+    item.setColor(139, 90, 43)
+end</code></pre></div>
+
+        <h2 id="where">Where scripts live</h2>
+        <p>Scripts are plain text files with a <code>.vyn</code> extension inside a resource pack:</p>
+        <div class="code-block"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="file">pack layout</span></div><pre><code class="language-bash">my_resource_pack/
+├── pack.mcmeta
+└── assets/
+    └── minecraft/
+        └── scripts/
+            ├── my_first_script.vyn
+            └── physics_lib.vyn</code></pre></div>
+        <div class="note warn"><span class="note-title">Path changed</span><p>Scripts used to live in <code>assets/interactivestuff/scripts/</code>. As of the 0.7 snapshots the path is <code>assets/minecraft/scripts/</code> — if you're following an older tutorial, that's the thing that will silently break.</p></div>
+        <p>Pack IDs matter when you import. The bundled pack is
+        <code>interactivestuff:interactive_resourcepack</code>, so importing its physics library looks like
+        this:</p>
+        <div class="code-block"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="file">.vyn</span></div><pre><code class="language-vyn">importScript(&quot;interactivestuff:interactive_resourcepack&quot;, &quot;physics_lib&quot;)</code></pre></div>
+
+        <h2 id="first">Your first script</h2>
+        <p>Create <code>my_first_script.vyn</code> in your pack, drop the pack into your resource packs
+        folder, enable it, and press <kbd>F3</kbd> + <kbd>T</kbd> to reload. This script tints whatever
+        you're holding with the grass colour of the biome you're standing in:</p>
+        <div class="code-block"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="file">my_first_script.vyn</span></div><pre><code class="language-vyn">task onItemUpdate takes itemRendered do
+    check player.getGamemode() != &quot;spectator&quot; do
+        make color = player.getWorld().getGrassColor(player.getPosition())
+        itemRendered.setTint(color)
+    end
+end</code></pre></div>
+        <p>Nothing appeared? Turn on <strong>Resource Pack Debug Mode</strong> in the mod config —
+        <code>debugText</code> only renders when it's enabled.</p>
+
+        <h2 id="language">Language basics</h2>
+        <p>Vyn is small. This is essentially the whole language:</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Statement</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td><code>make x = value</code></td><td>Declare (or reassign) a variable.</td></tr>
+              <tr><td><code>lock X = value</code></td><td>Declare a constant. Used for tunables at the top of a file.</td></tr>
+              <tr><td><code>check cond do … end</code></td><td>If statement.</td></tr>
+              <tr><td><code>check cond do … otherwise … end</code></td><td>If / else.</td></tr>
+              <tr><td><code>cycle i from 0 to n do … end</code></td><td>Counting loop, inclusive.</td></tr>
+              <tr><td><code>escape</code></td><td>Break out of the current loop.</td></tr>
+              <tr><td><code>task name do … end</code></td><td>Define a function.</td></tr>
+              <tr><td><code>task name takes a, b do … end</code></td><td>Define a function with parameters.</td></tr>
+              <tr><td><code>reply value</code></td><td>Return a value from a function.</td></tr>
+              <tr><td><code>wait 20 do … end</code></td><td>Run a block after 20 ticks (1 second), in the background.</td></tr>
+              <tr><td><code>~ comment</code></td><td>A line comment. Vyn uses <code>~</code>, not <code>//</code>.</td></tr>
+              <tr><td><code>nothing</code></td><td>The null value. Compare with <code>x != nothing</code>.</td></tr>
+              <tr><td><code>new ItemModel("minecraft:book")</code></td><td>Construct a type. Also <code>new Position(x, y, z)</code>, <code>new Sound(id, vol, pitch, pos)</code>, <code>new Key()</code>.</td></tr>
+              <tr><td><code>new List</code></td><td>Create a list, then <code>myList.add(a, b, c)</code>, <code>myList.get(i)</code>, <code>myList.size()</code>, <code>myList.contains(x)</code>.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Operators &amp; built-ins</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Token</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>==</code> <code>!=</code> <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td><td>Comparison.</td></tr>
+              <tr><td><code>&amp;&amp;</code> <code>||</code> <code>!</code></td><td>And, or, not.</td></tr>
+              <tr><td><code>size(x)</code></td><td>Length of a list.</td></tr>
+              <tr><td><code>random()</code> / <code>random(a, b)</code></td><td>Random float 0–1, or a random integer in a range.</td></tr>
+              <tr><td><code>time()</code></td><td>Current time in milliseconds — handy for spinning animations.</td></tr>
+              <tr><td><code>sin(x)</code> <code>cos(x)</code></td><td>Trigonometry, in radians.</td></tr>
+              <tr><td><code>replace(str, from, to)</code></td><td>String replace — used everywhere for building model IDs.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="events">Events</h2>
+        <p>Events are just tasks with reserved names. Define one and Vyn calls it at the right time.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Event</th><th>Fires when</th></tr></thead>
+            <tbody>
+              <tr><td><code>task onTick do … end</code></td><td>Every game tick (20×/second). Use it for logic on a fixed schedule.</td></tr>
+              <tr><td><code>task onSwingHand do … end</code></td><td>The player swings their hand.</td></tr>
+              <tr><td><code>task onPlaySound takes sound do … end</code></td><td>The game plays a sound. You get the <code>Sound</code> before it plays.</td></tr>
+              <tr><td><code>task onItemUpdate takes itemRendered do … end</code></td><td>Every render frame, for each item being rendered. <strong>The</strong> event for transforms, physics and colours.</td></tr>
+              <tr><td><code>task onKeyPress takes keyInput do … end</code></td><td>A key is pressed. <code>keyInput</code> is the integer key code.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note warn"><span class="note-title">Guard your render events</span><p>Always guard <code>onItemUpdate</code> with <code>check player.getGamemode() != "spectator" do … end</code> so your logic doesn't run while spectating.</p></div>
+
+        <h2 id="types">Types</h2>
+        <p>Nine types are available globally, plus one documented from the source. Click through for the
+        full reference:</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Type</th><th>Instance</th><th>What it gives you</th></tr></thead>
+            <tbody>
+              <tr><td><a href="api.html#block">Block</a></td><td><code>block</code></td><td>State, position, light levels and properties of a block.</td></tr>
+              <tr><td><a href="api.html#itemmodel">ItemModel</a></td><td><code>itemRendered</code></td><td>Transform, colour, lighting, tint and data components of a rendered item.</td></tr>
+              <tr><td><a href="api.html#player">Player</a></td><td><code>player</code></td><td>Position, health, held items, movement state, sounds.</td></tr>
+              <tr><td><a href="api.html#world">World</a></td><td><code>world</code></td><td>Blocks, biomes, time, dimension and colours.</td></tr>
+              <tr><td><a href="api.html#position">Position</a></td><td><code>pos</code></td><td>An integer X/Y/Z coordinate.</td></tr>
+              <tr><td><a href="api.html#sound">Sound</a></td><td><code>snd</code></td><td>A sound with ID, volume, pitch and optional position.</td></tr>
+              <tr><td><a href="api.html#modloader">ModLoader</a></td><td><code>modLoader</code></td><td>Loaded mods, active resource packs, game version.</td></tr>
+              <tr><td><a href="api.html#config">InteractiveStuffConfig</a></td><td><code>config</code></td><td>The player's current mod settings.</td></tr>
+              <tr><td><a href="api.html#key">Key</a></td><td><code>keyHelper</code></td><td>Resolve Minecraft translation keys.</td></tr>
+              <tr><td><a href="api.html#isp">ISP</a></td><td><code>isp</code></td><td>Hand checks and camera velocity — used throughout the built-in pack.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note info"><p><strong>Alias tip:</strong> the shipped scripts call
+        <code>player.getGameMode()</code> while the wiki documents <code>player.getGamemode()</code>. Both
+        work — pick one and stay consistent.</p></div>
+
+        <h2 id="notes">Notes to take care of</h2>
+        <ul>
+          <li><strong>Add Pack IDs before the file/pack file name</strong> for functions that take one —
+          e.g. <code>importScript("mypack", "math_utils")</code>.</li>
+          <li><strong>Always keep the InteractiveStuff resource pack at the bottom</strong> of the pack list
+          before using other resource packs that rely on its importable scripts.</li>
+          <li><strong>It's not a first-person animation mod</strong> — it's a first-person
+          <em>item interactions</em> mod. Set expectations accordingly.</li>
+        </ul>
+
+        <h2 id="next">Next steps</h2>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="api.html"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2 2 2-2 2 1.5 1.5-2.5 2.5-1.5-1.5-2 2"/></svg> Browse the API reference</a>
+          <a class="btn btn-ghost" href="physics.html"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/></svg> Physics Library</a>
+          <a class="btn btn-ghost" href="features.html"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M17.7 6.3l-2.8 2.8M9.1 14.9l-2.8 2.8"/></svg> Built-in scripts</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="index.html">
+          <img src="https://cdn.modrinth.com/data/KDfqMm8K/1983deb62ee8b3c0f8719d00bdf77f9fb32c6efd.png" alt="InteractiveStuff logo">
+          <span>Interactive<em>Stuff</em></span>
+        </a>
+        <p class="small muted">The First-Person Item Interactions Mod. A client-side Fabric mod for
+        Minecraft 1.21.10+ that makes the items in your hand part of the world.</p>
+        <div class="socials">
+          <a href="https://discord.gg/8Ap2gGaKbw" target="_blank" rel="noopener" title="Discord" aria-label="Discord">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.32 4.37a19.79 19.79 0 0 0-4.89-1.52.07.07 0 0 0-.08.04c-.21.37-.44.86-.6 1.25a18.27 18.27 0 0 0-5.49 0c-.17-.39-.4-.88-.62-1.25a.08.08 0 0 0-.08-.04 19.74 19.74 0 0 0-4.88 1.52.07.07 0 0 0-.04.03C.53 9.05-.32 13.58.1 18.06a.08.08 0 0 0 .03.05 19.9 19.9 0 0 0 5.99 3.03.08.08 0 0 0 .09-.03c.46-.63.87-1.3 1.22-1.99a.08.08 0 0 0-.04-.11c-.65-.24-1.27-.55-1.87-.89a.08.08 0 0 1 0-.13l.37-.29a.07.07 0 0 1 .08-.01 14.2 14.2 0 0 0 12.06 0 .07.07 0 0 1 .08.01l.37.3a.08.08 0 0 1 0 .12c-.6.35-1.22.65-1.87.9a.08.08 0 0 0-.04.1c.36.7.78 1.36 1.23 1.99a.08.08 0 0 0 .08.03 19.84 19.84 0 0 0 6-3.03.08.08 0 0 0 .03-.05c.5-5.18-.84-9.68-3.55-13.66a.06.06 0 0 0-.03-.03zM8.02 15.33c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.34-.96 2.42-2.16 2.42zm7.97 0c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.34-.95 2.42-2.16 2.42z"/></svg>
+          </a>
+          <a href="https://modrinth.com/mod/interactivestuff" target="_blank" rel="noopener" title="Modrinth" aria-label="Modrinth">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9z"/><path d="M8 16V8l4 5 4-5v8"/></svg>
+          </a>
+          <a href="https://www.curseforge.com/minecraft/mc-mods/interactivestuff" target="_blank" rel="noopener" title="CurseForge" aria-label="CurseForge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 9h18l-2 4H5z"/><path d="M7 13h10v3.5H7z"/><path d="M9.5 16.5h5V21h-5z"/></svg>
+          </a>
+          <a href="https://github.com/omardotcontent/InteractiveStuff" target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.9 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.5 4.7 18.5 5 18.5 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>
+          </a>
+          <a href="https://ko-fi.com/omardotcontent" target="_blank" rel="noopener" title="Ko-fi" aria-label="Ko-fi">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 9h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M7 2v2M11 2v2M15 2v2"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4>The Mod</h4>
+        <a href="index.html">Home</a>
+        <a href="features.html">Features</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="install.html">Install</a>
+        <a href="faq.html">FAQ</a>
+      </div>
+      <div>
+        <h4>Documentation</h4>
+        <a href="docs.html">Getting Started</a>
+        <a href="api.html">Vyn API Reference</a>
+        <a href="physics.html">Physics Library</a>
+        <a href="https://github.com/omardotcontent/InteractiveStuff/wiki" target="_blank" rel="noopener">Official Wiki ↗</a>
+        <a href="https://github.com/omardotcontent/InteractiveStuff" target="_blank" rel="noopener">Source Code ↗</a>
+      </div>
+      <div>
+        <h4>Community</h4>
+        <a href="https://discord.gg/8Ap2gGaKbw" target="_blank" rel="noopener">Discord</a>
+        <a href="https://modrinth.com/mod/interactivestuff" target="_blank" rel="noopener">Modrinth</a>
+        <a href="https://www.curseforge.com/minecraft/mc-mods/interactivestuff" target="_blank" rel="noopener">CurseForge</a>
+        <a href="https://modrinth.com/collection/DRSHO9SM" target="_blank" rel="noopener">Recommended Packs</a>
+        <a href="https://ko-fi.com/omardotcontent" target="_blank" rel="noopener">Support on Ko-fi</a>
+      </div>
+    </div>
+    <div class="footer-bot">
+      <span>© 2026 Omar Mohamed. All Rights Reserved.</span>
+      <span>GET IN TOUCH — <a href="mailto:omar@merakistudios.dev">omar@merakistudios.dev</a></span>
+    </div>
+  </div>
+</footer>
+<button id="to-top" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+<script src="assets/js/site.js"></script>
+
+</body>
+</html>

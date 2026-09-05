@@ -1,0 +1,52 @@
+# Deploys the static site in /docs to GitHub Pages.
+#
+# Setup (one time):
+#   Repo → Settings → Pages → Source: "GitHub Actions"
+#
+# The site is plain static HTML, so it can also be uploaded to Netlify,
+# Cloudflare Pages or any other host by pointing it at the /docs folder.
+
+name: Deploy site
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - 1.21.5
+    paths:
+      - "docs/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Don't cancel an in-flight deploy — let it finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
