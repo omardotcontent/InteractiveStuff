@@ -1,0 +1,93 @@
+package omar.projects.interactivestuff.handlers;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import omar.projects.interactivestuff.handlers.config.ConfigHandler;
+import omar.projects.interactivestuff.objects.InteractionMaterial;
+import omar.projects.interactivestuff.scripts.ScriptInterpreter;
+
+import java.util.Random;
+
+public final class InteractionHandler {
+
+    private static final InteractionHandler INSTANCE = new InteractionHandler();
+    private static final String COOLDOWN_ID = "SwingSoundCooldown";
+    private static final Random RANDOM = new Random();
+
+    private InteractionHandler() {
+    }
+
+    public static InteractionHandler getInstance() {
+        return INSTANCE;
+    }
+
+    public void handleBlockInteraction(final Minecraft client, final InteractionHand hand) {
+        if (BackgroundLoopHandler.getInstance().isLoopRunning(COOLDOWN_ID)) {
+            return;
+        }
+
+        final LocalPlayer player = client.player;
+        if (player == null) {
+            return;
+        }
+
+        final MobEffectInstance haste = player.getEffect(MobEffects.HASTE);
+        final MobEffectInstance conduit = player.getEffect(MobEffects.CONDUIT_POWER);
+        final int amplifier = (haste != null ? haste.getAmplifier() + 1 : 0) + (conduit != null ? conduit.getAmplifier() + 1 : 0);
+
+        BackgroundLoopHandler.getInstance().waitTicks(COOLDOWN_ID, Math.max(0, (ConfigHandler.INSTANCE.HitCooldownTicks) - amplifier), () -> {});
+
+        final ConfigHandler config = ConfigHandler.INSTANCE;
+        ScriptInterpreter.onSwingHand();
+
+        if (!config.enableInteractiveHits) {
+            return;
+        }
+
+        if (player.isSpectator() || player.gameMode() == GameType.ADVENTURE) {
+            return;
+        }
+
+        final ItemStack stack = player.getItemInHand(hand);
+        final InteractionMaterial material = config.getMaterial(stack.getItem());
+        if (material == null) {
+            return;
+        }
+
+        if (client.level == null) {
+            return;
+        }
+
+        try {
+            final BlockHitResult blockHit = (BlockHitResult) client.hitResult;
+            if (blockHit == null) {
+                return;
+            }
+            if (config.isExcluded(client.level.getBlockState(blockHit.getBlockPos()).getBlock())) {
+                return;
+            }
+        } catch (final Exception ignored) {
+            return;
+        }
+
+        if (material.requiresBlockHit) {
+            if (client.hitResult == null || client.hitResult.getType() == HitResult.Type.MISS) {
+                return;
+            }
+        }
+
+        final float basePitch = material.getPitch(stack);
+        final float pitch = material.randomPitch ? basePitch + (RANDOM.nextFloat() * 1.5F) : basePitch;
+
+        client.level.playPlayerSound(material.getSoundEvent(), SoundSource.BLOCKS, material.volume, pitch);
+    }
+
+}

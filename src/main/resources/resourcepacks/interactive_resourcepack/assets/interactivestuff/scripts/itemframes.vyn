@@ -1,0 +1,33 @@
+importScript("interactivestuff:interactive_resourcepack","physics_lib")
+
+lock FRAME_ITEMS = new List
+FRAME_ITEMS.add("minecraft:item_frame", "minecraft:glow_item_frame", "minecraft:painting", "minecraft:oak_hanging_sign", "minecraft:spruce_hanging_sign", "minecraft:birch_hanging_sign", "minecraft:jungle_hanging_sign", "minecraft:acacia_hanging_sign", "minecraft:dark_oak_hanging_sign", "minecraft:crimson_hanging_sign", "minecraft:warped_hanging_sign", "minecraft:cherry_hanging_sign", "minecraft:mangrove_hanging_sign", "minecraft:pale_oak_hanging_sign", "minecraft:bamboo_hanging_sign")
+
+task onItemUpdate takes itemRendered do
+    check player.getGamemode() != "spectator" && isFrame(itemRendered) do
+        check !modLoader.isModLoaded("holdmyitems") do
+            runPhysicsEngine(0.01, 0.1, 0.6, 0.3, 0.2, 0.8, 60, 0)
+            itemRendered.setPivot(0, 0.4, 0)
+            itemRendered.rotate(angleX, 0, -angleZ)
+
+            check itemRendered.isMainHand() do
+				check !modLoader.isModLoaded("punchy") do
+					itemRendered.rotateY(65)
+					itemRendered.rotateX(25)
+				end
+            otherwise
+				check !modLoader.isModLoaded("punchy") do
+					itemRendered.rotateY(-65)
+					itemRendered.rotateX(25)
+				end
+            end
+			check modLoader.isModLoaded("punchy") do
+				itemRendered.translate(0,-0.6,0)
+			end
+        end
+    end
+end
+
+task isFrame takes item do
+    reply FRAME_ITEMS.contains(item.getName())
+end

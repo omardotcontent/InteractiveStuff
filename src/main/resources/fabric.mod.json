@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "interactivestuff",
+  "version": "${version}",
+  "name": "InteractiveStuff",
+  "description": "The First-Person Item Interactions Mod!",
+  "authors": [
+    "OmarDotContent"
+  ],
+  "contact": {
+    "homepage": "https://omardotcontent.github.io/"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "omar.projects.interactivestuff.ISClient"
+    ],
+    "main": [
+      "omar.projects.interactivestuff.IS"
+    ],
+    "modmenu": [
+      "omar.projects.interactivestuff.handlers.config.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "interactivestuff.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=${minecraft_version}",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*",
+    "yacl": "*"
+  }
+}

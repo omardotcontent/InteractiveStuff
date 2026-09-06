@@ -1,0 +1,6 @@
+{
+	"parent": "interactivestuff:item/chest_base",
+	"textures": {
+		"0": "interactivestuff:item/chest_copper_weathered"
+	}
+}

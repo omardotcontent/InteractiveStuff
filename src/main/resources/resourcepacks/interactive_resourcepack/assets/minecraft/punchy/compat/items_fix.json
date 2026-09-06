@@ -1,0 +1,18 @@
+{
+  "customGroups": [
+    {
+      "name": "ITEMS",
+      "items": [
+        "minecraft:sculk_sensor"
+      ]
+    }
+  ],
+  "item": {
+    "ITEMS": {
+      "transforms": {
+        "right": { "offY": 0.2, "scale": 1.0 },
+        "left": { "offY": 0.2, "scale": 1.0  }
+      }
+    }
+  }
+}

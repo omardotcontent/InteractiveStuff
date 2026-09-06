@@ -1,0 +1,17 @@
+task onItemUpdate takes itemRendered do
+    check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
+        check isItemleaves(itemRendered) do
+            itemRendered.setItemModel(itemRendered.getName())
+
+            itemRendered.setTint(0,player.getWorld().getFoliageColor(player.getSteppingBlock().getPosition()))
+        end
+        check itemRendered.getName() == "minecraft:grass_block" do
+            itemRendered.setItemModel(itemRendered.getName())
+            itemRendered.setTint(player.getWorld().getGrassColor(player.getSteppingBlock().getPosition()))
+        end
+    end
+end
+
+task isItemleaves takes item do
+    reply item.getName() == "minecraft:oak_leaves" || item.getName() == "minecraft:spruce_leaves" || item.getName() == "minecraft:jungle_leaves" || item.getName() == "minecraft:acacia_leaves" || item.getName() == "minecraft:dark_oak_leaves"
+end

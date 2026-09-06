@@ -1,0 +1,49 @@
+{
+  "customGroups": [
+    {
+      "name": "FRAME_ITEMS",
+      "items": [
+        "minecraft:item_frame",
+        "minecraft:glow_item_frame",
+        "minecraft:painting",
+        "minecraft:oak_hanging_sign",
+        "minecraft:spruce_hanging_sign",
+        "minecraft:birch_hanging_sign",
+        "minecraft:jungle_hanging_sign",
+        "minecraft:acacia_hanging_sign",
+        "minecraft:dark_oak_hanging_sign",
+        "minecraft:crimson_hanging_sign",
+        "minecraft:warped_hanging_sign",
+        "minecraft:cherry_hanging_sign",
+        "minecraft:mangrove_hanging_sign",
+        "minecraft:pale_oak_hanging_sign",
+        "minecraft:bamboo_hanging_sign"
+      ]
+    }
+  ],
+  "item": {
+    "FRAME_ITEMS": {
+      "armTransforms": {
+        "right": { "offY": -0.4, "scale": 1.0 },
+        "left": { "offY": -0.4 , "scale":  1.0 }
+      }
+    }
+  },
+  "itemSpecific": {
+    "minecraft:item_frame": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:glow_item_frame": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:painting": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:oak_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:spruce_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:birch_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:jungle_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:acacia_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:dark_oak_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:crimson_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:warped_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:cherry_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:mangrove_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:pale_oak_hanging_sign": { "armKind": "BLOCK_DOUBLE" },
+    "minecraft:bamboo_hanging_sign": { "armKind": "BLOCK_DOUBLE" }
+  }
+}

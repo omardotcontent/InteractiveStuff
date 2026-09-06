@@ -1,0 +1,95 @@
+make chestProgress = 0
+make enderProgress = 0
+make trappedProgress = 0
+make copperProgress = 0
+make exposedProgress = 0
+make weatheredProgress = 0
+make oxidizedProgress = 0
+
+task onItemUpdate takes itemRendered do
+
+    make chestTop = nothing
+    make openProgress = 0
+
+    check itemRendered.getName() == "minecraft:chest" do
+        itemRendered.setItemModel("interactivestuff:chest_base")
+        make chestTop = new ItemModel("minecraft:chest")
+        chestTop.setItemModel("interactivestuff:chest_top")
+        make chestProgress = chestTop.smooth(chestProgress, getFallTarget(), 0.2)
+        make openProgress = chestProgress
+    end
+
+    check itemRendered.getName() == "minecraft:ender_chest" do
+        itemRendered.setItemModel("interactivestuff:ender_chest_base")
+        make chestTop = new ItemModel("minecraft:ender_chest")
+        chestTop.setItemModel("interactivestuff:ender_chest_top")
+        make enderProgress = chestTop.smooth(enderProgress, getFallTarget(), 0.2)
+        make openProgress = enderProgress
+    end
+
+    check itemRendered.getName() == "minecraft:trapped_chest" do
+        itemRendered.setItemModel("interactivestuff:trapped_chest_base")
+        make chestTop = new ItemModel("minecraft:trapped_chest")
+        chestTop.setItemModel("interactivestuff:trapped_chest_top")
+        make trappedProgress = chestTop.smooth(trappedProgress, getFallTarget(), 0.2)
+        make openProgress = trappedProgress
+    end
+
+    check itemRendered.getName() == "minecraft:copper_chest" || itemRendered.getName() == "minecraft:waxed_copper_chest" do
+        itemRendered.setItemModel("interactivestuff:copper_chest_base")
+        make chestTop = new ItemModel("minecraft:copper_chest")
+        chestTop.setItemModel("interactivestuff:copper_chest_top")
+        make copperProgress = chestTop.smooth(copperProgress, getFallTarget(), 0.2)
+        make openProgress = copperProgress
+    end
+
+    check itemRendered.getName() == "minecraft:exposed_copper_chest" || itemRendered.getName() == "minecraft:waxed_exposed_copper_chest" do
+        itemRendered.setItemModel("interactivestuff:exposed_copper_chest_base")
+        make chestTop = new ItemModel("minecraft:exposed_copper_chest")
+        chestTop.setItemModel("interactivestuff:exposed_copper_chest_top")
+        make exposedProgress = chestTop.smooth(exposedProgress, getFallTarget(), 0.2)
+        make openProgress = exposedProgress
+    end
+
+    check itemRendered.getName() == "minecraft:weathered_copper_chest" || itemRendered.getName() == "minecraft:waxed_weathered_copper_chest" do
+        itemRendered.setItemModel("interactivestuff:weathered_copper_chest_base")
+        make chestTop = new ItemModel("minecraft:weathered_copper_chest")
+        chestTop.setItemModel("interactivestuff:weathered_copper_chest_top")
+        make weatheredProgress = chestTop.smooth(weatheredProgress, getFallTarget(), 0.2)
+        make openProgress = weatheredProgress
+    end
+
+    check itemRendered.getName() == "minecraft:oxidized_copper_chest" || itemRendered.getName() == "minecraft:waxed_oxidized_copper_chest" do
+        itemRendered.setItemModel("interactivestuff:oxidized_copper_chest_base")
+        make chestTop = new ItemModel("minecraft:oxidized_copper_chest")
+        chestTop.setItemModel("interactivestuff:oxidized_copper_chest_top")
+        make oxidizedProgress = chestTop.smooth(oxidizedProgress, getFallTarget(), 0.2)
+        make openProgress = oxidizedProgress
+    end
+
+    check chestTop == nothing do
+        reply nothing
+    otherwise
+		chestTop.setParent(itemRendered)
+	end
+
+    check itemRendered.isMainHand() do
+        chestTop.setPivot(0.12, 0.17, -0.063)
+        chestTop.rotateAxis(-90 * (openProgress / 100), 1, 0, 1.25)
+    otherwise
+        chestTop.setPivot(-0.12, 0.17, -0.063)
+        chestTop.rotateAxis(-90 * (openProgress / 100), 1, 0, -1.25)
+    end
+end
+
+task getFallTarget do
+    make vy = player.getVelocityY()
+    make fallTarget = vy * -100
+    check fallTarget > 100 do
+        make fallTarget = 100
+    end
+    check fallTarget < -7 do
+        make fallTarget = -7
+    end
+    reply fallTarget
+end

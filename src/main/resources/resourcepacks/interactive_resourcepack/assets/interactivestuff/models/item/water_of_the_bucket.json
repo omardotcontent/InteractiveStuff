@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "interactivestuff:item/water_of_the_bucket"
+  }
+}

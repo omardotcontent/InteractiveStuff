@@ -1,0 +1,11 @@
+task onItemUpdate takes itemRendered do
+    check player.getGamemode() != "spectator" do
+        check itemRendered.getName() == "minecraft:redstone_lamp" && player.getSteppingBlock().getName() == "minecraft:redstone_block" && player.isSneaking() do
+            itemRendered.setItemModel("interactivestuff:redstone_lamp_on")
+            itemRendered.setLight(15)
+        end
+        check itemRendered.getName() == "minecraft:redstone_torch" && player.getSteppingBlock().getName() == "minecraft:redstone_block" && player.isSneaking() do
+            itemRendered.setItemModel("interactivestuff:redstone_torch_off")
+        end
+    end
+end

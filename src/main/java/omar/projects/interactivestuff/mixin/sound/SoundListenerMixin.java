@@ -1,0 +1,40 @@
+package omar.projects.interactivestuff.mixin.sound;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.sounds.SoundEngine;
+import net.minecraft.sounds.SoundSource;
+import omar.projects.interactivestuff.scripts.ScriptInterpreter;
+import omar.projects.interactivestuff.scripts.variables.Position;
+import omar.projects.interactivestuff.scripts.variables.Sound;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+
+@Environment(EnvType.CLIENT)
+@Mixin(SoundEngine.class)
+public abstract class SoundListenerMixin {
+
+    @Unique
+    private final Minecraft client = Minecraft.getInstance();
+
+    @Inject(method = "play", at = @At("TAIL"))
+    private void interactivestuff$play(final SoundInstance sound, CallbackInfoReturnable<SoundEngine.PlayResult> cir) {
+        if (client.player == null || client.level == null) {
+            return;
+        }
+        if (sound.getSound() == null || sound.getSource() == SoundSource.UI || sound.getSource() == SoundSource.AMBIENT) {
+            return;
+        }
+        ScriptInterpreter.onPlaySound(new Sound(
+                sound.getIdentifier().toString(),
+                sound.getVolume(),
+                sound.getPitch(),
+                new Position((int) sound.getX(), (int) sound.getY(), (int) sound.getZ())));
+    }
+}
