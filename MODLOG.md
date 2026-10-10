@@ -47,3 +47,12 @@
 - Bumped the shared mod version from 0.7.1 to 0.8.0 to reflect the overhaul since 0.7.0.
 - Added a user-facing changelog and rebuilt the eight supported Minecraft targets.
 - Release artifacts and SHA-256 checksums are generated from the final 0.8.0 builds.
+
+## Mod Menu / YACL settings fix (0.8.0, unpublished)
+
+- User reported that the settings button stayed in Mod Menu with Mod Menu and YACL installed. The shared availability check and optional dependency metadata incorrectly named YACL as `yacl`; its real Fabric mod ID is `yet_another_config_lib_v3` in all six dependency profiles.
+- Reproduced with actual Mod Menu/YACL on Minecraft 26.2: the registered IS factory returned the parent instead of a configuration screen. The native test failed with `installed YACL opens a configuration screen`.
+- Corrected the runtime check and optional dependency hint. Added development-only optional integrations and a native settings-screen fixture to every target.
+- User requested keeping 0.8.0 because it has not been uploaded.
+- The missing-YACL fixture reproduced a second error: Mod Menu could not register IS because entrypoint verification loaded `dev.isxander.yacl3.api.Option` before the guard. Moved the unchanged YACL screen-building code into a separately loaded `YaclConfigScreen`; the Mod Menu entrypoint references only Mod Menu/Fabric types until the presence check succeeds.
+- Final local validation: all eight builds passed 67 shared regression checks and actual Mod Menu/YACL screen opening, rendering and return-navigation checks, alongside the native render/lifecycle suite. Java 21/1.21.5 and Java 25/26.2 also passed with Mod Menu alone. CI now covers both combinations in separate test directories.
