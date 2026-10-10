@@ -32,6 +32,11 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: xvfb-run -a bash ./gradlew --no-daemon runClientGameTest
+      - name: Test Mod Menu without YACL
+        timeout-minutes: 5
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a bash ./gradlew --no-daemon -Pconfig_screen_test_yacl=false runClientGameTest
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -45,6 +50,6 @@ jobs:
         with:
           name: Client-tests-${{ github.sha }}
           path: |
-            build/*/*/run/clientGameTest/screenshots/
-            build/*/*/run/clientGameTest/logs/
-            build/*/*/run/clientGameTest/crash-reports/
+            build/*/*/run/clientGameTest*/screenshots/
+            build/*/*/run/clientGameTest*/logs/
+            build/*/*/run/clientGameTest*/crash-reports/

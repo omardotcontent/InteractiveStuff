@@ -42,3 +42,17 @@ Dependency profiles were resolved against the published releases and compiled/ru
 GitHub Actions runs build and isolated client checks for each version branch default; screenshots/logs are uploaded as diagnostic artifacts.
 
 Additional CI-environment validation: 1.21.10 and 1.21.11 passed their native suites with the test packet synchronizer disabled; 26.3 passed on Mesa llvmpipe 25.2.8/OpenGL 4.5 using EGL. The CI setup and initial diagnostic failures are documented in [VERSION_PORTING.md](VERSION_PORTING.md#ci-client-execution).
+
+## Mod Menu / YACL settings verification
+
+The shared settings factory originally checked `yacl` rather than YACL's actual Fabric ID, `yet_another_config_lib_v3`. A 26.2 client with both integrations installed reproduced the failure: Mod Menu's registered factory returned the parent screen. The missing-YACL test then reproduced a `NoClassDefFoundError` while Mod Menu loaded the entrypoint.
+
+The corrected factory uses the actual mod ID and loads the separate YACL screen builder only after the presence check. Optional dependency metadata uses the same ID. The existing options and bindings were preserved during extraction.
+
+All eight Minecraft targets passed `build runClientGameTest` with their actual Mod Menu and YACL versions. The fixture uses Mod Menu's registered IS factory, opens the actual screen in Minecraft, checks its title, renders it, captures a screenshot and verifies that closing settings returns to Mod Menu. The rendering/lifecycle suite and all 67 shared regression checks also passed.
+
+Additional native runs passed on Java 21/Minecraft 1.21.5 and Java 25/Minecraft 26.2 with Mod Menu installed and YACL absent. These verify factory registration and the missing-library branch without launching an external file manager. The entrypoint remains usable without loading YACL classes.
+
+CI exercises both dependency combinations for every branch default. Missing-YACL runs use the separate `clientGameTestWithoutYacl` directory; diagnostics from both modes are uploaded. Development-only `localRuntime`/`modLocalRuntime` dependencies are excluded from publication and release JARs.
+
+The user confirmed that 0.8.0 has not been uploaded and requested keeping that version. The upload bundle and checksums were refreshed with the corrected builds.

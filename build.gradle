@@ -7,6 +7,7 @@ plugins {
 
 // Select one target per Gradle invocation so Loom never mixes Minecraft classpaths.
 def selectedTarget = providers.gradleProperty("target_version").get()
+def configScreenTestYacl = providers.gradleProperty("config_screen_test_yacl").getOrElse("true").toBoolean()
 def profileFile = file("versions/${selectedTarget}/version.properties")
 if (!profileFile.isFile()) throw new GradleException("Unknown target ${selectedTarget}; see versions/")
 def profile = new Properties()
@@ -51,11 +52,19 @@ dependencies {
         modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
         modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
         modCompileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+        // Exercise optional settings integrations in development and client tests.
+        // localRuntime dependencies are excluded from publication and the release JAR.
+        modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
+        if (configScreenTestYacl)
+            modLocalRuntime "dev.isxander:yet-another-config-lib:${project.yacl_version}"
     } else {
         implementation "net.fabricmc:fabric-loader:${project.loader_version}"
         implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
         compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
         compileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+        localRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
+        if (configScreenTestYacl)
+            localRuntime "dev.isxander:yet-another-config-lib:${project.yacl_version}"
     }
 
     implementation files("libs/Vyn.jar")
@@ -142,8 +151,10 @@ fabricApi.configureTests {
     enableClientGameTests = true
     eula = false
 }
+sourceSets.gametest.compileClasspath += sourceSets.main.compileClasspath
+def clientTestDirectory = configScreenTestYacl ? "clientGameTest" : "clientGameTestWithoutYacl"
 loom.runs.named("clientGameTest") {
-    runDir("build/${selectedTarget}/${project.minecraft_version}/run/clientGameTest")
+    runDir("build/${selectedTarget}/${project.minecraft_version}/run/${clientTestDirectory}")
 }
 
 
@@ -160,7 +171,7 @@ tasks.register("verifyReleaseJar") {
              "LICENSE.txt_${project.base.archivesName.get()}"].each { required ->
                 if (!entries.contains(required.toString())) throw new GradleException("Release JAR is missing ${required}")
             }
-            if (entries.any { it.startsWith("net/minecraft/") || it.contains("ClientRenderChecks") || it.contains("RuntimeRegressionChecks") }) {
+            if (entries.any { it.startsWith("net/minecraft/") || it.contains("ClientRenderChecks") || it.contains("ClientConfigScreenChecks") || it.contains("ClientStateChecks") || it.contains("RuntimeRegressionChecks") }) {
                 throw new GradleException("Release JAR contains game or test classes")
             }
             entries.findAll { it.endsWith(".class") }.each { path ->
