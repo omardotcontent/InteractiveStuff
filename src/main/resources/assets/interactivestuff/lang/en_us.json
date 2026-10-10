@@ -65,7 +65,15 @@
   "interactive_stuff.config.settings.rps.matrix": "Resource Pack Matrix Mode.",
   "interactive_stuff.config.settings.rps.matrix.tooltip": "Makes the Items Move,Scale & Rotate",
   "interactive_stuff.config.settings.rps.color": "Resource Pack Color Rendering.",
-  "interactive_stuff.config.settings.rps.color.tooltip": "Allows the items to render with their modified colors. (Tints, etc)"
+  "interactive_stuff.config.settings.rps.color.tooltip": "Allows the items to render with their modified colors. (Tints, etc)",
 
-
+  "interactive_stuff.config.settings.particles": "First-person particles",
+  "interactive_stuff.config.settings.particles.enabled": "Enable particles",
+  "interactive_stuff.config.settings.particles.density": "Particle density (%)",
+  "interactive_stuff.config.settings.particles.density.tooltip": "Scales script emission rates and bursts. 100% uses the pack settings.",
+  "interactive_stuff.config.settings.particles.limit": "Maximum active particles",
+  "interactive_stuff.config.settings.particles.limit.tooltip": "Shared limit across both hands. New particles are dropped when the limit is reached.",
+  "interactive_stuff.config.settings.particles.counters": "Show particle counters",
+  "interactive_stuff.config.settings.particles.markers": "Show emitter origins",
+  "interactive_stuff.config.settings.particles.markers.tooltip": "Green marks the main hand and orange marks the off hand. Markers only appear in first person."
 }

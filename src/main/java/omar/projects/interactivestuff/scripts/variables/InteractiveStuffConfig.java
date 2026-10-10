@@ -6,6 +6,9 @@ import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 
 @VynType(name = "InteractiveStuffConfig")
 public final class InteractiveStuffConfig {
+    @VynFunc public boolean isParticlesEnabled() { return ConfigHandler.INSTANCE.enableParticles; }
+    @VynFunc public int getParticleLimit() { return ConfigHandler.INSTANCE.particleLimit; }
+    @VynFunc public int getParticleDensity() { return ConfigHandler.INSTANCE.particleDensity; }
 
     @VynFunc
     public boolean isResourcePackDebugModeEnabled () {return ConfigHandler.INSTANCE.resourcePackDebugMode;}

@@ -96,3 +96,7 @@ The paths follow `mod_version` if it changes. This task refreshes the upload bun
 Development clients use separate `run/<minecraft>/` directories. These survive `clean` and `cleanAll`. Existing saves in the old root `run/` folder remain there; copy a wanted save into the appropriate version's `saves` folder if needed. Native client tests retain their resettable `build/<profile>/<minecraft>/run/clientGameTest*` directories.
 
 One checkout on `main` can edit and build all versions. Commit shared changes and any required adapters together. Feature branches start from `main` and return to `main`; there is no separate version-branch synchronization step.
+
+## Editing Vyn particle effects
+
+Edit the shared `.vyn` scripts under `src/main/resources/resourcepacks/interactive_resourcepack/assets/interactivestuff/scripts/`. Emitter globals and `onItemUpdate` attachment follow the existing item scripting style. See [VYN_PARTICLES.md](VYN_PARTICLES.md) for a copyable example and all setters. Shared simulation is in `src/main/java/omar/projects/interactivestuff/particles`; native rendering adapters remain in the version folders.

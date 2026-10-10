@@ -10,6 +10,10 @@ One Gradle/IDE workspace supports Minecraft **1.21.5, 1.21.10, 1.21.11, 26.1, 26
 
 **`main` is the development branch for every supported version.** Previous version branches are preserved under `archive/`. Work in this one checkout and select Minecraft versions with Gradle commands; see [the repository workflow](docs/REPOSITORY_WORKFLOW.md).
 
+## Vyn particles
+
+Script first-person effects with persistent `ParticleEmitter` objects: vanilla/custom textures, bursts, motion, attachment, depth, lifetime easing/keyframes and optional particle callbacks. The bundled pack includes torch flame/smoke, enchanting glyphs and active sculk-sensor effects. See [the particle API and examples](docs/VYN_PARTICLES.md).
+
 ## IDE setup
 
 Open the repository root in IntelliJ IDEA as a Gradle project. Use Java 25 for Gradle and install a Java 21 JDK for the 1.21 modules. Reload Gradle and run:

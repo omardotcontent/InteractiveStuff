@@ -3,6 +3,28 @@ lock interactiveItems = ["minecraft:campfire", "minecraft:torch", "minecraft:red
 lock HOT_ITEMS = new List
 HOT_ITEMS.add("minecraft:campfire", "minecraft:torch", "minecraft:redstone_torch", "minecraft:soul_campfire", "minecraft:soul_torch", "minecraft:wall_torch", "minecraft:copper_torch")
 
+
+make flameParticles = new ParticleEmitter("minecraft:flame")
+flameParticles.setPosition(0.5, 0.655, 0.5)
+flameParticles.setSpread(0.02, 0.015, 0.02)
+flameParticles.setLifetime(8)
+flameParticles.setVelocity(0, 0.012, 0)
+flameParticles.setSizeOverLife(0.08, 0.025, "easeOutQuad")
+flameParticles.setOpacityOverLife(0.9, 0, "easeInQuad")
+flameParticles.setLight(15)
+flameParticles.setAttached(true)
+
+make smokeParticles = new ParticleEmitter("minecraft:smoke")
+smokeParticles.setPosition(0.5, 0.71, 0.5)
+smokeParticles.setSpread(0.025, 0.015, 0.025)
+smokeParticles.setLifetime(26)
+smokeParticles.setVelocity(0, 0.009, 0)
+smokeParticles.setVelocitySpread(0.002, 0.002, 0.002)
+smokeParticles.setDrag(0.01)
+smokeParticles.setSizeOverLife(0.03, 0.1, "easeOutCubic")
+smokeParticles.setOpacityOverLife(0.35, 0, "easeInQuad")
+smokeParticles.setColor(150, 150, 150)
+
 make wasSubmerged = false
 make intensity = 0.0
 
@@ -55,6 +77,23 @@ task onItemUpdate takes itemRendered do
         otherwise
             check isHoldingHotItem(itemRendered) do
                 itemRendered.setLight(15)
+                make fireType = "minecraft:flame"
+                check itemRendered.getName() == "minecraft:soul_torch" || itemRendered.getName() == "minecraft:soul_campfire" do
+                    make fireType = "minecraft:soul_fire_flame"
+                end
+                flameParticles.setType(fireType)
+                flameParticles.setPosition(0.5, 0.655, 0.5)
+                flameParticles.setSpread(0.02, 0.015, 0.02)
+                smokeParticles.setPosition(0.5, 0.71, 0.5)
+                check isWaterCampFire(itemRendered) do
+                    flameParticles.setPosition(0.5, 0.8, 0.5)
+                    flameParticles.setSpread(0.16, 0.04, 0.16)
+                    smokeParticles.setPosition(0.5, 0.9, 0.5)
+                end
+                flameParticles.setRate(0.35)
+                smokeParticles.setRate(0.12)
+                flameParticles.attach(itemRendered)
+                smokeParticles.attach(itemRendered)
             end
         end
     end

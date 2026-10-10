@@ -16,6 +16,9 @@ import net.minecraft.world.level.Level;
 import omar.projects.interactivestuff.IS;
 import omar.projects.interactivestuff.handlers.BackgroundLoopHandler;
 import omar.projects.interactivestuff.render.MinecraftItemRenderer;
+import omar.projects.interactivestuff.render.MinecraftParticleRenderer;
+import omar.projects.interactivestuff.particles.ParticleSystem;
+import omar.projects.interactivestuff.handlers.config.ConfigHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
 import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import omar.projects.interactivestuff.scripts.functions.*;
@@ -54,6 +57,9 @@ public final class ScriptInterpreter {
             NativeBinder.bind(environment, ItemModel.class);
             NativeBinder.bind(environment, Sound.class);
             NativeBinder.bind(environment, Position.class);
+            NativeBinder.bind(environment, ParticleEmitter.class);
+            NativeBinder.bind(environment, Particle.class);
+            NativeBinder.defineConstant(environment, "particles", ParticleSystem.INSTANCE);
             environment.defineFunction("importScript", new ImportScript(RUNTIME));
             environment.defineFunction("excludeScript", new ExcludeScript(RUNTIME));
             environment.defineFunction("debugText", new DebugText());
@@ -88,6 +94,7 @@ public final class ScriptInterpreter {
         BackgroundLoopHandler.getInstance().clearAll();
         ItemModelRenderRegistry.clear();
         RenderTickHandler.reset();
+        ParticleSystem.INSTANCE.reset();
         if (DebugTextHandler.INSTANCE != null) DebugTextHandler.INSTANCE.clear();
     }
 
@@ -95,6 +102,12 @@ public final class ScriptInterpreter {
         if (client.level != sessionWorld || client.player != PLAYER.getPlayer()) updateSession(client);
         if (!ready || client.isPaused()) return;
         for (Script script : RUNTIME.callbacks(FunctionType.ON_TICK)) script.call(FunctionType.ON_TICK);
+        var config = ConfigHandler.INSTANCE;
+        ParticleSystem.INSTANCE.tick(config.enableParticles, config.particleDensity / 100.0, config.particleLimit,
+                client.options.getCameraType().isFirstPerson(), (mainHand, id) -> {
+                    var stack = mainHand ? client.player.getMainHandItem() : client.player.getOffhandItem();
+                    return !stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals(id);
+                });
     }
 
     public static boolean hasItemCallbacks(ItemStack stack) {
@@ -148,6 +161,7 @@ public final class ScriptInterpreter {
         ready = false;
         clearSessionWork();
         MinecraftItemRenderer.clearCaches();
+        MinecraftParticleRenderer.clearCaches();
         RUNTIME.clear();
     }
 

@@ -1,6 +1,6 @@
 # Multi-version verification — 2026-10-10
 
-Each row passed `build runClientGameTest`. Shared regression output is **67 runtime/render checks** per target. Tests ran against the real target Minecraft JAR, actual Fabric mixins and the OpenGL client; 1.21 clients ran on Java 21, 26.x clients on Java 25.
+Each row passed `build runClientGameTest`. The latest particle implementation passes **135 runtime/render checks** per target, including the original 67 checks. Tests ran against the real target Minecraft JAR, actual Fabric mixins and the OpenGL client; 1.21 clients ran on Java 21, 26.x clients on Java 25. Historical results below retain their original check counts.
 
 | Target folder | Minecraft | Client Java | Release class version | Build/client result |
 | --- | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ The three 26.1 builds have byte-identical mod class entries. The 26.1 baseline J
 
 ## Artifacts and evidence
 
-JARs: `build/<target>/<minecraft>/libs/`. Client logs and four screenshots per run: `build/<target>/<minecraft>/run/clientGameTest/`. Test worlds are disposable and isolated from user saves. Checksums are in [RELEASE_CHECKSUMS.json](RELEASE_CHECKSUMS.json).
+JARs: `build/<target>/<minecraft>/libs/`. Client logs and eleven screenshots per current run: `build/<target>/<minecraft>/run/clientGameTest/`. Test worlds are disposable and isolated from user saves. Checksums are in [RELEASE_CHECKSUMS.json](RELEASE_CHECKSUMS.json).
 
 ## Practical scope
 
@@ -72,3 +72,19 @@ Artifacts from this setup are in `build/dist/0.8.0/` and `build/dist/Interactive
 All six former version-branch heads are ancestors of `main`; the validated shared tree was preserved during consolidation. `:commands :buildSelected` selected the new 26.2 default and passed the 67 regression checks and release-JAR guards. The mod remains 0.8.0.
 
 The catalog-driven workflow passed actionlint 1.7.12. Its actual matrix and packaging scripts were executed locally using the eight validated release JARs: all eight targets were selected, the twelve-file upload ZIP retained every JAR byte-for-byte, all SHA-256 entries matched, and a missing-JAR probe was rejected. GitHub runs the full matrix with both native dependency combinations and the final packaging job.
+
+## Vyn first-person particle verification (2026-10-10)
+
+All eight targets passed their final builds, **135 deterministic runtime/render checks each**, release guards and real-client suites with Mod Menu/YACL installed. `releaseAll` produced the eight 0.8.0 distributables and the thirteen-file upload ZIP, including `docs/VYN_PARTICLES.md`.
+
+- Deterministic coverage includes all easing families and immutable keyframes, attached/detached coordinates, gravity/drag, interpolation, independent hand styles/rates, bursts, density/cap/drop handling, item-change completion, callbacks and owner/session cleanup. Equivalent 10/20/120 FPS simulations emit the same particle count.
+- Native clients render torch and soul-torch effects with both dominant-hand preferences, enchanting glyphs, normal/calibrated sculk activation and a custom two-frame pack texture. A screenshot assertion verifies visible orange/blue custom-texture pixels beside the right-hand item after a 90-degree camera rotation. Simulation counts alone cannot verify native render-pass camera transforms.
+- The final 26.3 native suite also passed with YACL absent on Mesa 25.2.8/OpenGL 4.5 through EGL and forced software rendering, including the visible custom-texture assertion and the existing Mod Menu fallback/lifecycle checks.
+- Screenshot review confirms flame origins on the actual torch sprite tips, glyphs around the book and effects on both activated sensor variants. Complete native item/Vyn transforms are captured for the particle anchor, including physical-arm placement.
+- Settings save/reload and range clamping, third-person hiding, global disable, resource reload and disconnect cleanup pass in the actual client. Emission uses the local held-item render pass; it never calls the Minecraft world particle engine.
+- Native adapters account for render timing: 26.2/26.3 consume particle submissions with the camera stack active; 1.21.10/1.21.11/26.1 consume their queued pass after restoration. The 1.21.5 immediate renderer compensates for the active camera and flushes its particle buffers before restoration. Its separate mixin list includes the particle hook; the release guard checks hook registration on every target.
+- Ordinary build/release tasks do not compile or run `src/gametest`. Inspection of all eight final distributables confirms that regression/client fixtures and `interactivestuff_test` textures are absent. The CI bundle retains every JAR byte-for-byte and includes matching SHA-256 entries and the Vyn guide; missing-JAR input is rejected.
+
+The user's existing local removal of the `leaves.vyn` item filter was preserved and excluded from implementation commits. The recorded local release hashes include that working-tree edit; GitHub CI builds the committed script and produces its own checksums. Both forms retain coverage for deliberately unfiltered scripts and filtered dispatch.
+
+This verifies visible rendering and lifecycle behavior on the supported native clients. It does not establish an FPS improvement or compatibility with every external shader/resource pack.

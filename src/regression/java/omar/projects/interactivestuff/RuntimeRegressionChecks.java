@@ -4,6 +4,11 @@ import me.abdelaziz.main.VynMain;
 import me.abdelaziz.parser.Parser;
 import me.abdelaziz.runtime.Value;
 import me.abdelaziz.runtime.function.nat.NativeFunction;
+import me.abdelaziz.util.NativeBinder;
+import omar.projects.interactivestuff.particles.ParticleSystem;
+import omar.projects.interactivestuff.particles.ParticleRegressionChecks;
+import omar.projects.interactivestuff.scripts.variables.ParticleEmitter;
+import omar.projects.interactivestuff.scripts.variables.Particle;
 import omar.projects.interactivestuff.render.ColorMath;
 import omar.projects.interactivestuff.render.QuadSelection;
 import omar.projects.interactivestuff.render.RenderRegressionChecks;
@@ -33,6 +38,7 @@ public final class RuntimeRegressionChecks {
         VynMain.init(false);
         Parser.register("wait", new WaitHandler());
         scripts();
+        ParticleRegressionChecks.run(RuntimeRegressionChecks::check);
         bundledScripts();
         RenderRegressionChecks.run(RuntimeRegressionChecks::check);
         System.out.println("Passed " + checks + " runtime/render regression checks.");
@@ -117,6 +123,9 @@ public final class RuntimeRegressionChecks {
     private static ScriptRuntime runtime(List<String> errors) {
         ScriptRuntime runtime = new ScriptRuntime(() -> VynMain.loadLines(""), errors::add);
         VynMain.setStdListener(environment -> {
+            NativeBinder.bind(environment, ParticleEmitter.class);
+            NativeBinder.bind(environment, Particle.class);
+            NativeBinder.defineConstant(environment, "particles", ParticleSystem.INSTANCE);
             environment.defineFunction("importScript", new ImportScript(runtime));
             environment.defineFunction("excludeScript", new ExcludeScript(runtime));
         });
@@ -207,13 +216,15 @@ public final class RuntimeRegressionChecks {
         check(errors.isEmpty(), "all bundled scripts parse and initialize: " + errors);
         check(runtime.packs().get("interactivestuff:interactive_resourcepack").scripts().size() == 16, "all bundled scripts are discovered");
         check(runtime.callbacks(FunctionType.ON_ITEM_UPDATE).size() == 13, "all 13 item features register");
-        check(runtime.itemCallbacks("minecraft:stone").isEmpty(), "ordinary stone avoids all item model bindings");
-        check(runtime.itemCallbacks("minecraft:chest").size() == 1, "chest binds only the chest feature");
-        check(runtime.itemCallbacks("minecraft:redstone_torch").size() == 2, "overlapping redstone and torch features both run");
-        check(runtime.itemCallbacks("minecraft:waxed_oxidized_copper_chest").size() == 1, "waxed chest variants are covered");
+        int wildcard = (int) runtime.callbacks(FunctionType.ON_ITEM_UPDATE).stream()
+                .filter(script -> !script.getEnvironment().has("interactiveItems")).count();
+        check(runtime.itemCallbacks("minecraft:stone").size() == wildcard, "stone only binds deliberately unfiltered scripts");
+        check(runtime.itemCallbacks("minecraft:chest").size() == wildcard + 1, "chest skips unrelated filtered features");
+        check(runtime.itemCallbacks("minecraft:redstone_torch").size() == wildcard + 2, "overlapping redstone and torch features both run");
+        check(runtime.itemCallbacks("minecraft:waxed_oxidized_copper_chest").size() == wildcard + 1, "waxed chest variants are covered");
         long activeScripts = runtime.packs().get("interactivestuff:interactive_resourcepack").scripts().stream()
                 .filter(script -> script.getState() == Script.State.LOADED).count();
         check(activeScripts == 15, "baseline all-active-script binding count includes tick-only scripts");
-        System.out.println("Bundled dispatch: stone 0, chest 1, redstone torch 2 callbacks; old dispatcher bound all " + activeScripts + " active scripts.");
+        System.out.println("Bundled dispatch: " + wildcard + " unfiltered callbacks; chest +1, redstone torch +2; " + activeScripts + " active scripts.");
     }
 }

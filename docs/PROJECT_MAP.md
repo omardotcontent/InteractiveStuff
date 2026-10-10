@@ -41,6 +41,8 @@ Paths are relative to `src/main/java/omar/projects/interactivestuff`.
 | Visual state | `scripts/variables/ItemModel` | Transform, hierarchy, tint, lighting, glint, quad selection and stack copy-on-mutation |
 | Rendering core | `render/ColorMath`, `QuadSelection` | ARGB multiplication and clamped half-open selection ranges |
 | Rendering adapter | `render/MinecraftItemRenderer`, `ColoredQuadCache`, `RenderTransforms` | Resolve layers, preserve native transforms/special renderers, remap tint slots, bounded geometry cache |
+| Particle core | `particles/ParticleSystem`, `ParticleStyle`, `ParticleCurve`, `scripts/variables/ParticleEmitter`, `Particle` | Tick-based emitter channels, immutable birth settings, easing/keyframes, Vyn callbacks, caps and owner cleanup |
+| Particle renderer | `render/ParticleTextures`, `ParticleGeometry`, `MinecraftParticleRenderer`, `FirstPersonParticleMixin` | Resource-pack PNG/frame lookup and camera-facing first-person geometry, batched by texture/depth |
 | Render mixins | `HeldItemRendererMixin`, `ItemRenderStateAccessor`, `ItemRenderStateLayerAccessor` | Enter first-person rendering and access version-specific native layer APIs |
 | Interaction | `handlers/InteractionHandler`, `objects/InteractionMaterial`, `mixin/player/ArmSwingMixin` | Swing callbacks, hit-sound cooldown, material lookup and target exclusions |
 | Camera motion | `mixin/player/CameraMixin`, `handlers/CameraVelocityAccessor` | Wrapped yaw deltas and time-scaled smoothing |
@@ -93,6 +95,12 @@ Special renderers remain native, including in the partial/color path. Generic qu
 
 `select(start, end)` is exclusive. `setQuads(start, end)` preserves unselected complements. Ranges are half-open; end zero means through the final quad. The matrix/color config toggles are honored. Packed sky/block light uses offsets 20 and 4.
 
+## First-person particle contract
+
+[The Vyn particle API](VYN_PARTICLES.md) binds persistent emitter objects to models inside the item-render scope. Anchors include script/native transforms and are resolved once per model per scope. Main/off-hand channels snapshot independent styles and rates. Tick-based emission uses held-item validation plus render-frame bindings, so it remains active below 20 FPS. Existing particles finish at the last anchor unless scripts request immediate clearing.
+
+Detached particles live in view coordinates; attached particles follow the current model anchor. The separate hand-pass tail draws immutable camera-facing geometry snapshots, batched by texture/depth, even after an item switches. Native adapters account for whether the queue is consumed before or after camera restoration; the immediate 1.21.5 adapter flushes inside the hand pass. The system never uses Minecraft world particle spawning. Session/resource reload releases particles, emitters and texture caches.
+
 ## Bundled features
 
 The resource pack remains at `src/main/resources/resourcepacks/interactive_resourcepack`.
@@ -120,7 +128,7 @@ Custom models live under `assets/interactivestuff/items` and `models/item`; text
 
 ## Verification and future work
 
-`./gradlew build26_2` includes 67 deterministic regression checks from `src/regression`. `./gradlew test26_2` uses a separate `src/gametest` mod and `build/26.2/26.2/run/clientGameTest`, exercises actual Minecraft rendering/lifecycle, and exits automatically. It requires a graphics display; it is not required by the ordinary headless build. `buildAll` and `testAll` run the respective checks for all eight releases.
+`./gradlew build26_2` includes deterministic runtime/render/particle regression checks from `src/regression`. `./gradlew test26_2` uses a separate `src/gametest` mod and `build/26.2/26.2/run/clientGameTest`, exercises actual Minecraft rendering/lifecycle, and exits automatically. It requires a graphics display; it is not required by the ordinary headless build. `buildAll` and `testAll` run the respective checks for all eight releases.
 
 See [26.2_OVERHAUL.md](26.2_OVERHAUL.md) for changes, evidence and limits, and [VERSION_PORTING.md](VERSION_PORTING.md) for the version boundary.
 

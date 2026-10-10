@@ -1,5 +1,16 @@
 lock interactiveItems = ["minecraft:sculk_sensor", "minecraft:calibrated_sculk_sensor"]
 
+make sculkParticles = new ParticleEmitter("minecraft:sculk_charge_pop")
+sculkParticles.setPosition(0.5, 0.78, 0.5)
+sculkParticles.setSpread(0.28, 0.06, 0.28)
+sculkParticles.setLifetime(16)
+sculkParticles.setVelocity(0, 0.01, 0)
+sculkParticles.setVelocitySpread(0.012, 0.004, 0.012)
+sculkParticles.setSizeOverLife(0.025, 0.065, "easeOutCubic")
+sculkParticles.setOpacityOverLife(0.9, 0, "easeInQuad")
+sculkParticles.setLight(15)
+sculkParticles.setAttached(true)
+
 make wasOnGround = false
 make intensity = 0.0
 
@@ -57,6 +68,7 @@ task handleSensor takes distance do
     check !vibrating do
         check distance <= RANGE_NORMAL do
             make vibrating = true
+            sculkParticles.burst(6)
             player.playSound("minecraft:block.sculk_sensor.clicking", 1.0, 1.0)
             pulse()
             wait COOLDOWN_NORMAL do
@@ -73,6 +85,7 @@ task handleCalibratedSensor takes distance do
     check !calibratedVibrating do
         check distance <= RANGE_CALIBRATED do
             make calibratedVibrating = true
+            sculkParticles.burst(6)
             player.playSound("minecraft:block.sculk_sensor.clicking", 1.0, 1.0)
             pulse()
             wait COOLDOWN_CALIBRATED do
@@ -86,6 +99,17 @@ task handleCalibratedSensor takes distance do
 end
 
 task onItemUpdate takes itemRendered do
+    check !config.isSculkSensorFeatureEnabled() || player.getGamemode() == "spectator" do
+        reply nothing
+    end
+    sculkParticles.setRate(0)
+    check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do
+        sculkParticles.setRate(0.3)
+    end
+    check calibratedVibrating && itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
+        sculkParticles.setRate(0.3)
+    end
+    sculkParticles.attach(itemRendered)
 	check itemRendered.getName() == "minecraft:sculk_sensor" || itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
 		check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do
 			itemRendered.setItemModel("interactivestuff:sculk_sensor_active")

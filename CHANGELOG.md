@@ -38,6 +38,14 @@ Fixed item frames, chests and vault animations using the wrong side when playing
 
 ## Additions
 
+### Vyn First-Person Particles
+
+Resource packs can now create held-item particles with Vyn emitter objects! Use vanilla or custom textures, continuous emission or bursts, animated frames, velocity, gravity, drag and lifetime easing/keyframes for size, opacity, color and rotation. Choose particles that follow the item or drift in the view, with depth or overlay rendering and optional per-particle callbacks.
+
+Particles stay in first-person rendering. Added torch flame/smoke, enchanting-table glyphs and particles when normal/calibrated sculk sensors activate. New settings control enable, density, the shared particle limit, live counters and emitter markers.
+
+See [Vyn particle documentation](docs/VYN_PARTICLES.md) for the API and pack examples.
+
 ### New Vyn Hand Helpers
 
 Added `isLeftHand()` and `isRightHand()` so resource-pack scripts can follow the physical hand holding an item. The existing `isMainHand()` and `isOffHand()` helpers still identify the inventory slots.

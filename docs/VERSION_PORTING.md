@@ -53,3 +53,21 @@ An existing `DISPLAY` disables Loom's extra Xvfb wrapper, so each CI job uses a 
 The 1.21.10 and 1.21.11 profiles disable Fabric's test-only packet synchronizer after reproducible initial-world-loading stalls on CI. Assertions still wait for actual native client state; production networking is unaffected. Both modes also passed their local native suites.
 
 26.3 requests an accelerated GLX visual, which CI's Mesa software renderer rejects. The workflow installs Mesa's EGL loader and driver libraries. Linux CI uses SDL's [EGL context path](https://wiki.libsdl.org/SDL3/SDL_HINT_VIDEO_FORCE_EGL); the complete native suite also passed locally on Mesa llvmpipe through this path. Desktop runs retain their default graphics configuration.
+
+## First-person particle adapters
+
+Particle simulation, Vyn bindings, texture lists and geometry stay shared. Port the `FirstPersonParticleMixin` hand-pass tail, `MinecraftParticleRenderer` queue/buffer factories and `MinecraftItemRenderer.anchor` native layer transform.
+
+The anchor includes script transforms and the first native model layer. `ParticleView.capture` converts the submitted model pose to actual view coordinates. The native draw adapter must match when Minecraft consumes that geometry:
+
+| Releases | Native draw timing | Particle pose |
+| --- | --- | --- |
+| 1.21.5 | Immediate buffers in the hand pass | Cancel the current camera matrix and explicitly flush particle buffers before restoration |
+| 1.21.10, 1.21.11, 26.1 family | Queued custom geometry consumed after the hand camera stack is restored | Submit view-coordinate geometry with an identity pose |
+| 26.2, 26.3 | Hand custom geometry consumed with the camera stack active | Cancel that camera matrix in the submitted pose |
+
+1.21.5/1.21.10 factories are on `RenderType`; later factories are on `RenderTypes`. Transparent particle batches are grouped by texture/depth while immutable snapshots survive deferred queue consumption.
+
+The 1.21.5 resource adapter also owns a separate mixin list; new hooks must be registered there as well as in the shared list. The release guard verifies particle-hook registration.
+
+Run `test<version>` and review its particle screenshots. Simulation counts and queued submissions cannot prove that pixels are visible or anchored correctly. `ClientParticleChecks` also verifies custom orange/blue PNG pixels beside the right-hand model after rotating the camera. It exercises both hands, a dominant-hand swap, detached smoke, glyphs, both activated sensors, custom animation/overlay, global disable, third-person suppression, resource reload and disconnect. Test textures/classes remain separate from release JARs.

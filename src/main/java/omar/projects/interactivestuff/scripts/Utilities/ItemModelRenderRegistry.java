@@ -2,11 +2,16 @@ package omar.projects.interactivestuff.scripts.Utilities;
 
 import net.minecraft.world.item.ItemDisplayContext;
 import omar.projects.interactivestuff.scripts.variables.ItemModel;
+import omar.projects.interactivestuff.scripts.variables.ParticleEmitter;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+import org.joml.Matrix4f;
 
 /** Extra models belong to one item render; nested renders cannot consume another hand's models. */
 public final class ItemModelRenderRegistry {
@@ -30,10 +35,20 @@ public final class ItemModelRenderRegistry {
 
     public static void clear() { SCOPES.remove(); }
 
+    public static void bind(ParticleEmitter emitter, ItemModel item) {
+        Scope scope = SCOPES.get().peek();
+        if (scope == null) throw new IllegalStateException("Attach particle emitters inside onItemUpdate");
+        scope.particles.add(new ParticleBinding(emitter, item));
+    }
+
+    public record ParticleBinding(ParticleEmitter emitter, ItemModel item) {}
+
     public static final class Scope implements AutoCloseable {
         private final ItemDisplayContext context;
         private final boolean mainHand;
         private final List<ItemModel> models = new ArrayList<>();
+        private final List<ParticleBinding> particles = new ArrayList<>();
+        private final Map<ItemModel, Matrix4f> anchors = new IdentityHashMap<>();
         private boolean closed;
 
         private Scope(ItemDisplayContext context, boolean mainHand) {
@@ -42,6 +57,10 @@ public final class ItemModelRenderRegistry {
         }
 
         public List<ItemModel> models() { return models; }
+        public List<ParticleBinding> particles() { return particles; }
+        public Matrix4f anchor(ItemModel model, Supplier<Matrix4f> resolve) {
+            return anchors.computeIfAbsent(model, ignored -> resolve.get());
+        }
 
         @Override public void close() {
             if (closed) return;
@@ -50,6 +69,8 @@ public final class ItemModelRenderRegistry {
             if (scopes.peek() != this) throw new IllegalStateException("Render scopes must close in order");
             scopes.pop();
             models.clear();
+            particles.clear();
+            anchors.clear();
             if (scopes.isEmpty()) SCOPES.remove();
         }
     }

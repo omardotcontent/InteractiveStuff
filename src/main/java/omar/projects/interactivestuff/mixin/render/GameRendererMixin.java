@@ -13,5 +13,6 @@ public abstract class GameRendererMixin {
     @Inject(method = "render", at = @At("HEAD"))
     private void interactivestuff$beginFrame(CallbackInfo ci) {
         RenderTickHandler.beginFrame(Minecraft.getInstance().isPaused());
+        omar.projects.interactivestuff.particles.ParticleSystem.INSTANCE.beginFrame(RenderTickHandler.normalizedDelta / 3.0);
     }
 }

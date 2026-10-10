@@ -2102,5 +2102,10 @@
       "randomPitch": true,
       "customPitches": []
     }
-  ]
+  ],
+  "enableParticles": true,
+  "particleDensity": 100,
+  "particleLimit": 512,
+  "particleDebugCounters": false,
+  "particleEmitterMarkers": false
 }

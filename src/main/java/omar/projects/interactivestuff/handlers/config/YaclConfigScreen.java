@@ -42,6 +42,7 @@ final class YaclConfigScreen {
 
         // --------------------- Resource Pack Settings ---------------------
         builder.category(createRPSCategory(instance, defaults).build());
+        builder.category(createParticleCategory(instance, defaults).build());
 
         // --------------------- Config Settings ---------------------
         builder.category(createConfigSettingsCategory().build());
@@ -147,6 +148,34 @@ final class YaclConfigScreen {
         return rps;
     }
 
+
+    private ConfigCategory.Builder createParticleCategory(ConfigHandler instance, ConfigHandler defaults) {
+        var category = ConfigCategory.createBuilder().name(Component.translatable("interactive_stuff.config.settings.particles"));
+        category.option(Option.<Boolean>createBuilder()
+                .name(Component.translatable("interactive_stuff.config.settings.particles.enabled"))
+                .binding(defaults.enableParticles, () -> instance.enableParticles, value -> instance.enableParticles = value)
+                .controller(TickBoxControllerBuilder::create).build());
+        category.option(Option.<Integer>createBuilder()
+                .name(Component.translatable("interactive_stuff.config.settings.particles.density"))
+                .description(OptionDescription.of(Component.translatable("interactive_stuff.config.settings.particles.density.tooltip")))
+                .binding(defaults.particleDensity, () -> instance.particleDensity, value -> instance.particleDensity = value)
+                .controller(option -> IntegerSliderControllerBuilder.create(option).range(0, 200).step(10)).build());
+        category.option(Option.<Integer>createBuilder()
+                .name(Component.translatable("interactive_stuff.config.settings.particles.limit"))
+                .description(OptionDescription.of(Component.translatable("interactive_stuff.config.settings.particles.limit.tooltip")))
+                .binding(defaults.particleLimit, () -> instance.particleLimit, value -> instance.particleLimit = value)
+                .controller(option -> IntegerSliderControllerBuilder.create(option).range(0, 4096).step(64)).build());
+        category.option(Option.<Boolean>createBuilder()
+                .name(Component.translatable("interactive_stuff.config.settings.particles.counters"))
+                .binding(defaults.particleDebugCounters, () -> instance.particleDebugCounters, value -> instance.particleDebugCounters = value)
+                .controller(TickBoxControllerBuilder::create).build());
+        category.option(Option.<Boolean>createBuilder()
+                .name(Component.translatable("interactive_stuff.config.settings.particles.markers"))
+                .description(OptionDescription.of(Component.translatable("interactive_stuff.config.settings.particles.markers.tooltip")))
+                .binding(defaults.particleEmitterMarkers, () -> instance.particleEmitterMarkers, value -> instance.particleEmitterMarkers = value)
+                .controller(TickBoxControllerBuilder::create).build());
+        return category;
+    }
 
     private ConfigCategory.Builder createConfigSettingsCategory() {
         final ConfigCategory.Builder cat = ConfigCategory.createBuilder()

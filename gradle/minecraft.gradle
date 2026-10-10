@@ -181,7 +181,7 @@ tasks.register("verifyReleaseJar") {
              "LICENSE.txt_${project.base.archivesName.get()}"].each { required ->
                 if (!entries.contains(required.toString())) throw new GradleException("Release JAR is missing ${required}")
             }
-            if (entries.any { it.startsWith("net/minecraft/") || it.contains("ClientRenderChecks") || it.contains("ClientConfigScreenChecks") || it.contains("ClientStateChecks") || it.contains("RuntimeRegressionChecks") }) {
+            if (entries.any { it.startsWith("net/minecraft/") || it.startsWith("assets/interactivestuff_test/") || it.contains("ClientRenderChecks") || it.contains("ClientConfigScreenChecks") || it.contains("ClientStateChecks") || it.contains("ClientParticleChecks") || it.contains("RegressionChecks") }) {
                 throw new GradleException("Release JAR contains game or test classes")
             }
             entries.findAll { it.endsWith(".class") }.each { path ->
@@ -193,6 +193,8 @@ tasks.register("verifyReleaseJar") {
             def mixinMetadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry("interactivestuff.mixins.json")))
             if (mixinMetadata.compatibilityLevel != "JAVA_${targetJavaVersion}")
                 throw new GradleException("Mixin Java compatibility does not match the target")
+            if (!mixinMetadata.client.contains("render.FirstPersonParticleMixin"))
+                throw new GradleException("Release JAR is missing the first-person particle render hook")
             def metadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry("fabric.mod.json")))
             if (metadata.depends.minecraft != (selectedTarget == "26.1.X" ? "~26.1" : "~${project.minecraft_version}") || metadata.depends.java != ">=${targetJavaVersion}") {
                 throw new GradleException("Release metadata does not match the selected Minecraft/Java target")

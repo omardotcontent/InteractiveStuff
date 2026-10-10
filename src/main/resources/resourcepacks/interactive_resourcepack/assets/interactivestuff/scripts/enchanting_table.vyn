@@ -2,6 +2,21 @@ lock interactiveItems = ["minecraft:enchanting_table"]
 
 make openingProgress = 0
 
+make glyphParticles = new ParticleEmitter("minecraft:enchant")
+glyphParticles.setPosition(0.5, 1.25, 0.5)
+glyphParticles.setSpread(0.28, 0.15, 0.28)
+glyphParticles.setLifetime(45)
+glyphParticles.setVelocity(0, 0.004, 0)
+glyphParticles.setVelocitySpread(0.004, 0.002, 0.004)
+glyphParticles.setSizeOverLife(0.055, 0.085, "easeOutSine")
+glyphParticles.setOpacityOverLife(0, 0, "linear")
+glyphParticles.addOpacityKeyframe(0.15, 0.85, "easeOutQuad")
+glyphParticles.addOpacityKeyframe(0.7, 0.7, "linear")
+glyphParticles.setColor(200, 170, 255)
+glyphParticles.setAnimation("random", 1)
+glyphParticles.setLight(15)
+
+
 task onItemUpdate takes itemRendered do
 
     check itemRendered.getName() != "minecraft:enchanting_table" do
@@ -21,6 +36,8 @@ task onItemUpdate takes itemRendered do
     end
 
     make openingProgress = itemRendered.smooth(openingProgress, progress, 0.2)
+    glyphParticles.setRate(0.2 + (openingProgress / 100) * 0.3)
+    glyphParticles.attach(itemRendered)
     make book_left = new ItemModel("minecraft:book")
     make book_right = new ItemModel("minecraft:book")
 	book_left.setParent(itemRendered)

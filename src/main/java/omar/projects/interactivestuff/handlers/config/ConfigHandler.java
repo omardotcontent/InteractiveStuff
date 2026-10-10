@@ -55,6 +55,11 @@ public final class ConfigHandler {
     public boolean resourcePackDebugMode = false;
     public boolean resourcePackMatrixEditing = true;
     public boolean resourcePackColorChanging = true;
+    public boolean enableParticles = true;
+    public int particleDensity = 100;
+    public int particleLimit = 512;
+    public boolean particleDebugCounters = false;
+    public boolean particleEmitterMarkers = false;
 
     public @NotNull List<Item> excludedBlocks = new ArrayList<>();
     public List<InteractionMaterial> materials = new ArrayList<>();
@@ -74,6 +79,11 @@ public final class ConfigHandler {
         this.resourcePackMatrixEditing = loaded.resourcePackMatrixEditing;
         this.resourcePackColorChanging = loaded.resourcePackColorChanging;
         this.resourcePackDebugMode = loaded.resourcePackDebugMode;
+        this.enableParticles = loaded.enableParticles;
+        this.particleDensity = loaded.particleDensity;
+        this.particleLimit = loaded.particleLimit;
+        this.particleDebugCounters = loaded.particleDebugCounters;
+        this.particleEmitterMarkers = loaded.particleEmitterMarkers;
 
         this.enableInteractiveHits = loaded.enableInteractiveHits;
         this.enableTextureChanges = loaded.enableTextureChanges;
@@ -166,6 +176,8 @@ public final class ConfigHandler {
     public void refreshCache() {
         itemLookupCache.clear();
         HitCooldownTicks = Math.max(0, HitCooldownTicks);
+        particleDensity = Math.max(0, Math.min(200, particleDensity));
+        particleLimit = Math.max(0, Math.min(4096, particleLimit));
         if (excludedBlocks == null) excludedBlocks = new ArrayList<>();
         excludedBlocks.removeIf(Objects::isNull);
         if (materials == null) materials = new ArrayList<>();

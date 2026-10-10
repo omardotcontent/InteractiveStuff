@@ -13,6 +13,7 @@
     "render.InGameHudMixin",
     "render.GameRendererMixin",
     "render.HeldItemRendererMixin",
+    "render.FirstPersonParticleMixin",
     "render.ItemRenderStateAccessor",
     "render.ItemRenderStateLayerAccessor",
 

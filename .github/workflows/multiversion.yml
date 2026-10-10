@@ -121,14 +121,15 @@ jobs:
           destination.mkdir(parents=True)
           for jar in jars:
               shutil.copyfile(jar, destination / jar.name)
-          for source, name in [('README.md', 'README.md'), ('CHANGELOG.md', 'CHANGELOG.md'), ('LICENSE.txt', 'LICENSE.txt')]:
+          for source, name in [('README.md', 'README.md'), ('CHANGELOG.md', 'CHANGELOG.md'), ('LICENSE.txt', 'LICENSE.txt'), ('docs/VYN_PARTICLES.md', 'docs/VYN_PARTICLES.md')]:
+              (destination / name).parent.mkdir(parents=True, exist_ok=True)
               shutil.copyfile(source, destination / name)
           checksums = [f'{hashlib.sha256(jar.read_bytes()).hexdigest()}  {jar.name}' for jar in sorted(destination.glob('*.jar'))]
           (destination / 'SHA256SUMS.txt').write_text('\n'.join(checksums) + '\n')
           archive = destination.parent / f'InteractiveStuff-{version}-all-versions.zip'
           with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as bundle:
-              for file in sorted(destination.iterdir()):
-                  bundle.writestr(zipfile.ZipInfo(file.name, date_time=(1980, 1, 1, 0, 0, 0)), file.read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
+              for file in sorted(path for path in destination.rglob('*') if path.is_file()):
+                  bundle.writestr(zipfile.ZipInfo(file.relative_to(destination).as_posix(), date_time=(1980, 1, 1, 0, 0, 0)), file.read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write(f'version={version}\n')
           PY

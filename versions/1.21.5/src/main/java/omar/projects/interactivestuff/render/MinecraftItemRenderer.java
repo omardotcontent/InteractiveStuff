@@ -89,6 +89,21 @@ public final class MinecraftItemRenderer {
         }
     }
 
+
+    public static org.joml.Matrix4f anchor(ItemModel item, ItemModelResolver resolver, LivingEntity entity,
+                                          ItemDisplayContext mode, PoseStack matrices) {
+        ItemStackRenderState state = new ItemStackRenderState();
+        resolver.updateForTopItem(state, item.getFinalStack(), mode, entity.level(), entity,
+                entity.getId() + mode.ordinal() + item.getUniqueSeed());
+        var layers = (ItemRenderStateAccessor) state;
+        matrices.pushPose();
+        try {
+            item.apply(matrices);
+            if (layers.getLayerCount() > 0) ((ItemRenderStateLayerAccessor) layers.getLayers()[0]).interactivestuff$getTransform().apply(mode.leftHand(), matrices.last());
+            return ParticleView.capture(matrices.last().pose());
+        } finally { matrices.popPose(); }
+    }
+
     private static void submitRange(ItemModel item, ItemDisplayContext mode, PoseStack matrices,
                                     MultiBufferSource queue, ItemRenderStateLayerAccessor layer, int light,
                                     List<BakedQuad> quads, int[] nativeTints, int start, int end,

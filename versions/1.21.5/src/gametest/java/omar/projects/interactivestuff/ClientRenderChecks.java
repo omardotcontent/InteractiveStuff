@@ -77,7 +77,7 @@ public final class ClientRenderChecks implements FabricClientGameTest {
             context.waitTicks(8);
             context.runOnClient(client -> {
                 checkScripts();
-                check(!ScriptInterpreter.hasItemCallbacks(new ItemStack(Items.STONE)), "vanilla stone fast path");
+                checkStoneDispatch();
             });
             context.takeScreenshot("interactivestuff-left-handed");
 
@@ -89,6 +89,7 @@ public final class ClientRenderChecks implements FabricClientGameTest {
             context.waitTicks(4);
             check(waits.get() == 2, "both real client waits fired");
 
+            ClientParticleChecks.run(context);
             context.runOnClient(client -> client.reloadResourcePacks());
             context.waitFor(client -> client.getOverlay() == null && ScriptInterpreter.hasItemCallbacks(new ItemStack(Items.CHEST)), 600);
             context.waitTicks(4);
@@ -101,8 +102,16 @@ public final class ClientRenderChecks implements FabricClientGameTest {
         context.runOnClient(client -> {
             check(!BackgroundLoopHandler.getInstance().isLoopRunning("disconnect-check"), "disconnect clears scheduled work");
             check(!ScriptInterpreter.hasItemCallbacks(new ItemStack(Items.CHEST)), "disconnect clears render readiness");
+            check(omar.projects.interactivestuff.particles.ParticleSystem.INSTANCE.getCount() == 0
+                    && omar.projects.interactivestuff.particles.ParticleSystem.INSTANCE.getEmitterCount() == 0, "disconnect releases every particle and emitter");
         });
         IS.LOGGER.info("InteractiveStuff client render/lifecycle checks passed.");
+    }
+
+    private static void checkStoneDispatch() {
+        boolean wildcard = ScriptInterpreter.getPackScripts().values().stream().flatMap(pack -> pack.scripts().stream())
+                .anyMatch(script -> script.hasCallback(Script.FunctionType.ON_ITEM_UPDATE) && !script.getEnvironment().has("interactiveItems"));
+        check(ScriptInterpreter.hasItemCallbacks(new ItemStack(Items.STONE)) == wildcard, "stone only binds deliberately unfiltered scripts");
     }
 
     private static void checkScripts() {
@@ -149,12 +158,18 @@ public final class ClientRenderChecks implements FabricClientGameTest {
     private static void configPersistence() {
         ConfigHandler config = new ConfigHandler();
         config.specializedNoteblockHits = false;
+        config.enableParticles = false; config.particleDensity = 37; config.particleLimit = 96;
+        config.particleDebugCounters = true; config.particleEmitterMarkers = true;
         config.materials.add(new omar.projects.interactivestuff.objects.InteractionMaterial("test"));
         config.save();
         check(config.getMaterial(Items.STONE) != null, "save refreshes material lookup");
         config.specializedNoteblockHits = true;
         config.reload();
         check(!config.specializedNoteblockHits, "reload copies specialized noteblock setting");
+        check(!config.enableParticles && config.particleDensity == 37 && config.particleLimit == 96
+                && config.particleDebugCounters && config.particleEmitterMarkers, "all particle options survive save/reload");
+        config.particleDensity = 500; config.particleLimit = -1; config.refreshCache();
+        check(config.particleDensity == 200 && config.particleLimit == 0, "invalid particle limits are clamped");
         config.materials.clear();
         config.save();
         check(config.getMaterial(Items.STONE) == null, "removed material leaves no stale cache entry");

@@ -46,6 +46,11 @@ public abstract class HeldItemRendererMixin {
             else MinecraftItemRenderer.submit(item, client.getItemModelResolver(), client.player, mode, matrices, queue, light);
             for (var extra : scope.models())
                 MinecraftItemRenderer.submit(extra, client.getItemModelResolver(), client.player, mode, matrices, queue, light);
+            for (var binding : scope.particles()) {
+                var model = binding.item();
+                omar.projects.interactivestuff.particles.ParticleSystem.INSTANCE.bind(binding.emitter(), mainHand,
+                        stack.getItem().toString(), scope.anchor(model, () -> MinecraftItemRenderer.anchor(model, client.getItemModelResolver(), client.player, mode, matrices)), light);
+            }
         } catch (Exception error) {
             if (!interactivestuff$reportedRenderFailure) {
                 interactivestuff$reportedRenderFailure = true;

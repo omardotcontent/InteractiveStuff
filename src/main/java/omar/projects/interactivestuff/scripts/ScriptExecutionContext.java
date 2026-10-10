@@ -8,6 +8,8 @@ public final class ScriptExecutionContext {
 
     private ScriptExecutionContext() {}
 
+    public static Script current() { return CURRENT.get(); }
+
     public static void run(Script script, Runnable action) {
         Script previous = CURRENT.get();
         CURRENT.set(script);
