@@ -2,6 +2,8 @@
 
 First-person item interactions driven by Vyn resource-pack scripts.
 
+Current mod version: **0.8.0**. See [the changelog from 0.7.0](CHANGELOG.md).
+
 The 26.2 overhaul is the shared implementation for Minecraft **1.21.5, 1.21.10, 1.21.11, 26.1.X, 26.2 and 26.3**. Version folders contain dependency profiles and native API adapters; the scheduler, script runtime, behavior scripts and most bindings are shared.
 
 ## Build
