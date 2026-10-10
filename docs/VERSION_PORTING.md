@@ -2,6 +2,8 @@
 
 The root `src/` is the corrected 26.2 overhaul. All eight Minecraft releases are separate Gradle/IDE modules in one checkout. `gradle.properties` selects only the default for `buildSelected`, `runSelected` and `testSelected`; it never hides modules. See [the IDE workflow](IDE_WORKFLOW.md) for version commands and run configurations.
 
+All ports are maintained together on `main`. A Minecraft version is a Gradle module and adapter folder. The previous version branches are historical snapshots under `archive/`; see [the repository workflow](REPOSITORY_WORKFLOW.md).
+
 | Folder | Runtime Java | Native boundary |
 | --- | --- | --- |
 | `versions/1.21.5` | 21 | Immediate `MultiBufferSource` rendering, legacy keyboard/sound hooks |
@@ -44,7 +46,9 @@ The suite uses its own automatically reset game directory. It never opens user s
 
 ## CI client execution
 
-An existing `DISPLAY` disables Loom's extra Xvfb wrapper, so CI uses a single virtual display. The workflow checks builds and client tests separately and bounds client execution to five minutes.
+CI generates its eight-target matrix from `gradle/targets.json`. Every target builds and runs native tests with Mod Menu/YACL present and with YACL absent, regardless of the default target in `gradle.properties`. Successful runs collect all eight ordinary release JARs into one upload ZIP with checksums. Diagnostic artifacts are named by Minecraft version.
+
+An existing `DISPLAY` disables Loom's extra Xvfb wrapper, so each CI job uses a single virtual display. The workflow checks builds and client tests separately and bounds each client execution to five minutes.
 
 The 1.21.10 and 1.21.11 profiles disable Fabric's test-only packet synchronizer after reproducible initial-world-loading stalls on CI. Assertions still wait for actual native client state; production networking is unaffected. Both modes also passed their local native suites.
 

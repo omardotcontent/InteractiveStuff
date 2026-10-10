@@ -124,4 +124,4 @@ Custom models live under `assets/interactivestuff/items` and `models/item`; text
 
 See [26.2_OVERHAUL.md](26.2_OVERHAUL.md) for changes, evidence and limits, and [VERSION_PORTING.md](VERSION_PORTING.md) for the version boundary.
 
-The current adapter layout, build commands and branch workflow are documented in [VERSION_PORTING.md](VERSION_PORTING.md). Latest per-version evidence is in [MULTIVERSION_VALIDATION.md](MULTIVERSION_VALIDATION.md).
+The current adapter layout and build commands are documented in [VERSION_PORTING.md](VERSION_PORTING.md). All versions share the `main` development branch; see [REPOSITORY_WORKFLOW.md](REPOSITORY_WORKFLOW.md). Latest per-version evidence is in [MULTIVERSION_VALIDATION.md](MULTIVERSION_VALIDATION.md).

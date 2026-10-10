@@ -1,0 +1,140 @@
+name: InteractiveStuff multi-version checks
+
+on:
+  push:
+    branches-ignore: ["archive/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: multiversion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  targets:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.catalog.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the shared Minecraft target catalog
+        id: catalog
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          targets = json.loads(Path('gradle/targets.json').read_text())
+          for target in targets:
+              target['minecraft'] = target.get('patch', '26.1' if target['profile'] == '26.1.X' else target['profile'])
+          assert len({target['minecraft'] for target in targets}) == len(targets)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('matrix=' + json.dumps({'include': targets}, separators=(',', ':')) + '\n')
+          PY
+
+  build:
+    name: Minecraft ${{ matrix.minecraft }}
+    needs: targets
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.targets.outputs.matrix) }}
+    env:
+      MC_MODULE: ${{ matrix.module }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java 21 runtime
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Set up Java 25 compiler and runtime
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - name: Install software graphics libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y libegl1 libegl-mesa0 libgl1-mesa-dri
+      - name: Build and verify this Minecraft target
+        run: ./gradlew --no-daemon ":${MC_MODULE}:build"
+      - name: Test the real client
+        timeout-minutes: 5
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a ./gradlew --no-daemon ":${MC_MODULE}:runClientGameTest"
+      - name: Test Mod Menu without YACL
+        timeout-minutes: 5
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a ./gradlew --no-daemon -Pconfig_screen_test_yacl=false ":${MC_MODULE}:runClientGameTest"
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: InteractiveStuff-JAR-${{ matrix.minecraft }}-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            build/*/*/libs/*.jar
+            !build/*/*/libs/*-dev.jar
+            !build/*/*/libs/*-sources.jar
+      - name: Upload client diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Client-tests-${{ matrix.minecraft }}-${{ github.sha }}
+          path: |
+            build/*/*/run/clientGameTest*/screenshots/
+            build/*/*/run/clientGameTest*/logs/
+            build/*/*/run/clientGameTest*/crash-reports/
+
+  package:
+    name: All-version upload bundle
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the eight verified distributables
+        uses: actions/download-artifact@v4
+        with:
+          pattern: InteractiveStuff-JAR-*
+          path: build/ci-jars
+          merge-multiple: true
+      - name: Assemble the upload bundle and checksums
+        id: bundle
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, shutil, zipfile
+          from pathlib import Path
+          properties = dict(line.split('=', 1) for line in Path('gradle.properties').read_text().splitlines() if line and not line.startswith('#'))
+          version = properties['mod_version']
+          targets = json.loads(Path('gradle/targets.json').read_text())
+          minecraft = [target.get('patch', '26.1' if target['profile'] == '26.1.X' else target['profile']) for target in targets]
+          expected = {f'interactivestuff-{game}-{version}.jar' for game in minecraft}
+          jars = list(Path('build/ci-jars').rglob('*.jar'))
+          assert len(jars) == len(expected) and {jar.name for jar in jars} == expected, 'Missing, duplicate or unexpected release JARs'
+          destination = Path('build/dist') / version
+          destination.mkdir(parents=True)
+          for jar in jars:
+              shutil.copyfile(jar, destination / jar.name)
+          for source, name in [('README.md', 'README.md'), ('CHANGELOG.md', 'CHANGELOG.md'), ('LICENSE.txt', 'LICENSE.txt')]:
+              shutil.copyfile(source, destination / name)
+          checksums = [f'{hashlib.sha256(jar.read_bytes()).hexdigest()}  {jar.name}' for jar in sorted(destination.glob('*.jar'))]
+          (destination / 'SHA256SUMS.txt').write_text('\n'.join(checksums) + '\n')
+          archive = destination.parent / f'InteractiveStuff-{version}-all-versions.zip'
+          with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as bundle:
+              for file in sorted(destination.iterdir()):
+                  bundle.writestr(zipfile.ZipInfo(file.name, date_time=(1980, 1, 1, 0, 0, 0)), file.read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'version={version}\n')
+          PY
+      - name: Upload the complete mod bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: InteractiveStuff-${{ steps.bundle.outputs.version }}-all-versions-${{ github.sha }}
+          path: build/dist/*.zip
+          if-no-files-found: error

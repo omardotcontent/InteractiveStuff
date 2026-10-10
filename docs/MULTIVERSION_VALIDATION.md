@@ -39,7 +39,7 @@ These checks validate the port and native render/lifecycle boundaries. They are 
 
 Dependency profiles were resolved against the published releases and compiled/run against their actual APIs. The 26.3 profile uses Fabric API 0.162.0+26.3 because the earlier cached 0.160.0 build failed a Fabric renderer startup mixin.
 
-GitHub Actions runs build and isolated client checks for each version branch default; screenshots/logs are uploaded as diagnostic artifacts.
+GitHub Actions reads the shared target catalog and runs builds and isolated client checks for all eight Minecraft targets. Screenshots/logs are uploaded as diagnostic artifacts per version.
 
 Additional CI-environment validation: 1.21.10 and 1.21.11 passed their native suites with the test packet synchronizer disabled; 26.3 passed on Mesa llvmpipe 25.2.8/OpenGL 4.5 using EGL. The CI setup and initial diagnostic failures are documented in [VERSION_PORTING.md](VERSION_PORTING.md#ci-client-execution).
 
@@ -53,7 +53,7 @@ All eight Minecraft targets passed `build runClientGameTest` with their actual M
 
 Additional native runs passed on Java 21/Minecraft 1.21.5 and Java 25/Minecraft 26.2 with Mod Menu installed and YACL absent. These verify factory registration and the missing-library branch without launching an external file manager. The entrypoint remains usable without loading YACL classes.
 
-CI exercises both dependency combinations for every branch default. Missing-YACL runs use the separate `clientGameTestWithoutYacl` directory; diagnostics from both modes are uploaded. Development-only `localRuntime`/`modLocalRuntime` dependencies are excluded from publication and release JARs.
+CI exercises both dependency combinations for every supported target. Missing-YACL runs use the separate `clientGameTestWithoutYacl` directory; diagnostics from both modes are uploaded. Development-only `localRuntime`/`modLocalRuntime` dependencies are excluded from publication and release JARs.
 
 The user confirmed that 0.8.0 has not been uploaded and requested keeping that version. The upload bundle and checksums were refreshed with the corrected builds.
 
@@ -66,3 +66,9 @@ The Gradle Tooling API's IDE model reported nine projects (root + eight Minecraf
 Shortcut selection was checked for a legacy build, an explicit 26.2 launch and the 26.1.2 default-target patch. Temporary shared-resource additions and edits propagated to inherited copies; a native 26.3 override took precedence; removing the files removed all generated copies. The temporary probes were removed before final packaging. Qualified `:commands` prints help without configuring Minecraft modules.
 
 Artifacts from this setup are in `build/dist/0.8.0/` and `build/dist/InteractiveStuff-0.8.0-all-versions.zip`. Updated release hashes are recorded in `docs/RELEASE_CHECKSUMS.json`; see `docs/IDE_WORKFLOW.md` for current commands and source ownership.
+
+## Unified repository workflow validation (2026-10-10)
+
+All six former version-branch heads are ancestors of `main`; the validated shared tree was preserved during consolidation. `:commands :buildSelected` selected the new 26.2 default and passed the 67 regression checks and release-JAR guards. The mod remains 0.8.0.
+
+The catalog-driven workflow passed actionlint 1.7.12. Its actual matrix and packaging scripts were executed locally using the eight validated release JARs: all eight targets were selected, the twelve-file upload ZIP retained every JAR byte-for-byte, all SHA-256 entries matched, and a missing-JAR probe was rejected. GitHub runs the full matrix with both native dependency combinations and the final packaging job.

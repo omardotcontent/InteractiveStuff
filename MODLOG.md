@@ -68,3 +68,11 @@
 - Validation: all eight `buildAll` targets passed 67 deterministic checks and release guards; all eight `testAll` native clients passed rendering/lifecycle and actual Mod Menu/YACL screen checks. Minecraft 26.2 additionally passed without YACL through the new shortcut command.
 - The actual Gradle IDE model contained root + eight target modules, 50 unique Java source directories, correct Java 21/25 language levels and target-specific Minecraft libraries. Command selection, branch-default patch selection, shared-resource additions/updates, native override precedence and stale-copy removal were checked independently.
 - Full usage and command reference: `docs/IDE_WORKFLOW.md`. Mod version remains 0.8.0.
+
+## Unified repository and branch consolidation (2026-10-10)
+
+- Made `main` the canonical development branch for all eight Minecraft targets, retaining the complete histories of the six previous version branches in a merge with the validated unified tree.
+- Preserved the previous remote branch tips under `archive/<version>` and selected 26.2 as the convenience-command default. Shared code and adapters now move together on `main`.
+- Replaced branch-default CI with a matrix generated from `gradle/targets.json`. Every target receives build/regression/release checks and both real-client dependency combinations. Successful runs assemble all eight verified JARs into an upload ZIP with checksums.
+- Updated the README, architecture/porting/IDE documentation and repository description for the unified workflow. Added `docs/REPOSITORY_WORKFLOW.md` and a `main` CI badge. Mod version remains 0.8.0.
+- Validation: all six old branch heads are ancestors of `main`; the default 26.2 build passed 67 regression checks and release guards. actionlint 1.7.12 accepted the workflow. Actual CI matrix/bundle scripts selected all eight targets, preserved all JAR bytes, verified ZIP checksums and rejected a missing-JAR probe.

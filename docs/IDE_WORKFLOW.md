@@ -2,6 +2,8 @@
 
 Open the repository root (the folder containing `settings.gradle`) as a Gradle project. All eight Minecraft releases are imported together; changing the target or switching Git branches is no longer needed to work on a different Minecraft API.
 
+Use the repository's default `main` branch. Historical version branches live under `archive/`; the [repository workflow](REPOSITORY_WORKFLOW.md) explains how they were preserved and how other checkouts move to `main`.
+
 ## Initial setup
 
 1. Use Java 25 for IntelliJ's Project SDK and Gradle JVM. Install a Java 21 JDK as well for the 1.21 modules. Gradle toolchains select Java 21 or 25 for each compiler and client automatically.
@@ -71,7 +73,7 @@ For faster single-version terminal commands, prefix a root shortcut with `:`, fo
 
 ## Default-target compatibility
 
-`target_version` in root `gradle.properties` now selects only `buildSelected`, `runSelected`, and `testSelected`. It does not change which modules IntelliJ imports. CI uses these commands for each version branch.
+`target_version` in root `gradle.properties` selects only `buildSelected`, `runSelected`, and `testSelected`, with 26.2 as the default. It does not change which modules IntelliJ imports. CI addresses every module explicitly, independently of this convenience setting.
 
 ```sh
 ./gradlew -Ptarget_version=1.21.5 buildSelected
@@ -93,4 +95,4 @@ The paths follow `mod_version` if it changes. This task refreshes the upload bun
 
 Development clients use separate `run/<minecraft>/` directories. These survive `clean` and `cleanAll`. Existing saves in the old root `run/` folder remain there; copy a wanted save into the appropriate version's `saves` folder if needed. Native client tests retain their resettable `build/<profile>/<minecraft>/run/clientGameTest*` directories.
 
-One checkout can edit and build all versions. Git commits still apply to the checked-out branch; synchronizing the GitHub version branches is a separate Git operation.
+One checkout on `main` can edit and build all versions. Commit shared changes and any required adapters together. Feature branches start from `main` and return to `main`; there is no separate version-branch synchronization step.
