@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:item_frame", "minecraft:glow_item_frame", "minecraft:painting", "minecraft:oak_hanging_sign", "minecraft:spruce_hanging_sign", "minecraft:birch_hanging_sign", "minecraft:jungle_hanging_sign", "minecraft:acacia_hanging_sign", "minecraft:dark_oak_hanging_sign", "minecraft:crimson_hanging_sign", "minecraft:warped_hanging_sign", "minecraft:cherry_hanging_sign", "minecraft:mangrove_hanging_sign", "minecraft:pale_oak_hanging_sign", "minecraft:bamboo_hanging_sign"]
+
 importScript("interactivestuff:interactive_resourcepack","physics_lib")
 
 lock FRAME_ITEMS = new List

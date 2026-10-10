@@ -24,14 +24,21 @@ public final class ModMenuIntegration implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return this::createConfigScreen;
+        return parent -> {
+            if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("yacl")) {
+                if (ConfigHandler.INSTANCE != null) ConfigHandler.INSTANCE.openConfigDirectory();
+                return parent;
+            }
+            return createConfigScreen(parent);
+        };
     }
 
     private Screen createConfigScreen(final Screen parent) {
         if (ConfigHandler.INSTANCE == null)
             ConfigHandler.INSTANCE = ConfigHandler.load();
         final ConfigHandler instance = ConfigHandler.INSTANCE;
-        final ConfigHandler defaults = ConfigHandler.loadDefaults();
+        final ConfigHandler loadedDefaults = ConfigHandler.loadDefaults();
+        final ConfigHandler defaults = loadedDefaults == null ? new ConfigHandler() : loadedDefaults;
         ModMenuIntegration.parent = parent;
 
         final YetAnotherConfigLib.Builder builder = YetAnotherConfigLib.createBuilder()
@@ -326,7 +333,7 @@ public final class ModMenuIntegration implements ModMenuApi {
 
         final List<String> defaultCustomPitches = defaultMat != null
                 ? defaultMat.customPitches.stream()
-                .map(cp -> (cp.item != null ? BuiltInRegistries.ITEM.getId(cp.item) : "minecraft:stone") + "=" + cp.pitch)
+                .map(cp -> (cp.item != null ? BuiltInRegistries.ITEM.getKey(cp.item) : "minecraft:stone") + "=" + cp.pitch)
                 .collect(Collectors.toList())
                 : new ArrayList<>();
 
@@ -337,7 +344,7 @@ public final class ModMenuIntegration implements ModMenuApi {
                         .binding(
                                 defaultCustomPitches,
                                 () -> mat.customPitches.stream()
-                                        .map(cp -> (cp.item != null ? BuiltInRegistries.ITEM.getId(cp.item) : "minecraft:stone") + "=" + cp.pitch)
+                                        .map(cp -> (cp.item != null ? BuiltInRegistries.ITEM.getKey(cp.item) : "minecraft:stone") + "=" + cp.pitch)
                                         .collect(Collectors.toList()),
                                 newList -> {
                                     mat.customPitches.clear();

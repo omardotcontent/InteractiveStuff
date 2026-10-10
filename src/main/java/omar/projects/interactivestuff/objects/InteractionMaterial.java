@@ -36,13 +36,16 @@ public final class InteractionMaterial {
     }
 
     public SoundEvent getSoundEvent() {
-        return BuiltInRegistries.SOUND_EVENT.get(Objects.requireNonNull(Identifier.tryParse(sound))).orElseThrow().value();
+        Identifier id = sound == null ? null : Identifier.tryParse(sound);
+        if (id == null) return net.minecraft.sounds.SoundEvents.STONE_BREAK;
+        return BuiltInRegistries.SOUND_EVENT.get(id).map(net.minecraft.core.Holder.Reference::value)
+                .orElse(net.minecraft.sounds.SoundEvents.STONE_BREAK);
     }
 
     public float getPitch(final ItemStack stack) {
         if (customPitches != null) {
             for (final PitchEntry entry : customPitches) {
-                if (entry.item.equals(stack.getItem())) {
+                if (entry != null && entry.item == stack.getItem()) {
                     return entry.pitch;
                 }
             }

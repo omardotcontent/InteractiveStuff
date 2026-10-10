@@ -1,6 +1,7 @@
 package omar.projects.interactivestuff.mixin.player;
 
 import net.minecraft.client.Camera;
+import net.minecraft.util.Mth;
 import omar.projects.interactivestuff.handlers.CameraVelocityAccessor;
 import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,14 +45,16 @@ public abstract class CameraMixin implements CameraVelocityAccessor {
 
     @Inject(method = "setRotation", at = @At("TAIL"))
     private void calculateSmoothedVelocity(final float yaw, final float pitch, final CallbackInfo ci) {
-        float rawYawVelocity = this.yRot - this.lastYaw;
+        float rawYawVelocity = Mth.wrapDegrees(this.yRot - this.lastYaw);
         float rawPitchVelocity = this.xRot - this.lastPitch;
 
         final float dt = RenderTickHandler.normalizedDelta;
-        if (dt > 0) {
-            rawYawVelocity /= dt;
-            rawPitchVelocity /= dt;
+        if (dt <= 0) {
+            this.smoothedYawVelocity = this.smoothedPitchVelocity = 0;
+            return;
         }
+        rawYawVelocity /= dt;
+        rawPitchVelocity /= dt;
 
         final float smoothFactor = (float) (1.0 - Math.pow(1.0 - SMOOTHING_SPEED, dt));
         this.smoothedYawVelocity = this.smoothedYawVelocity + (rawYawVelocity - this.smoothedYawVelocity) * smoothFactor;

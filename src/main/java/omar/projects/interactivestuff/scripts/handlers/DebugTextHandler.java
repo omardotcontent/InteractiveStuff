@@ -1,31 +1,22 @@
 package omar.projects.interactivestuff.scripts.handlers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class DebugTextHandler {
+    public static DebugTextHandler INSTANCE;
+    private static List<String> renderedTexts = List.of();
+    private final List<String> textBuffer = new ArrayList<>();
 
-    public static volatile DebugTextHandler INSTANCE;
-
-    private static volatile List<String> renderedTexts = Collections.emptyList();
-    private final List<String> textBuffer = new CopyOnWriteArrayList<>();
-
-    public DebugTextHandler() {
-        INSTANCE = this;
-    }
-
-    public static List<String> getRenderedTexts() {
-        return renderedTexts;
-    }
-
-    public void addText(final String text) {
-        textBuffer.add(text);
-    }
-
+    public DebugTextHandler() { INSTANCE = this; }
+    public static List<String> getRenderedTexts() { return renderedTexts; }
+    public void addText(String text) { textBuffer.add(text); }
     public void onTickEnd() {
-        renderedTexts = new ArrayList<>(textBuffer);
+        renderedTexts = List.copyOf(textBuffer);
         textBuffer.clear();
+    }
+    public void clear() {
+        textBuffer.clear();
+        renderedTexts = List.of();
     }
 }

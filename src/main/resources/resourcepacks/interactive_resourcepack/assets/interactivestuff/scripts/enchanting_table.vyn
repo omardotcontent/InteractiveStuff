@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:enchanting_table"]
+
 make openingProgress = 0
 
 task onItemUpdate takes itemRendered do
@@ -11,16 +13,7 @@ task onItemUpdate takes itemRendered do
 		end
 	end
 
-    make blocks = player.getNearbyBlocks(2)
-    make bookshelfNearby = false
-
-    cycle i from 0 to blocks.size() - 1 do
-        make block = blocks.get(i)
-        check block.getName() == "minecraft:bookshelf" do
-            make bookshelfNearby = true
-            escape
-        end
-    end
+    make bookshelfNearby = player.hasNearbyBlock("minecraft:bookshelf", 2)
 
     make progress = 0
     check bookshelfNearby do

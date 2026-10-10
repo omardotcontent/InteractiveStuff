@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:redstone_lamp", "minecraft:redstone_torch"]
+
 task onItemUpdate takes itemRendered do
     check player.getGamemode() != "spectator" do
         check itemRendered.getName() == "minecraft:redstone_lamp" && player.getSteppingBlock().getName() == "minecraft:redstone_block" && player.isSneaking() do

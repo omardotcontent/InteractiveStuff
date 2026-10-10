@@ -1,153 +1,155 @@
 package omar.projects.interactivestuff.scripts;
 
 import me.abdelaziz.main.VynMain;
-
 import me.abdelaziz.parser.Parser;
+import me.abdelaziz.runtime.Value;
 import me.abdelaziz.runtime.function.nat.NativeFunction;
 import me.abdelaziz.util.NativeBinder;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import omar.projects.interactivestuff.IS;
 import omar.projects.interactivestuff.handlers.BackgroundLoopHandler;
-import omar.projects.interactivestuff.scripts.functions.DebugText;
-import omar.projects.interactivestuff.scripts.functions.ImportScript;
-import omar.projects.interactivestuff.scripts.functions.ExcludeScript;
-import omar.projects.interactivestuff.scripts.functions.GetDelta;
+import omar.projects.interactivestuff.render.MinecraftItemRenderer;
+import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
+import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
+import omar.projects.interactivestuff.scripts.functions.*;
+import omar.projects.interactivestuff.scripts.handlers.DebugTextHandler;
 import omar.projects.interactivestuff.scripts.handlers.WaitHandler;
 import omar.projects.interactivestuff.scripts.objects.PackScripts;
 import omar.projects.interactivestuff.scripts.objects.Script;
+import omar.projects.interactivestuff.scripts.objects.Script.FunctionType;
 import omar.projects.interactivestuff.scripts.variables.*;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.Map;
 
+/** Minecraft lifecycle and bindings around the independently testable script runtime. */
 public final class ScriptInterpreter {
-    private static final InteractiveStuffConfig INTERACTIVE_STUFF_CONFIG = new InteractiveStuffConfig();
-    private static final ModLoader MOD_LOADER = new ModLoader(FabricLoader.getInstance());
-    private static final Player PLAYER_VAR;
-    private static final Key KEY = new Key();
+    private static final Player PLAYER = new Player(null, Minecraft.getInstance());
+    private static final World WORLD = new World(null);
+    private static final ScriptRuntime RUNTIME = new ScriptRuntime(() -> VynMain.loadLines(""), message -> {
+        IS.LOGGER.error(message);
+        PLAYER.sendMessage(message);
+    });
+    private static Level sessionWorld;
+    private static volatile long sessionGeneration;
+    private static boolean ready;
 
-    private static final Set<Script> globalScripts = new CopyOnWriteArraySet<>();
-    private static final Map<String, PackScripts> packScripts = new ConcurrentHashMap<>();
-
-    private static final NativeFunction IMPORT_SCRIPT_FUNCTION = new ImportScript(packScripts);
-    private static final NativeFunction EXCLUDE_SCRIPT_FUNCTION = new ExcludeScript(packScripts);
-    private static final NativeFunction DEBUG_TEXT_FUNCTION = new DebugText();
-    private static final NativeFunction GET_DELTA_FUNCTION = new GetDelta();
-
-    static {
-        PLAYER_VAR = new Player(Minecraft.getInstance().player, Minecraft.getInstance());
-        ClientPlayConnectionEvents.JOIN
-                .register((_, _, client) -> PLAYER_VAR.setPlayer(client.player));
-    }
-
-    private ScriptInterpreter() {
-    }
+    private ScriptInterpreter() {}
 
     public static void register() {
-        VynMain.init(true);
+        VynMain.init(false);
         Parser.register("wait", new WaitHandler());
-        VynMain.setStdListener(listener -> {
-            NativeBinder.defineConstant(listener, "player", PLAYER_VAR);
-            NativeBinder.defineConstant(listener, "world", PLAYER_VAR.getWorld());
-            NativeBinder.defineConstant(listener, "config", INTERACTIVE_STUFF_CONFIG);
-            NativeBinder.defineConstant(listener, "key", KEY);
-            NativeBinder.defineConstant(listener, "modLoader", MOD_LOADER);
-            NativeBinder.bind(listener, ItemModel.class);
-            NativeBinder.bind(listener, Sound.class);
-            NativeBinder.bind(listener, Position.class);
-            listener.defineFunction("importScript", IMPORT_SCRIPT_FUNCTION);
-            listener.defineFunction("excludeScript", EXCLUDE_SCRIPT_FUNCTION);
-            listener.defineFunction("debugText", DEBUG_TEXT_FUNCTION);
-            listener.defineFunction("getDelta", GET_DELTA_FUNCTION);
+        VynMain.setStdListener(environment -> {
+            NativeBinder.defineConstant(environment, "player", PLAYER);
+            NativeBinder.defineConstant(environment, "world", WORLD);
+            NativeBinder.defineConstant(environment, "config", new InteractiveStuffConfig());
+            NativeBinder.defineConstant(environment, "key", new Key());
+            NativeBinder.defineConstant(environment, "modLoader", new ModLoader(FabricLoader.getInstance()));
+            NativeBinder.bind(environment, ItemModel.class);
+            NativeBinder.bind(environment, Sound.class);
+            NativeBinder.bind(environment, Position.class);
+            environment.defineFunction("importScript", new ImportScript(RUNTIME));
+            environment.defineFunction("excludeScript", new ExcludeScript(RUNTIME));
+            environment.defineFunction("debugText", new DebugText());
+            environment.defineFunction("getDelta", new GetDelta());
+            environment.defineFunction("getFrameId", new NativeFunction((_, _) -> new Value(RenderTickHandler.getFrameId())));
+        });
+        ClientPlayConnectionEvents.JOIN.register((_, _, client) -> updateSession(client));
+        ClientPlayConnectionEvents.DISCONNECT.register((_, client) -> {
+            ready = false;
+            sessionWorld = null;
+            PLAYER.setPlayer(null);
+            WORLD.setWorld(null);
+            clearSessionWork();
         });
         ClientTickEvents.START_CLIENT_TICK.register(ScriptInterpreter::tick);
     }
 
-    private static void tick(final Minecraft client) {
-        if (client.player != null && client.player != PLAYER_VAR.getPlayer()) {
-            PLAYER_VAR.setPlayer(client.player);
+    private static void updateSession(Minecraft client) {
+        boolean changedWorld = sessionWorld != client.level;
+        PLAYER.setPlayer(client.player);
+        WORLD.setWorld(client.level);
+        if (changedWorld) {
+            sessionWorld = client.level;
+            clearSessionWork();
+            RUNTIME.load();
         }
-
-        if (PLAYER_VAR.getPlayer() == null || client.isPaused() || client.level == null) {
-            return;
-        }
-
-        if (PLAYER_VAR.getLivingEntity() == null) {
-            PLAYER_VAR.setLivingEntity(client.player.getLivingEntity());
-        }
-
-        for (final Script entry : globalScripts) {
-            entry.call(PLAYER_VAR);
-        }
+        ready = client.player != null && client.level != null;
     }
 
-    public static ItemModel itemUpdate(final ItemStack itemStack, final ItemDisplayContext displayContext) {
-        if (PLAYER_VAR.getPlayer() == null) {
-            return null;
-        }
-        final ItemModel item = new ItemModel(itemStack);
-        item.setDisplayContext(displayContext);
+    private static void clearSessionWork() {
+        sessionGeneration++;
+        BackgroundLoopHandler.getInstance().clearAll();
+        ItemModelRenderRegistry.clear();
+        RenderTickHandler.reset();
+        if (DebugTextHandler.INSTANCE != null) DebugTextHandler.INSTANCE.clear();
+    }
 
-        for (final Script entry : globalScripts) {
-            entry.call(PLAYER_VAR, Script.FunctionType.ON_ITEM_UPDATE,
-                    List.of(NativeBinder.toValue(entry.getEnvironment(), item)));
-        }
+    private static void tick(Minecraft client) {
+        if (client.level != sessionWorld || client.player != PLAYER.getPlayer()) updateSession(client);
+        if (!ready || client.isPaused()) return;
+        for (Script script : RUNTIME.callbacks(FunctionType.ON_TICK)) script.call(FunctionType.ON_TICK);
+    }
 
-        if (!item.modified) {
-            return null;
-        }
+    public static boolean hasItemCallbacks(ItemStack stack) {
+        return ready && !stack.isEmpty()
+                && !RUNTIME.itemCallbacks(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()).isEmpty();
+    }
 
-        return item;
+    public static ItemModel itemUpdate(ItemStack stack, ItemDisplayContext context, boolean mainHand) {
+        if (!ready) return null;
+        ItemModel model = new ItemModel(stack);
+        model.setDisplayContext(context, mainHand);
+        for (Script script : RUNTIME.itemCallbacks(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()))
+            script.call(FunctionType.ON_ITEM_UPDATE, model);
+        return model.modified ? model : null;
     }
 
     public static void onSwingHand() {
-        for (final Script entry : globalScripts) {
-            entry.call(PLAYER_VAR, Script.FunctionType.ON_SWING_HAND);
-        }
+        if (!ready) return;
+        for (Script script : RUNTIME.callbacks(FunctionType.ON_SWING_HAND)) script.call(FunctionType.ON_SWING_HAND);
     }
 
     public static void onPlaySound(Sound sound) {
-        for (Script entry : globalScripts)
-            entry.call(PLAYER_VAR, Script.FunctionType.ON_PLAY_SOUND,
-                    List.of(NativeBinder.toValue(entry.getEnvironment(), sound)));
+        Minecraft client = Minecraft.getInstance();
+        long generation = sessionGeneration;
+        Runnable dispatch = () -> {
+            if (!ready || generation != sessionGeneration) return;
+            for (Script script : RUNTIME.callbacks(FunctionType.ON_PLAY_SOUND)) script.call(FunctionType.ON_PLAY_SOUND, sound);
+        };
+        if (client.isSameThread()) dispatch.run();
+        else client.execute(dispatch);
     }
 
-
-    public static void onKeyPress(int keyInput) {
-        for (Script entry : globalScripts)
-            entry.call(PLAYER_VAR, Script.FunctionType.ON_KEY_PRESS,
-                    List.of(NativeBinder.toValue(entry.getEnvironment(), keyInput)));
+    public static void onKeyPress(int key) {
+        if (!ready || Minecraft.getInstance().gui.screen() != null) return;
+        for (Script script : RUNTIME.callbacks(FunctionType.ON_KEY_PRESS)) script.call(FunctionType.ON_KEY_PRESS, key);
     }
 
-    public static void addScript(String packId, String name, String content) {
-        packScripts.computeIfAbsent(packId, _ -> new PackScripts())
-                .addScript(content, name);
-    }
+    public static void addScript(String pack, String name, String code) { RUNTIME.addScript(pack, name, code); }
 
     public static void loadScripts() {
-        Deque<Script> delayedScripts = new ArrayDeque<>();
-        for (PackScripts packScripts : ScriptInterpreter.packScripts.values())
-            packScripts.loadScripts(PLAYER_VAR, globalScripts, delayedScripts);
-        while (!delayedScripts.isEmpty())
-            delayedScripts.pop().load(PLAYER_VAR, globalScripts, delayedScripts);
+        clearSessionWork();
+        Minecraft client = Minecraft.getInstance();
+        PLAYER.setPlayer(client.player);
+        WORLD.setWorld(client.level);
+        sessionWorld = client.level;
+        RUNTIME.load();
+        ready = client.player != null && client.level != null;
     }
 
     public static void clearScripts() {
-        globalScripts.clear();
-        packScripts.clear();
-        BackgroundLoopHandler.getInstance().clearAll();
+        ready = false;
+        clearSessionWork();
+        MinecraftItemRenderer.clearCaches();
+        RUNTIME.clear();
     }
 
-    public static Set<Script> getGlobalScripts() {
-        return globalScripts;
-    }
-
-    public static Map<String, PackScripts> getPackScripts() {
-        return packScripts;
-    }
+    public static Map<String, PackScripts> getPackScripts() { return RUNTIME.packs(); }
 }

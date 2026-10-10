@@ -2,7 +2,6 @@ plugins {
     id 'net.fabricmc.fabric-loom' version '1.17.19'
     id 'java'
     id 'maven-publish'
-    id "io.github.goooler.shadow" version "8.1.7"
 }
 
 version = project.mod_version
@@ -33,7 +32,6 @@ dependencies {
     compileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
 
     implementation files("libs/Vyn.jar")
-    shadow files("libs/Vyn.jar")
 }
 
 processResources {
@@ -68,8 +66,12 @@ java {
 }
 
 jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+    from("LICENSE.txt") {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+    // Bundle the interpreter in the ordinary distributable, not a separate shadow artifact.
+    from(zipTree("libs/Vyn.jar")) {
+        exclude "META-INF/**"
     }
 }
 
@@ -82,10 +84,55 @@ publishing {
 }
 
 
-tasks.named("shadowJar") {
-    configurations = [project.configurations.shadow]
+sourceSets {
+    regression {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
-tasks.named("jar") {
-    dependsOn(tasks.named("shadowJar"))
+tasks.register("runtimeRegression", JavaExec) {
+    group = "verification"
+    description = "Runs deterministic runtime, scheduler, rendering math, and bundled-script checks."
+    dependsOn regressionClasses
+    classpath = sourceSets.regression.runtimeClasspath
+    mainClass = "omar.projects.interactivestuff.RuntimeRegressionChecks"
+    workingDir = projectDir
+}
+
+tasks.named("check") {
+    dependsOn tasks.named("runtimeRegression"), tasks.named("verifyReleaseJar")
+}
+
+// Client integration tests live in a separate test mod and isolated game directory.
+fabricApi.configureTests {
+    createSourceSet = true
+    modId = "interactivestuff_test"
+    enableGameTests = false
+    enableClientGameTests = true
+    eula = false
+}
+
+
+tasks.register("verifyReleaseJar") {
+    group = "verification"
+    description = "Checks bundled interpreter, license, metadata and release/test separation."
+    dependsOn tasks.named("jar")
+    inputs.file(tasks.named("jar").flatMap { it.archiveFile })
+    doLast {
+        new java.util.zip.ZipFile(tasks.named("jar").get().archiveFile.get().asFile).withCloseable { archive ->
+            def entries = archive.entries().collect { it.name }
+            ["fabric.mod.json", "interactivestuff.mixins.json", "me/abdelaziz/main/VynMain.class",
+             "LICENSE.txt_${project.base.archivesName.get()}"].each { required ->
+                if (!entries.contains(required.toString())) throw new GradleException("Release JAR is missing ${required}")
+            }
+            if (entries.any { it.startsWith("net/minecraft/") || it.contains("ClientRenderChecks") || it.contains("RuntimeRegressionChecks") }) {
+                throw new GradleException("Release JAR contains game or test classes")
+            }
+            def metadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry("fabric.mod.json")))
+            if (metadata.depends.minecraft != "~${project.minecraft_version}" || metadata.depends.java != ">=25") {
+                throw new GradleException("Release metadata does not match the selected Minecraft/Java target")
+            }
+        }
+    }
 }

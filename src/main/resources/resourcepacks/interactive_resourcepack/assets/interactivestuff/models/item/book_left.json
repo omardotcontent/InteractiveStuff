@@ -3,6 +3,7 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 32],
 	"textures": {
+		"particle": "#1",
 		"1": "entity/enchantment/enchanting_table_book"
 	},
 	"elements": [

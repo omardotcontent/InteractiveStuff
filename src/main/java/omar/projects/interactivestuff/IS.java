@@ -7,11 +7,14 @@ import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
 import omar.projects.interactivestuff.handlers.config.ConfigHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public final class IS implements ModInitializer {
 
     public static final String MOD_ID = "interactivestuff";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 
     @Override

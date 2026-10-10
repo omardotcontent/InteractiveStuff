@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:mace"]
+
 importScript("interactivestuff:interactive_resourcepack","physics_lib")
 
 make smoothFallLean = 0

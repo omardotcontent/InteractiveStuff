@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:totem_of_undying"]
+
 
 task onItemUpdate takes itemRendered do
     check player.getGamemode() != "spectator" && itemRendered.getName() == "minecraft:totem_of_undying" do

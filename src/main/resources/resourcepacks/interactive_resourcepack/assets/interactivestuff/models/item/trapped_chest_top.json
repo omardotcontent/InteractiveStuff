@@ -1,6 +1,7 @@
 {
 	"parent": "interactivestuff:item/chest_top",
 	"textures": {
+		"particle": "#1_0",
 		"1_0": "interactivestuff:item/chest_trapped"
 	}
 }

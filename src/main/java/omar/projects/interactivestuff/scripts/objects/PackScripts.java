@@ -1,37 +1,26 @@
 package omar.projects.interactivestuff.scripts.objects;
 
-
-import omar.projects.interactivestuff.scripts.variables.Player;
-
-import java.util.Deque;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeMap;
 
+/** Full relative paths prevent scripts in different subfolders from overwriting each other. */
 public final class PackScripts {
-    private final Map<String, Script> scripts;
+    private final Map<String, Script> scripts = new TreeMap<>();
 
-    public PackScripts() {
-        scripts = new HashMap<>();
-    }
+    public void addScript(String name, Script script) { scripts.put(name, script); }
+    public Collection<Script> scripts() { return scripts.values(); }
 
-    public void addScript(final String code, final String fileName) {
-       scripts.put(fileName, new Script(code, fileName));
-    }
-
-    public void loadScripts(final Player playerVar, final Set<Script> globalScripts, final Deque<Script> delayedScripts) {
-        for (final Script script: scripts.values()) {
-            script.load(playerVar, globalScripts, delayedScripts);
+    public Script getScript(String name) {
+        Script exact = scripts.get(name);
+        if (exact != null) return exact;
+        Script match = null;
+        for (Map.Entry<String, Script> entry : scripts.entrySet()) {
+            if (entry.getKey().endsWith("/" + name)) {
+                if (match != null) throw new IllegalArgumentException("Ambiguous script name: " + name + "; use its relative path");
+                match = entry.getValue();
+            }
         }
-    }
-
-    public void excludeScript(final Script script) {
-        script.setState(Script.State.EXCLUDED);
-    }
-
-
-
-    public Script getScript(final String fileName) {
-        return scripts.get(fileName);
+        return match;
     }
 }

@@ -14,7 +14,7 @@ public class PivotRendererBlock extends ItemModel {
         translate(parent.getPivotX(), parent.getPivotY(), parent.getPivotZ());
         scale(0.3D, 0.3D, 0.3D);
         setItemModel("interactivestuff:pivotrendererblock");
-        ItemModelRenderRegistry.ACTIVE.add(this);
+        ItemModelRenderRegistry.enqueue(this);
     }
 
 }

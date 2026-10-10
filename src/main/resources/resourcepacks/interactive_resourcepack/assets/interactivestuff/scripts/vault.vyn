@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:vault"]
+
 lock lootItems = new List
 lootItems.add("minecraft:wind_charge","minecraft:emerald","minecraft:iron_ingot","minecraft:diamond","minecraft:ominous_bottle","minecraft:honey_bottle","minecraft:golden_apple","minecraft:golden_carrot","minecraft:enchanted_book")
 

@@ -5,7 +5,11 @@ import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -24,10 +28,18 @@ public final class Player {
     private LocalPlayer player;
     private final Minecraft client;
     private LivingEntity livingEntity;
+    private final World worldView = new World(null);
+    private long nearbyTick = Long.MIN_VALUE;
+    private BlockPos nearbyPosition;
+    private final Map<NearbyQuery, Boolean> nearbyQueries = new HashMap<>();
+    private record NearbyQuery(String blockId, int radius) {}
+    private Vec3 velocitySource;
+    private float velocityYaw = Float.NaN;
+    private double localVelocityX, localVelocityY, localVelocityZ;
 
     public Player(final LocalPlayer player, final Minecraft client) {
-        this.player = player;
         this.client = client;
+        setPlayer(player);
     }
 
     public void setLivingEntity(final LivingEntity entity) {
@@ -40,6 +52,11 @@ public final class Player {
 
     public void setPlayer(final LocalPlayer player) {
         this.player = player;
+        this.livingEntity = player;
+        worldView.setWorld(player == null ? null : client.level);
+        nearbyTick = Long.MIN_VALUE;
+        nearbyQueries.clear();
+        velocitySource = null;
     }
 
     @VynFunc
@@ -71,7 +88,7 @@ public final class Player {
 
     @VynFunc
     public Block getTargetBlock() {
-        if (!(client.hitResult instanceof BlockHitResult blockHit)) {
+        if (!(client.hitResult instanceof BlockHitResult blockHit) || blockHit.getType() != HitResult.Type.BLOCK) {
             return null;
         }
         if (player == null || client.level == null) {
@@ -87,12 +104,13 @@ public final class Player {
 
     @VynFunc
     public Position getPosition() {
-        return (player != null) ? new Position((int) player.getX(), (int) player.getY(), (int) player.getZ()) : null;
+        return (player != null) ? new Position(player.blockPosition().getX(), player.blockPosition().getY(), player.blockPosition().getZ()) : null;
     }
 
     @VynFunc
     public World getWorld() {
-        return (client.level != null) ? new World(client.level) : null;
+        worldView.setWorld(client.level);
+        return client.level == null ? null : worldView;
     }
 
     @VynFunc
@@ -112,7 +130,8 @@ public final class Player {
 
     @VynFunc
     public ItemModel getBlockingItem() {
-        return (livingEntity != null) ? new ItemModel(livingEntity.getItemBlockingWith()) : null;
+        return livingEntity != null && livingEntity.getItemBlockingWith() != null
+                ? new ItemModel(livingEntity.getItemBlockingWith()) : null;
     }
 
     @VynFunc
@@ -200,33 +219,53 @@ public final class Player {
         return player != null ? player.experienceProgress : -1f;
     }
 
-    @VynFunc
-    public double getVelocityX() {
+    private void updateVelocity() {
         if (player == null) {
-            return 0;
+            localVelocityX = localVelocityY = localVelocityZ = 0;
+            return;
         }
-        final double vx = player.getDeltaMovement().get(Direction.Axis.X);
-        final double vz = player.getDeltaMovement().get(Direction.Axis.Z);
-        final double yawRad = Math.toRadians(player.getYRot());
-        return (vx * Math.cos(yawRad) + vz * Math.sin(yawRad)) * 0.3333;
+        Vec3 velocity = player.getDeltaMovement();
+        float yaw = player.getYRot();
+        if (velocity.equals(velocitySource) && yaw == velocityYaw) return;
+        velocitySource = velocity;
+        velocityYaw = yaw;
+        double radians = Math.toRadians(yaw), cosine = Math.cos(radians), sine = Math.sin(radians);
+        localVelocityX = (velocity.x * cosine + velocity.z * sine) * 0.3333;
+        localVelocityY = Math.abs(velocity.y + 0.0784) < 0.001 ? 0 : velocity.y * 0.3333;
+        localVelocityZ = (-velocity.x * sine + velocity.z * cosine) * 0.3333;
     }
 
     @VynFunc
-    public double getVelocityY() {
-        if (player == null) return 0;
-        final double y = player.getDeltaMovement().get(Direction.Axis.Y);
-        return (Math.abs(y + 0.0784) < 0.001) ? 0 : y * 0.3333;
-    }
-
+    public double getVelocityX() { updateVelocity(); return localVelocityX; }
     @VynFunc
-    public double getVelocityZ() {
-        if (player == null) {
-            return 0;
+    public double getVelocityY() { updateVelocity(); return localVelocityY; }
+    @VynFunc
+    public double getVelocityZ() { updateVelocity(); return localVelocityZ; }
+
+    /** Memoized per tick and player block position, with no Vyn Block wrappers. */
+    @VynFunc
+    public boolean hasNearbyBlock(String blockId, int radius) {
+        if (player == null || client.level == null || radius < 0) return false;
+        long tick = client.level.getGameTime();
+        BlockPos center = player.blockPosition();
+        if (tick != nearbyTick || !center.equals(nearbyPosition)) {
+            nearbyTick = tick;
+            nearbyPosition = center;
+            nearbyQueries.clear();
         }
-        final double vx = player.getDeltaMovement().get(Direction.Axis.X);
-        final double vz = player.getDeltaMovement().get(Direction.Axis.Z);
-        final double yawRad = Math.toRadians(player.getYRot());
-        return (-vx * Math.sin(yawRad) + vz * Math.cos(yawRad)) * 0.3333;
+        return nearbyQueries.computeIfAbsent(new NearbyQuery(blockId, radius), query -> {
+            var block = BuiltInRegistries.BLOCK.get(Identifier.parse(query.blockId()))
+                    .map(net.minecraft.core.Holder.Reference::value).orElse(null);
+            if (block == null) return false;
+            BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+            for (int x = -radius; x <= radius; x++)
+                for (int y = -radius; y <= radius; y++)
+                    for (int z = -radius; z <= radius; z++) {
+                        cursor.set(center.getX() + x, center.getY() + y, center.getZ() + z);
+                        if (client.level.getBlockState(cursor).is(block)) return true;
+                    }
+            return false;
+        });
     }
 
     @VynFunc
@@ -541,21 +580,18 @@ public final class Player {
 
     @VynFunc
     public boolean isMainHand(final ItemModel item) {
-        return player != null && item != null && player.getMainHandItem().equals(item.getFinalStack());
+        return player != null && item != null && player.getMainHandItem() == item.getSourceStack();
     }
 
     @VynFunc
     public boolean isOffHand(final ItemModel item) {
-        return player != null && item != null && player.getOffhandItem().equals(item.getFinalStack());
+        return player != null && item != null && player.getOffhandItem() == item.getSourceStack();
     }
 
     @VynFunc
     public boolean isHoldingItem(final String itemId) {
-        final ItemModel mainHandItem = getMainHandItem();
-        final ItemModel offHandItem = getOffHandItem();
-        final String mainItemName = mainHandItem == null ? "AIR" : mainHandItem.getName();
-        final String offItemName = offHandItem == null ? "AIR" : offHandItem.getName();
-        return mainItemName.equals(itemId) || offItemName.equals(itemId);
+        return player != null && (BuiltInRegistries.ITEM.getKey(player.getMainHandItem().getItem()).toString().equals(itemId)
+                || BuiltInRegistries.ITEM.getKey(player.getOffhandItem().getItem()).toString().equals(itemId));
     }
 
     @VynFunc

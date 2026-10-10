@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:sculk_sensor", "minecraft:calibrated_sculk_sensor"]
+
 make wasOnGround = false
 make intensity = 0.0
 

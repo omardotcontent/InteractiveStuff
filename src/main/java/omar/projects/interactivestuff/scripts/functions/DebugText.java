@@ -14,7 +14,7 @@ public final class DebugText extends NativeFunction {
                 return null;
             }
             if (args.size() != 1) {
-                throw new RuntimeException("excludeScript requires 1 arguments: text (String)");
+                throw new RuntimeException("debugText requires 1 argument: text (String)");
             }
             final String text = args.getFirst().toString();
             DEBUG_TEXT_HANDLER.addText(text);

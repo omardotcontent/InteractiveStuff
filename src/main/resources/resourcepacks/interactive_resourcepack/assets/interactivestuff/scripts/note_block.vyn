@@ -25,7 +25,7 @@ end
 
 task onSwingHand do
     check config.isSpecializedNoteblockHitsEnabled() do
-        check player.getGamemode() != "spectator" && player.getGamemode() != "adventure" && player.isHoldingItem("minecraft:note_block") && player.getTargetBlock().getName() != "minecraft:air" do
+        check player.getGamemode() != "spectator" && player.getGamemode() != "adventure" && player.isHoldingItem("minecraft:note_block") && player.getTargetBlock() != nothing do
             make targetBlock = player.getTargetBlock()
             player.playSoundWorld(targetBlock.getPosition(), targetBlock.getInstrument(), 0.2, 1.0)
         end

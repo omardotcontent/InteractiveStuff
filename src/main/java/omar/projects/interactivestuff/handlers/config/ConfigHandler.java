@@ -17,6 +17,9 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.AtomicMoveNotSupportedException;
+import omar.projects.interactivestuff.IS;
 import java.util.*;
 
 public final class ConfigHandler {
@@ -65,6 +68,7 @@ public final class ConfigHandler {
     public void reload() {
         final ConfigHandler loaded = load();
 
+        this.specializedNoteblockHits = loaded.specializedNoteblockHits;
         this.enableNoteBlockCrouchFeature = loaded.enableNoteBlockCrouchFeature;
         this.enableSculkSensorFeature = loaded.enableSculkSensorFeature;
 
@@ -107,7 +111,7 @@ public final class ConfigHandler {
 
         final ConfigHandler defaults = loadDefaults();
         if (defaults != null) {
-            defaults.save();
+            if (!Files.exists(CONFIG_PATH)) defaults.save();
             return defaults;
         }
 
@@ -137,25 +141,42 @@ public final class ConfigHandler {
     }
 
     public void save() {
-        try (final Writer writer = Files.newBufferedWriter(CONFIG_PATH, StandardCharsets.UTF_8)) {
-            GSON.toJson(this, writer);
-        } catch (final Exception e) {
-            System.err.println("[InteractiveStuff] Failed to save config.");
-            e.printStackTrace();
+        refreshCache();
+        Path temporary = null;
+        try {
+            Files.createDirectories(CONFIG_PATH.getParent());
+            temporary = Files.createTempFile(CONFIG_PATH.getParent(), "interactivestuff-", ".tmp");
+            try (Writer writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
+                GSON.toJson(this, writer);
+            }
+            try {
+                Files.move(temporary, CONFIG_PATH, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, CONFIG_PATH, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (Exception error) {
+            IS.LOGGER.error("Failed to save config", error);
+        } finally {
+            if (temporary != null) {
+                try { Files.deleteIfExists(temporary); }
+                catch (Exception error) { IS.LOGGER.warn("Failed to remove temporary config", error); }
+            }
         }
     }
 
     public void refreshCache() {
         itemLookupCache.clear();
-        if (materials == null) {
-            return;
-        }
+        HitCooldownTicks = Math.max(0, HitCooldownTicks);
+        if (excludedBlocks == null) excludedBlocks = new ArrayList<>();
+        excludedBlocks.removeIf(Objects::isNull);
+        if (materials == null) materials = new ArrayList<>();
+        materials.removeIf(Objects::isNull);
 
         for (final InteractionMaterial material : materials) {
-            if (material == null || material.items == null) {
-                continue;
-            }
-
+            if (material.items == null) material.items = new ArrayList<>();
+            material.items.removeIf(Objects::isNull);
+            if (material.customPitches == null) material.customPitches = new ArrayList<>();
+            material.customPitches.removeIf(entry -> entry == null || entry.item == null || !Float.isFinite(entry.pitch));
             for (final Item itemId : material.items) {
                 if (itemId != null) {
                     itemLookupCache.put(itemId, material);

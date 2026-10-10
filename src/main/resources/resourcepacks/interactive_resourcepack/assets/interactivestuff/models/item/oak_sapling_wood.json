@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
+		"particle": "#layer0",
     "layer0": "interactivestuff:item/oak_sapling_wood"
   }
 }

@@ -1,9 +1,18 @@
 task onTick do
+    check !config.isResourcePackDebugModeEnabled() do
+        reply nothing
+    end
     debugText("§6Game version: " + modLoader.getRawGameVersion())
     debugText("§aMain Hand Item: " + player.getMainHandItem().getName())
-    debugText("§aBlocking Item: " + player.getBlockingItem().getName())
-    debugText("§aWeapon Item: " + player.getWeaponItem().getName())
-    debugText("§aPick Block Item: " + player.getPickBlockItem().getName())
+    check player.getBlockingItem() != nothing do
+        debugText("§aBlocking Item: " + player.getBlockingItem().getName())
+    end
+    check player.getWeaponItem() != nothing do
+        debugText("§aWeapon Item: " + player.getWeaponItem().getName())
+    end
+    check player.getPickBlockItem() != nothing do
+        debugText("§aPick Block Item: " + player.getPickBlockItem().getName())
+    end
     debugText("§cHealth: " + player.getHealth())
     debugText("§aStepping Block: " + player.getSteppingBlock().getName())
     check player.getTargetBlock() != nothing do

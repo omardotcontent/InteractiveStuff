@@ -25,7 +25,7 @@ public final class Block {
 
     @VynFunc
     public String getName() {
-        return blockState.getBlock().asItem().toString();
+        return net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).toString();
     }
 
     @VynFunc

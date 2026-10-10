@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:campfire", "minecraft:torch", "minecraft:redstone_torch", "minecraft:soul_campfire", "minecraft:soul_torch", "minecraft:wall_torch", "minecraft:copper_torch"]
+
 lock HOT_ITEMS = new List
 HOT_ITEMS.add("minecraft:campfire", "minecraft:torch", "minecraft:redstone_torch", "minecraft:soul_campfire", "minecraft:soul_torch", "minecraft:wall_torch", "minecraft:copper_torch")
 

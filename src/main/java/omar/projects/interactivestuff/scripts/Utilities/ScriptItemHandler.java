@@ -2,6 +2,9 @@ package omar.projects.interactivestuff.scripts.Utilities;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
@@ -168,7 +171,7 @@ public final class ScriptItemHandler {
     private static <T> String encodeValue(final DataComponentType<T> type, final Object value) {
         try {
             final Codec<T> codec = type.codecOrThrow();
-            final DataResult<Tag> result = codec.encodeStart(NbtOps.INSTANCE, (T) value);
+            final DataResult<Tag> result = codec.encodeStart(componentOps(), (T) value);
             return result.result()
                     .map(Tag::toString)
                     .orElse(value.toString());
@@ -179,68 +182,27 @@ public final class ScriptItemHandler {
 
     private static <T> void applyDecoded(final ItemStack stack, final DataComponentType<T> type, final Tag nbt) {
         final Codec<T> codec = type.codecOrThrow();
-        final DataResult<T> result = codec.parse(NbtOps.INSTANCE, nbt);
-        result.result().ifPresent(value -> stack.set(type, value));
-        result.error().ifPresent(err -> System.err.println("Error parsing component " + type + ": " + err.message()));
+        final DataResult<T> result = codec.parse(componentOps(), nbt);
+        T value = result.getOrThrow(error -> new IllegalArgumentException("Invalid component " + type + ": " + error));
+        stack.set(type, value);
+    }
+
+    private static DynamicOps<Tag> componentOps() {
+        Minecraft client = Minecraft.getInstance();
+        return client != null && client.level != null
+                ? RegistryOps.create(NbtOps.INSTANCE, client.level.registryAccess()) : NbtOps.INSTANCE;
     }
 
     private static Tag coerce(final String rawInput) {
-        final String input = rawInput.trim();
-        if (input.equals("null")) {
-            return null;
+        String input = rawInput.trim();
+        if (input.equals("null")) return null;
+        // Existing scripts pass model IDs as bare strings; preserve that shorthand.
+        if (!input.startsWith("{") && !input.startsWith("[") && !input.startsWith("\"")
+                && !input.startsWith("'") && input.contains(":")) return StringTag.valueOf(input);
+        try {
+            return TagParser.create(NbtOps.INSTANCE).parseFully(input);
+        } catch (com.mojang.brigadier.exceptions.CommandSyntaxException error) {
+            throw new IllegalArgumentException("Invalid component SNBT: " + error.getMessage(), error);
         }
-        if (input.equalsIgnoreCase("true") || input.equalsIgnoreCase("false")) {
-            return ByteTag.valueOf(Boolean.parseBoolean(input));
-        }
-        if (input.matches("-?\\d+")) {
-            return IntTag.valueOf(Integer.parseInt(input));
-        }
-        if (input.matches("-?\\d+\\.\\d+")) {
-            return DoubleTag.valueOf(Double.parseDouble(input));
-        }
-        if (input.startsWith("\"") && input.endsWith("\"")) {
-            return StringTag.valueOf(input.substring(1, input.length() - 1));
-        }
-        if (input.startsWith("[") && input.endsWith("]")) {
-            return parseList(input);
-        }
-        if (input.startsWith("{") && input.endsWith("}")) {
-            return parseCompound(input);
-        }
-        return StringTag.valueOf(input);
-    }
-
-    private static Tag parseList(final String input) {
-        final String body = input.substring(1, input.length() - 1).trim();
-        final ListTag list = new ListTag();
-        if (body.isEmpty()) {
-            return list;
-        }
-        for (final String part : body.split(",")) {
-            final Tag element = coerce(part.trim());
-            if (element != null) {
-                list.add(element);
-            }
-        }
-        return list;
-    }
-
-    private static CompoundTag parseCompound(final String input) {
-        final String body = input.substring(1, input.length() - 1).trim();
-        final CompoundTag compound = new CompoundTag();
-        if (body.isEmpty()) {
-            return compound;
-        }
-        for (final String pair : body.split(",")) {
-            final String[] kv = pair.split(":", 2);
-            if (kv.length != 2) {
-                continue;
-            }
-            final Tag value = coerce(kv[1].trim());
-            if (value != null) {
-                compound.put(kv[0].trim(), value);
-            }
-        }
-        return compound;
     }
 }

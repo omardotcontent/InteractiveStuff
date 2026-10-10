@@ -8,16 +8,16 @@ make prevMoveX = 0
 make prevMoveY = 0
 make prevMoveZ = 0
 make isFirstFrame = 1
-make lastUpdateTime = -1
+make lastUpdateFrame = -1
 
 task runPhysicsEngine takes stiffness, damping, moveRes, lookRes, vertRes, inertial, maxAngle, windMult do
-    make now = time()
+    make now = getFrameId()
 
-    check lastUpdateTime == now do
+    check lastUpdateFrame == now do
         reply 0
     end
 
-    make lastUpdateTime = now
+    make lastUpdateFrame = now
 
     make dt = getDelta()
 
@@ -56,13 +56,14 @@ task runPhysicsEngine takes stiffness, damping, moveRes, lookRes, vertRes, inert
     make accZ = (currMoveZ - prevMoveZ) * moveRes
     make accY = (currMoveY - prevMoveY) * vertRes
 
-    make windPhase = now * 0.0015
+    make windTime = time()
+    make windPhase = windTime * 0.0015
     make windVal = sin(windPhase)
 
-    make gustPhase = now * 0.004
+    make gustPhase = windTime * 0.004
     make gustVal = sin(gustPhase)
 
-    make envPhase = now * 0.0008
+    make envPhase = windTime * 0.0008
     make envVal = sin(envPhase) * 0.5 + 0.5
     make envVal = envVal * envVal
 

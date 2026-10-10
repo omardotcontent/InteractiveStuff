@@ -30,6 +30,7 @@ public final class InteractionHandler {
     }
 
     public void handleBlockInteraction(final Minecraft client, final InteractionHand hand) {
+        ScriptInterpreter.onSwingHand();
         if (BackgroundLoopHandler.getInstance().isLoopRunning(COOLDOWN_ID)) {
             return;
         }
@@ -46,8 +47,6 @@ public final class InteractionHandler {
         BackgroundLoopHandler.getInstance().waitTicks(COOLDOWN_ID, Math.max(0, (ConfigHandler.INSTANCE.HitCooldownTicks) - amplifier), () -> {});
 
         final ConfigHandler config = ConfigHandler.INSTANCE;
-        ScriptInterpreter.onSwingHand();
-
         if (!config.enableInteractiveHits) {
             return;
         }
@@ -66,23 +65,9 @@ public final class InteractionHandler {
             return;
         }
 
-        try {
-            final BlockHitResult blockHit = (BlockHitResult) client.hitResult;
-            if (blockHit == null) {
-                return;
-            }
-            if (config.isExcluded(client.level.getBlockState(blockHit.getBlockPos()).getBlock())) {
-                return;
-            }
-        } catch (final Exception ignored) {
-            return;
-        }
-
-        if (material.requiresBlockHit) {
-            if (client.hitResult == null || client.hitResult.getType() == HitResult.Type.MISS) {
-                return;
-            }
-        }
+        boolean blockHit = client.hitResult instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK;
+        if (material.requiresBlockHit && !blockHit) return;
+        if (blockHit && config.isExcluded(client.level.getBlockState(((BlockHitResult) client.hitResult).getBlockPos()).getBlock())) return;
 
         final float basePitch = material.getPitch(stack);
         final float pitch = material.randomPitch ? basePitch + (RANDOM.nextFloat() * 1.5F) : basePitch;

@@ -1,3 +1,5 @@
+lock interactiveItems = ["minecraft:piston", "minecraft:sticky_piston"]
+
 make wasSneaking = false
 make isSneaking = false
 

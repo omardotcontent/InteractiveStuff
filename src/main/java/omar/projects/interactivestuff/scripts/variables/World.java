@@ -10,35 +10,37 @@ import net.minecraft.world.level.Level;
 @VynType(name = "World")
 public final class World {
 
-    private final Level sourceWorld;
+    private Level sourceWorld;
 
     public World(final Level sourceWorld) {
         this.sourceWorld = sourceWorld;
     }
 
+    public void setWorld(Level world) { sourceWorld = world; }
+
     @VynFunc
     public Block getBlock(final int x, final int y, final int z) {
-        return new Block(new BlockPos(x, y, z), sourceWorld);
+        return sourceWorld == null ? null : new Block(new BlockPos(x, y, z), sourceWorld);
     }
 
     @VynFunc
     public String getDimension() {
-        return sourceWorld.dimension().identifier().toString();
+        return sourceWorld == null ? "" : sourceWorld.dimension().identifier().toString();
     }
 
     @VynFunc
     public boolean isDay() {
-        return sourceWorld.isBrightOutside();
+        return sourceWorld != null && sourceWorld.isBrightOutside();
     }
 
     @VynFunc
     public long getTimeOfDay() {
-        return sourceWorld.getDefaultClockTime();
+        return sourceWorld == null ? 0 : sourceWorld.getDefaultClockTime();
     }
 
     @VynFunc
     public long getTime() {
-        return sourceWorld.getGameTime();
+        return sourceWorld == null ? 0 : sourceWorld.getGameTime();
     }
 
     @VynFunc
@@ -48,42 +50,42 @@ public final class World {
 
     @VynFunc
     public String getBiomeAt(final int x, final int y, final int z) {
-        return sourceWorld.getBiome(new BlockPos(x, y, z)).getRegisteredName();
+        return sourceWorld == null ? "" : sourceWorld.getBiome(new BlockPos(x, y, z)).getRegisteredName();
     }
 
     @VynFunc
     public int getBiomeColorAt(final int x, final int y, final int z) {
-        return sourceWorld.getClientLeafTintColor(new BlockPos(x, y, z));
+        return sourceWorld == null ? 0xFFFFFF : sourceWorld.getClientLeafTintColor(new BlockPos(x, y, z));
     }
 
     @VynFunc
     public String getBiomeAt(final Position position) {
-        return sourceWorld.getBiome(new BlockPos(position.getX(), position.getY(), position.getZ())).getRegisteredName();
+        return sourceWorld == null ? "" : sourceWorld.getBiome(new BlockPos(position.getX(), position.getY(), position.getZ())).getRegisteredName();
     }
 
     @VynFunc
     public int getGrassColor(final Position position) {
-        return BiomeColors.getAverageGrassColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : BiomeColors.getAverageGrassColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getDryFoliageColor(final Position position) {
-        return BiomeColors.getAverageDryFoliageColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : BiomeColors.getAverageDryFoliageColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getFoliageColor(final Position position) {
-        return BiomeColors.getAverageFoliageColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : BiomeColors.getAverageFoliageColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getWaterColor(final Position position) {
-        return BiomeColors.getAverageWaterColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : BiomeColors.getAverageWaterColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getBiomeColorAt(final Position position) {
-        return sourceWorld.getClientLeafTintColor(new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : sourceWorld.getClientLeafTintColor(new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc

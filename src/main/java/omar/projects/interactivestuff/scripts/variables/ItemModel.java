@@ -5,6 +5,7 @@ import me.abdelaziz.api.annotation.VynConstructor;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -17,7 +18,8 @@ import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import omar.projects.interactivestuff.render.RenderTransforms;
+import omar.projects.interactivestuff.render.ColorMath;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +32,7 @@ public class ItemModel {
     private int light = -1;
     private int quadEnd = 0;
     private int quadStart = 0;
-    private static int NEXT_SEED = 1;
-    private final int seed = NEXT_SEED++;
+    private int seed;
     private int selectionColor = 0xFFFFFFFF;
 
     private final ItemStack originalStack;
@@ -45,7 +46,7 @@ public class ItemModel {
 
     private ItemDisplayContext displayContext = ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
 
-    private final Map<Integer, Integer> indexTints = new HashMap<>();
+    private Map<Integer, Integer> indexTints;
 
     private double x, y, z;
     private double sx = 1, sy = 1, sz = 1;
@@ -55,7 +56,9 @@ public class ItemModel {
     private float shYX = 0, shYZ = 0;
     private float shZX = 0, shZY = 0;
 
-    private final Quaternionf rotation = new Quaternionf();
+    private Quaternionf rotation;
+    private Matrix4f shearMatrix;
+    private boolean mainHand = true;
 
     private float red = 1.0f;
     private float alpha = 1.0f;
@@ -65,7 +68,7 @@ public class ItemModel {
     @VynConstructor
     public ItemModel(final String itemId) {
         this(createStackFromId(itemId));
-        ItemModelRenderRegistry.ACTIVE.add(this);
+        ItemModelRenderRegistry.enqueue(this);
     }
 
     private static ItemStack createStackFromId(final String itemId) {
@@ -151,21 +154,26 @@ public class ItemModel {
 
     @VynFunc
     public double getRotationX() {
-        return rotation.x;
+        return rotation == null ? 0 : rotation.x;
     }
 
     @VynFunc
     public double getRotationY() {
-        return rotation.y;
+        return rotation == null ? 0 : rotation.y;
     }
 
     @VynFunc
     public double getRotationZ() {
-        return rotation.z;
+        return rotation == null ? 0 : rotation.z;
     }
 
     public void setDisplayContext(final ItemDisplayContext context) {
+        setDisplayContext(context, !context.leftHand());
+    }
+
+    public void setDisplayContext(final ItemDisplayContext context, boolean mainHand) {
         this.displayContext = context;
+        this.mainHand = mainHand;
     }
 
     public ItemDisplayContext getDisplayContext() {
@@ -174,13 +182,18 @@ public class ItemModel {
 
     @VynFunc
     public boolean isMainHand() {
-        return displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
-                || displayContext == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
+        return isHandContext() && mainHand;
     }
 
     @VynFunc
     public boolean isOffHand() {
-        return displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+        return isHandContext() && !mainHand;
+    }
+
+    private boolean isHandContext() {
+        return displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
+                || displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                || displayContext == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
                 || displayContext == ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
     }
 
@@ -197,19 +210,19 @@ public class ItemModel {
 
     @VynFunc
     public void setItemModel(final String model) {
-        modificationCheck();
-        ScriptItemHandler.apply(workingStack, "minecraft:item_model", model);
+        ensureWorkingCopy();
+        workingStack.set(DataComponents.ITEM_MODEL, Identifier.parse(model));
     }
 
     @VynFunc
     public void setBobbingTime(final int bobbingTime) {
-        modificationCheck();
+        ensureWorkingCopy();
         workingStack.setPopTime(bobbingTime);
     }
 
     @VynFunc
     public void setDataComponent(final String key, final Object value) {
-        modificationCheck();
+        ensureWorkingCopy();
         ScriptItemHandler.apply(workingStack, key, value.toString());
     }
 
@@ -235,20 +248,20 @@ public class ItemModel {
 
     @VynFunc
     public void removeDataComponent(final String key) {
-        modificationCheck();
+        ensureWorkingCopy();
         ScriptItemHandler.remove(workingStack, key);
     }
 
     @VynFunc
     public void setQuads(int start, int end) {
-        modificationCheck();
+        markModified();
         this.quadStart = Math.max(0, start);
         this.quadEnd = Math.max(0, end);
     }
 
     @VynFunc
     public void setColor(final int r, final int g, final int b) {
-        modificationCheck();
+        markModified();
         this.red = Mth.clamp(r, 0, 255) / 255.0f;
         this.green = Mth.clamp(g, 0, 255) / 255.0f;
         this.blue = Mth.clamp(b, 0, 255) / 255.0f;
@@ -256,13 +269,13 @@ public class ItemModel {
 
     @VynFunc
     public void setOpacity(final double opacity) {
-        modificationCheck(); //
+        markModified();
         this.alpha = (float) Mth.clamp(opacity, 0.0, 1.0);
     }
 
     @VynFunc
     public void setLight(final int light) {
-        modificationCheck();
+        markModified();
 
         final int clampedLight = Mth.clamp(light, -1, 15);
 
@@ -272,19 +285,20 @@ public class ItemModel {
         }
 
         final int blockPart = clampedLight << 4;
-        final int skyPart = clampedLight << 16;
+        final int skyPart = clampedLight << 20;
         this.light = skyPart | blockPart;
     }
 
     @VynFunc
     public void setGlint(final int glint) {
-        modificationCheck();
+        markModified();
         this.glint = Mth.clamp(glint, -1, 2);
     }
 
     @VynFunc
     public void setTint(final int index, final int color) {
-        modificationCheck();
+        markModified();
+        if (this.indexTints == null) this.indexTints = new HashMap<>();
         this.indexTints.put(index, (color & 0xFF000000) == 0 ? color | 0xFF000000 : color);
     }
 
@@ -295,14 +309,14 @@ public class ItemModel {
 
     @VynFunc
     public void setQuadColor(final int color) {
-        modificationCheck();
+        markModified();
         this.selectionColor = (color & 0xFF000000) == 0 ? color | 0xFF000000 : color;
         this.useSelectionColor = true;
     }
 
     @VynFunc
     public void translate(final double dx, final double dy, final double dz) {
-        modificationCheck();
+        markModified();
         this.x += dx;
         this.y += dy;
         this.z += dz;
@@ -310,60 +324,61 @@ public class ItemModel {
 
     @VynFunc
     public void translateX(final double dx) {
-        modificationCheck();
+        markModified();
         this.x += dx;
     }
 
     @VynFunc
     public void translateY(final double dy) {
-        modificationCheck();
+        markModified();
         this.y += dy;
     }
 
     @VynFunc
     public void translateZ(final double dz) {
-        modificationCheck();
+        markModified();
         this.z += dz;
     }
 
     @VynFunc
     public void rotateAxis(final double angle, final double axisX, final double axisY, final double axisZ) {
-        modificationCheck();
-        rotation.mul(new Quaternionf().rotateAxis(
-                (float) Math.toRadians(angle),
-                new Vector3f((float) axisX, (float) axisY, (float) axisZ).normalize()));
+        markModified();
+        double length = Math.sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ);
+        if (length == 0 || !Double.isFinite(length)) return;
+        rotation().rotateAxis((float) Math.toRadians(angle), (float) (axisX / length),
+                (float) (axisY / length), (float) (axisZ / length));
     }
 
     @VynFunc
     public void rotate(final double dx, final double dy, final double dz) {
-        modificationCheck();
-        rotation.mul(new Quaternionf().rotateXYZ(
+        markModified();
+        rotation().rotateXYZ(
                 (float) Math.toRadians(dx),
                 (float) Math.toRadians(dy),
-                (float) Math.toRadians(dz)));
+                (float) Math.toRadians(dz));
     }
 
     @VynFunc
     public void rotateX(final double angle) {
-        modificationCheck();
-        rotation.rotateX((float) Math.toRadians(angle));
+        markModified();
+        rotation().rotateX((float) Math.toRadians(angle));
     }
 
     @VynFunc
     public void rotateY(final double angle) {
-        modificationCheck();
-        rotation.rotateY((float) Math.toRadians(angle));
+        markModified();
+        rotation().rotateY((float) Math.toRadians(angle));
     }
 
     @VynFunc
     public void rotateZ(final double angle) {
-        modificationCheck();
-        rotation.rotateZ((float) Math.toRadians(angle));
+        markModified();
+        rotation().rotateZ((float) Math.toRadians(angle));
     }
 
     @VynFunc
     public void scale(final double sx, final double sy, final double sz) {
-        modificationCheck();
+        markModified();
         this.sx *= sx;
         this.sy *= sy;
         this.sz *= sz;
@@ -371,43 +386,43 @@ public class ItemModel {
 
     @VynFunc
     public void scaleX(final double sx) {
-        modificationCheck();
+        markModified();
         this.sx *= sx;
     }
 
     @VynFunc
     public void scaleY(final double sy) {
-        modificationCheck();
+        markModified();
         this.sy *= sy;
     }
 
     @VynFunc
     public void scaleZ(final double sz) {
-        modificationCheck();
+        markModified();
         this.sz *= sz;
     }
 
     @VynFunc
     public void shear(final double xy, final double xz, final double yx, final double yz, final double zx,
             final double zy) {
-        modificationCheck();
+        markModified();
         this.shXY = (float) xy;
         this.shXZ = (float) xz;
         this.shYX = (float) yx;
         this.shYZ = (float) yz;
         this.shZX = (float) zx;
         this.shZY = (float) zy;
+        this.shearMatrix = null;
     }
 
     @VynFunc
     public double smooth(final double current, final double target, final double speed) {
-        modificationCheck();
         return current + (target - current) * (1.0 - Math.pow(1.0 - speed, RenderTickHandler.normalizedDelta));
     }
 
     @VynFunc
     public void setPivot(final double x, final double y, final double z) {
-        modificationCheck();
+        markModified();
         this.px = x;
         this.py = y;
         this.pz = z;
@@ -455,7 +470,7 @@ public class ItemModel {
             currentChecker = currentChecker.getParent();
         }
 
-        modificationCheck();
+        markModified();
         this.parent = parent;
     }
 
@@ -467,15 +482,34 @@ public class ItemModel {
 
     @VynFunc
     public ItemModel copy() {
-        final ItemModel copy = new ItemModel(this.workingStack.copy());
-        copy.displayContext = this.displayContext;
-        ItemModelRenderRegistry.ACTIVE.add(copy);
+        final ItemModel copy = new ItemModel(this.workingStack);
+        copy.displayContext = displayContext;
+        copy.mainHand = mainHand;
+        copy.modified = modified;
+        copy.glint = glint;
+        copy.light = light;
+        copy.quadStart = quadStart;
+        copy.quadEnd = quadEnd;
+        copy.exclusive = exclusive;
+        copy.selectionColor = selectionColor;
+        copy.useSelectionColor = useSelectionColor;
+        copy.parent = parent;
+        copy.x = x; copy.y = y; copy.z = z;
+        copy.sx = sx; copy.sy = sy; copy.sz = sz;
+        copy.px = px; copy.py = py; copy.pz = pz;
+        copy.shXY = shXY; copy.shXZ = shXZ;
+        copy.shYX = shYX; copy.shYZ = shYZ;
+        copy.shZX = shZX; copy.shZY = shZY;
+        copy.rotation = rotation == null ? null : new Quaternionf(rotation);
+        copy.indexTints = indexTints == null ? null : new HashMap<>(indexTints);
+        copy.red = red; copy.green = green; copy.blue = blue; copy.alpha = alpha;
+        ItemModelRenderRegistry.enqueue(copy);
         return copy;
     }
 
     @VynFunc
     public void detach() {
-        modificationCheck();
+        markModified();
         this.parent = null;
     }
 
@@ -488,17 +522,25 @@ public class ItemModel {
         return parent;
     }
 
-    private void modificationCheck() {
-        if (modified) {
-            return;
-        }
-        workingStack = originalStack.copy();
-        modified = true;
+    private void markModified() { modified = true; }
+
+    private void ensureWorkingCopy() {
+        markModified();
+        if (workingStack == originalStack) workingStack = originalStack.copy();
     }
+
+    private Quaternionf rotation() {
+        if (rotation == null) rotation = new Quaternionf();
+        return rotation;
+    }
+
+    public void setUniqueSeed(int seed) { this.seed = seed; }
 
     public int getUniqueSeed() {
         return seed;
     }
+
+    public ItemStack getSourceStack() { return originalStack; }
 
     public ItemStack getFinalStack() {
         return workingStack;
@@ -523,27 +565,27 @@ public class ItemModel {
         matrices.translate(px, py, pz);
 
         if (shXY != 0 || shXZ != 0 || shYX != 0 || shYZ != 0 || shZX != 0 || shZY != 0) {
-            final Matrix4f shearMatrix = new Matrix4f();
+            if (shearMatrix == null) {
+                shearMatrix = new Matrix4f();
 
-            shearMatrix.m01(shXY);
-            shearMatrix.m02(shXZ);
+                shearMatrix.m01(shXY);
+                shearMatrix.m02(shXZ);
+                shearMatrix.m10(shYX);
+                shearMatrix.m12(shYZ);
+                shearMatrix.m20(shZX);
+                shearMatrix.m21(shZY);
+            }
 
-            shearMatrix.m10(shYX);
-            shearMatrix.m12(shYZ);
-
-            shearMatrix.m20(shZX);
-            shearMatrix.m21(shZY);
-
-            matrices.last().pose().mul(shearMatrix);
+            RenderTransforms.multiply(matrices, shearMatrix);
         }
 
-        matrices.mulPose(rotation);
+        if (rotation != null) RenderTransforms.rotate(matrices, rotation);
         matrices.translate(-px, -py, -pz);
         matrices.scale((float) sx, (float) sy, (float) sz);
     }
 
     private int getRenderColor() {
-        final int a = (int) (this.alpha * 255.0f); // New: use the alpha field
+        final int a = (int) (this.alpha * 255.0f);
         final int r = (int) (Mth.clamp(red, 0.0f, 1.0f) * 255.0f);
         final int g = (int) (Mth.clamp(green, 0.0f, 1.0f) * 255.0f);
         final int b = (int) (Mth.clamp(blue, 0.0f, 1.0f) * 255.0f);
@@ -552,24 +594,33 @@ public class ItemModel {
 
         // Combine with parent color if parent exists
         if (parent != null) {
-            color = multiplyColor(color, parent.getRenderColor());
+            color = ColorMath.multiply(color, parent.getRenderColor());
         }
 
         return color;
     }
 
+    public boolean hasColorChanges() {
+        return red != 1 || green != 1 || blue != 1 || alpha != 1 || useSelectionColor
+                || (indexTints != null && !indexTints.isEmpty()) || (parent != null && parent.hasColorChanges());
+    }
+
     public int getFinalColorForIndex(final int tintIndex) {
-        int baseColor = getRenderColor();
+        return getFinalColorForIndex(tintIndex, 0xFFFFFFFF);
+    }
 
-        // Get tint from this model, or inherit from parent if not set
-        int tintColor = indexTints.getOrDefault(tintIndex, 0xFFFFFFFF);
-        if (tintColor == 0xFFFFFFFF && parent != null && parent.indexTints.containsKey(tintIndex)) {
-            tintColor = parent.indexTints.get(tintIndex);
+    public int getFinalColorForIndex(final int tintIndex, int originalColor) {
+        return ColorMath.multiply(getRenderColor(), resolveTint(tintIndex, originalColor));
+    }
+
+    private int resolveTint(int index, int fallback) {
+        if (indexTints != null) {
+            Integer tint = indexTints.get(index);
+            if (tint != null) return tint;
+            tint = indexTints.get(-1);
+            if (tint != null) return tint;
         }
-
-        int result = multiplyColor(baseColor, tintColor);
-
-        return result;
+        return parent == null ? fallback : parent.resolveTint(index, fallback);
     }
 
     public boolean getUseSelectionColor() {
@@ -590,25 +641,6 @@ public class ItemModel {
             return parent.getSelectionColor();
         }
         return 0xFFFFFFFF;
-    }
-
-    private static int multiplyColor(final int c1, final int c2) {
-        final int a1 = (c1 >>> 24) & 0xFF;
-        final int r1 = (c1 >>> 16) & 0xFF;
-        final int g1 = (c1 >>> 8) & 0xFF;
-        final int b1 = c1 & 0xFF;
-
-        final int a2 = (c2 >>> 24) & 0xFF;
-        final int r2 = (c2 >>> 16) & 0xFF;
-        final int g2 = (c2 >>> 8) & 0xFF;
-        final int b2 = c2 & 0xFF;
-
-        final int a = (a1 * a2) / 255;
-        final int r = (r1 * r2) / 255;
-        final int g = (g1 * g2) / 255;
-        final int b = (b1 * b2) / 255;
-
-        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     public boolean isPartialSelection() {
