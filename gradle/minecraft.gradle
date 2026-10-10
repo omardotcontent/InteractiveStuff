@@ -1,0 +1,305 @@
+// One module per Minecraft release, all using the same build rules.
+def target = rootProject.minecraftTargets.find { it.module == project.name }
+if (target == null) throw new GradleException("No Minecraft profile for ${project.path}")
+def selectedTarget = target.profile
+def configScreenTestYacl = providers.gradleProperty("config_screen_test_yacl").getOrElse("true").toBoolean()
+def profileFile = rootProject.file("versions/${selectedTarget}/version.properties")
+def profile = new Properties()
+profileFile.withInputStream { profile.load(it) }
+profile.each { key, value -> project.ext.set(key.toString(), value.toString()) }
+if (target.patch) project.ext.minecraft_version = target.patch
+apply plugin: (project.mapped == "true" ? "net.fabricmc.fabric-loom-remap" : "net.fabricmc.fabric-loom")
+
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+
+layout.buildDirectory = rootProject.layout.buildDirectory.dir("${selectedTarget}/${project.minecraft_version}")
+def targetJavaVersion = project.java_version.toInteger()
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = "${project.archives_base_name}-${project.minecraft_version}"
+}
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://maven.isxander.dev/releases" }
+    maven { url "https://maven.terraformersmc.com/releases" }
+
+    flatDir {
+        dirs rootProject.file('libs')
+    }
+
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    if (project.mapped == "true") mappings loom.officialMojangMappings()
+    if (project.mapped == "true") {
+        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+        modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+        modCompileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+        // Exercise optional settings integrations in development and client tests.
+        // localRuntime dependencies are excluded from publication and the release JAR.
+        modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
+        if (configScreenTestYacl)
+            modLocalRuntime "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    } else {
+        implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+        compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+        compileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+        localRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
+        if (configScreenTestYacl)
+            localRuntime "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    }
+
+    implementation files(rootProject.file("libs/Vyn.jar"))
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "minecraft_version", project.minecraft_version
+    inputs.property "loader_version", project.loader_version
+    inputs.property "java_version", targetJavaVersion
+    inputs.property "minecraft_compatibility", selectedTarget == "26.1.X" ? "~26.1" : "~${project.minecraft_version}"
+    filteringCharset "UTF-8"
+
+    filesMatching(["fabric.mod.json", "interactivestuff.mixins.json", "resourcepacks/interactive_resourcepack/pack.mcmeta"]) {
+        expand "version": project.version,
+                "minecraft_version": project.minecraft_version,
+                "loader_version": project.loader_version,
+                "java_version": targetJavaVersion,
+                "minecraft_compatibility": selectedTarget == "26.1.X" ? "~26.1" : "~${project.minecraft_version}"
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+
+    it.options.encoding = "UTF-8"
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        it.options.release.set(targetJavaVersion)
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+
+    withSourcesJar()
+}
+
+jar {
+    from(rootProject.file("LICENSE.txt")) {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+    // Bundle the interpreter in the ordinary distributable, not a separate shadow artifact.
+    from(zipTree(rootProject.file("libs/Vyn.jar"))) {
+        exclude "META-INF/**"
+    }
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+
+sourceSets {
+    regression {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register("runtimeRegression", JavaExec) {
+    group = "verification"
+    description = "Runs deterministic runtime, scheduler, rendering math, and bundled-script checks."
+    dependsOn regressionClasses
+    classpath = sourceSets.regression.runtimeClasspath
+    mainClass = "omar.projects.interactivestuff.RuntimeRegressionChecks"
+    workingDir = rootProject.projectDir
+}
+
+tasks.named("check") {
+    dependsOn tasks.named("runtimeRegression"), tasks.named("verifyReleaseJar")
+}
+
+// Client integration tests live in a separate test mod and isolated game directory.
+fabricApi.configureTests {
+    createSourceSet = true
+    modId = "interactivestuff_test"
+    enableGameTests = false
+    enableClientGameTests = true
+    eula = false
+}
+sourceSets.gametest.compileClasspath += sourceSets.main.compileClasspath
+def clientTestDirectory = configScreenTestYacl ? "clientGameTest" : "clientGameTestWithoutYacl"
+loom.mods {
+    interactivestuff { sourceSet sourceSets.main }
+}
+loom.runs.configureEach {
+    generateRunConfig = name == "client"
+    preferGradleTask = true
+    ideConfigFolder = "InteractiveStuff"
+}
+loom.runs.named("client") {
+    displayName = "IS Minecraft ${project.minecraft_version}"
+    appendProjectPathToDisplayName = false
+    // Ordinary development saves survive clean and are isolated by Minecraft release.
+    runDirectory = rootProject.file("run/${project.minecraft_version}")
+}
+loom.runs.named("clientGameTest") {
+    runDirectory = rootProject.file("build/${selectedTarget}/${project.minecraft_version}/run/${clientTestDirectory}")
+}
+// Gradle-backed IDE run configs use the correct runtime automatically.
+tasks.withType(JavaExec).configureEach {
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(targetJavaVersion) }
+}
+['runClient', 'runClientGameTest'].each { taskName ->
+    tasks.named(taskName) { usesService rootProject.clientExecution }
+}
+
+
+tasks.register("verifyReleaseJar") {
+    group = "verification"
+    description = "Checks bundled interpreter, license, metadata and release/test separation."
+    def releaseJar = tasks.named(project.mapped == "true" ? "remapJar" : "jar")
+    dependsOn releaseJar
+    inputs.file(releaseJar.flatMap { it.archiveFile })
+    doLast {
+        new java.util.zip.ZipFile(releaseJar.get().archiveFile.get().asFile).withCloseable { archive ->
+            def entries = archive.entries().collect { it.name }
+            ["fabric.mod.json", "interactivestuff.mixins.json", "me/abdelaziz/main/VynMain.class",
+             "LICENSE.txt_${project.base.archivesName.get()}"].each { required ->
+                if (!entries.contains(required.toString())) throw new GradleException("Release JAR is missing ${required}")
+            }
+            if (entries.any { it.startsWith("net/minecraft/") || it.contains("ClientRenderChecks") || it.contains("ClientConfigScreenChecks") || it.contains("ClientStateChecks") || it.contains("RuntimeRegressionChecks") }) {
+                throw new GradleException("Release JAR contains game or test classes")
+            }
+            entries.findAll { it.endsWith(".class") }.each { path ->
+                byte[] header = archive.getInputStream(archive.getEntry(path)).withCloseable { it.readNBytes(8) }
+                int major = ((header[6] & 255) << 8) | (header[7] & 255)
+                if (major > targetJavaVersion + 44 || (path.startsWith("omar/") && major != targetJavaVersion + 44))
+                    throw new GradleException("${path} has incompatible Java class version ${major}")
+            }
+            def mixinMetadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry("interactivestuff.mixins.json")))
+            if (mixinMetadata.compatibilityLevel != "JAVA_${targetJavaVersion}")
+                throw new GradleException("Mixin Java compatibility does not match the target")
+            def metadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry("fabric.mod.json")))
+            if (metadata.depends.minecraft != (selectedTarget == "26.1.X" ? "~26.1" : "~${project.minecraft_version}") || metadata.depends.java != ">=${targetJavaVersion}") {
+                throw new GradleException("Release metadata does not match the selected Minecraft/Java target")
+            }
+        }
+    }
+}
+
+// Resolve paths once, with the selected adapter taking precedence over inherited ones.
+def overlayTargets = []
+def visited = [] as Set
+def cursorTarget = selectedTarget
+while (cursorTarget) {
+    if (!visited.add(cursorTarget)) throw new GradleException("Cyclic version adapter inheritance")
+    overlayTargets.add(0, cursorTarget)
+    def inheritedProfile = new Properties()
+    rootProject.file("versions/${cursorTarget}/version.properties").withInputStream { inheritedProfile.load(it) }
+    cursorTarget = inheritedProfile.getProperty("base_target")
+}
+def nativeNames = { String original ->
+    if (profile.getProperty("legacy_names") != "true") return original
+    original.replaceAll(/\bIdentifier\b/, "ResourceLocation")
+            .replace(".identifier()", ".location()")
+            .replace(".getIdentifier()", ".getLocation()")
+            .replace("net.minecraft.util.Util", "net.minecraft.Util")
+            .replace("net.minecraft.client.renderer.rendertype.RenderType", "net.minecraft.client.renderer.RenderType")
+}
+def prepareSources = tasks.register("prepareSources") {
+    group = "ide"
+    description = "Refreshes inherited source/resource copies for Minecraft ${project.minecraft_version}."
+}
+def configureOverlays = { sourceSet, category, kind ->
+    def extension = kind == "java" ? "**/*.java" : "**/*"
+    def roots = [rootProject.file("src/${category}/${kind}")] + overlayTargets.collect {
+        rootProject.file("versions/${it}/src/${category}/${kind}")
+    }
+    // Only 26.2 owns the editable shared sources. Native adapters belong to their profile module.
+    // Patch modules inherit 26.1.X rather than attaching its source directory a second time.
+    def ownedRoot = selectedTarget == "26.2" ? roots[0] :
+            (target.module == selectedTarget ? rootProject.file("versions/${selectedTarget}/src/${category}/${kind}") : null)
+    def winners = [:]
+    roots.each { sourceRoot ->
+        if (sourceRoot.isDirectory()) fileTree(sourceRoot).matching { include extension }.files.each { source ->
+            def relativePath = sourceRoot.toPath().relativize(source.toPath()).toString().replace('\\', '/')
+            winners[relativePath] = [root: sourceRoot, file: source]
+        }
+    }
+    def inherited = winners.findAll { path, source -> source.root != ownedRoot }
+    def generatedRoot = layout.buildDirectory.dir("generated/${kind == 'java' ? 'sources' : 'resources'}/${category}/${kind}").get().asFile
+    // A native adapter is edited directly in the IDE, so it must already use its native names.
+    if (kind == "java" && profile.getProperty("legacy_names") == "true") {
+        winners.findAll { path, source -> source.root == ownedRoot }.each { path, source ->
+            def code = source.file.getText("UTF-8")
+            if (nativeNames(code) != code)
+                throw new GradleException("Use native Minecraft names in editable adapter ${source.file}; shared name substitutions belong in src/.")
+        }
+    }
+    def generator = tasks.register("generate${category.capitalize()}${kind == 'java' ? 'Adapters' : 'Resources'}") {
+        inputs.files(inherited.values().collect { it.file })
+        inputs.property("origins", inherited.collectEntries { path, source -> [path, rootProject.relativePath(source.file)] })
+        inputs.property("legacy_names", kind == "java" ? profile.getProperty("legacy_names", "false") : "false")
+        outputs.dir(generatedRoot)
+        doLast {
+            delete(generatedRoot)
+            generatedRoot.mkdirs()
+            inherited.each { path, source ->
+                def destination = new File(generatedRoot, path)
+                destination.parentFile.mkdirs()
+                if (kind == "java") destination.setText(nativeNames(source.file.getText("UTF-8")), "UTF-8")
+                else java.nio.file.Files.copy(source.file.toPath(), destination.toPath())
+            }
+        }
+    }
+    def sourceDirs = (ownedRoot == null ? [] : [ownedRoot]) + [generatedRoot]
+    if (kind == "java") {
+        sourceSet.java.setSrcDirs(sourceDirs)
+        tasks.named(sourceSet.compileJavaTaskName) { dependsOn generator }
+        idea.module.generatedSourceDirs += generatedRoot
+    } else {
+        sourceSet.resources.setSrcDirs(sourceDirs)
+        tasks.named(sourceSet.processResourcesTaskName) { dependsOn generator }
+    }
+    if (category == "main") tasks.named("sourcesJar") { dependsOn generator }
+    prepareSources.configure { dependsOn generator }
+}
+[sourceSets.main, sourceSets.regression, sourceSets.gametest].each { sourceSet ->
+    configureOverlays(sourceSet, sourceSet.name, "java")
+    configureOverlays(sourceSet, sourceSet.name, "resources")
+}
+idea.module.testSources.from(sourceSets.regression.java.srcDirs, sourceSets.gametest.java.srcDirs)
+idea.module.testResources.from(sourceSets.regression.resources.srcDirs, sourceSets.gametest.resources.srcDirs)
+// IntelliJ imports the unique generated source roots with each target's own Minecraft classpath.
+tasks.named("ideaSyncTask") { dependsOn prepareSources }
+
+// Verify old releases on their actual Java runtime, while release compilation uses --release.
+tasks.named("runClientGameTest", JavaExec) {
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(targetJavaVersion) }
+    // An explicitly supplied display already has its own X server (including CI's wrapper).
+    if (providers.environmentVariable("DISPLAY").isPresent()) useXvfb = false
+    // Fabric's older test packet synchronizer can stall initial chunk loading on CI.
+    // Native assertions still wait for actual client state; this affects only the test process.
+    if (profile.getProperty("client_test_async_network") == "true")
+        systemProperty "fabric.client.gametest.disableNetworkSynchronizer", ""
+    // 26.3 requests an accelerated GLX visual. Mesa's software CI renderer works through EGL.
+    if (selectedTarget == "26.3" && System.getProperty("os.name").startsWith("Linux")
+            && providers.environmentVariable("CI").isPresent())
+        environment "SDL_VIDEO_FORCE_EGL", "1"
+}
+
+if (profile.getProperty("excluded_resources")) sourceSets.main.resources.exclude(profile.getProperty("excluded_resources").split(","))
