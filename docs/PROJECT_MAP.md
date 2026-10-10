@@ -120,7 +120,7 @@ Custom models live under `assets/interactivestuff/items` and `models/item`; text
 
 ## Verification and future work
 
-`bash ./gradlew build` includes 66 deterministic regression checks from `src/regression`. `bash ./gradlew runClientGameTest` uses a separate `src/gametest` mod and `build/run/clientGameTest`, exercises actual Minecraft rendering/lifecycle, and exits automatically. It requires a graphics display; it is not required by the ordinary headless build.
+`./gradlew build26_2` includes 67 deterministic regression checks from `src/regression`. `./gradlew test26_2` uses a separate `src/gametest` mod and `build/26.2/26.2/run/clientGameTest`, exercises actual Minecraft rendering/lifecycle, and exits automatically. It requires a graphics display; it is not required by the ordinary headless build. `buildAll` and `testAll` run the respective checks for all eight releases.
 
 See [26.2_OVERHAUL.md](26.2_OVERHAUL.md) for changes, evidence and limits, and [VERSION_PORTING.md](VERSION_PORTING.md) for the version boundary.
 

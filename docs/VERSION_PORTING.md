@@ -1,6 +1,6 @@
 # Shared 26.2 base and version adapters
 
-The root `src/` is the corrected 26.2 overhaul. All version branches carry this same multi-version tree. `gradle.properties` selects the branch's default `target_version`; `-Ptarget_version=<folder>` overrides it.
+The root `src/` is the corrected 26.2 overhaul. All eight Minecraft releases are separate Gradle/IDE modules in one checkout. `gradle.properties` selects only the default for `buildSelected`, `runSelected` and `testSelected`; it never hides modules. See [the IDE workflow](IDE_WORKFLOW.md) for version commands and run configurations.
 
 | Folder | Runtime Java | Native boundary |
 | --- | --- | --- |
@@ -13,11 +13,11 @@ The root `src/` is the corrected 26.2 overhaul. All version branches carry this 
 
 ## Source and resource selection
 
-Build one target per Gradle invocation. Profiles select the correct Loom plugin: the 1.21 releases use official Mojang mappings and the remapping plugin; 26.x uses the unobfuscated plugin. Release JARs and test directories have distinct target/version paths.
+Each module has a separate Minecraft classpath and build directory, so several targets can build in the same Gradle invocation. Profiles select the correct Loom plugin: the 1.21 releases use official Mojang mappings and the remapping plugin; 26.x uses the unobfuscated plugin. Release JARs and test directories have distinct target/version paths.
 
 For a Java or resource path, the selected target wins over its `base_target`, which wins over root `src/`. 1.21.5 inherits the 1.21.10 adapters, and 1.21.10 inherits 1.21.11. All inherit the shared root. Only native boundaries are overridden; the scheduler, frame clock, script/runtime/import logic, callback dispatch, Vyn scripts, config logic and most player/model bindings remain shared.
 
-`legacy_names=true` generates only the sources needing deterministic Minecraft name substitutions (`Identifier`/`ResourceLocation`, resource-key and sound identifier access, and the older `Util`/`RenderType` packages). Generated files go under the selected build directory and are never committed. This keeps the bindings shared without reflection or runtime version checks. API behavior differences belong in `MinecraftAccess` or a native renderer/mixin override.
+`legacy_names=true` applies deterministic Minecraft name substitutions to inherited sources (`Identifier`/`ResourceLocation`, resource-key and sound identifier access, and the older `Util`/`RenderType` packages). Inherited files are generated under each target build directory and are never committed. Only the 26.2 module owns shared editable source roots; other modules directly own their native adapters and compile inherited copies. This keeps IntelliJ source roots unique across Minecraft classpaths. Native adapters must already use native names. The bindings remain shared without reflection or runtime version checks. API behavior differences belong in `MinecraftAccess` or a native renderer/mixin override.
 
 When adding an adapter file, match the shared relative path. The build replaces that path, preventing duplicate classes/resources. A version-specific fixture under `src/gametest/java` or `src/regression/java` follows the same rule. Source JARs contain the selected, compilable sources.
 
@@ -26,8 +26,8 @@ When adding an adapter file, match the shared relative path. The build replaces 
 The family profile compiles against 26.1 and declares `~26.1` compatibility. Build another patch with:
 
 ```sh
-bash ./gradlew -Ptarget_version=26.1.X -PminecraftPatch=26.1.1 build runClientGameTest
-bash ./gradlew -Ptarget_version=26.1.X -PminecraftPatch=26.1.2 build runClientGameTest
+./gradlew build26_1_1 test26_1_1
+./gradlew build26_1_2 test26_1_2
 ```
 
 Unknown targets and patches fail at configuration time. Verify each supported patch; do not extend the metadata range across untested major/minor releases.
@@ -38,7 +38,7 @@ Unknown targets and patches fail at configuration time. Verify each supported pa
 
 ## Port verification
 
-Run `build` for shared regression and distributable checks, then `runClientGameTest` with the target Java runtime and a working display/OpenGL context. Test real native model resolution/submission, native special renderers, tint slots, partial/complementary geometry, both physical arms under either hand identity, matrix/color toggles, copy-on-component changes, config persistence, waits, resource reload and disconnect. Inspect logs for missing mod textures and render fallbacks; compiler success alone does not validate mixin targets.
+Run a version build such as `build26_2` for shared regression and distributable checks, then `test26_2` (the module's `runClientGameTest`) with the target Java runtime and a working display/OpenGL context. Test real native model resolution/submission, native special renderers, tint slots, partial/complementary geometry, both physical arms under either hand identity, matrix/color toggles, copy-on-component changes, config persistence, waits, resource reload and disconnect. Inspect logs for missing mod textures and render fallbacks; compiler success alone does not validate mixin targets.
 
 The suite uses its own automatically reset game directory. It never opens user saves. Keep known results in `docs/MULTIVERSION_VALIDATION.md` and `MODLOG.md`.
 
