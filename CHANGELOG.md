@@ -20,6 +20,8 @@ Fixed item frames, chests and vault animations using the wrong side when playing
 
 ### Lots of Bug Fixes
 
+- Fixed the InteractiveStuff settings button in Mod Menu incorrectly treating installed YACL as missing.
+- Fixed Mod Menu integration failing to load when the optional YACL library is absent.
 - Fixed component data handling for nested values and quoted text.
 - Improved swing events, hit sounds and keyboard input handling.
 - Fixed configuration reloads, saving and material settings.
