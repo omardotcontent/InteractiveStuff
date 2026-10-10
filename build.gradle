@@ -243,7 +243,7 @@ tasks.named("runClientGameTest", JavaExec) {
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(targetJavaVersion) }
     // An explicitly supplied display already has its own X server (including CI's wrapper).
     if (providers.environmentVariable("DISPLAY").isPresent()) useXvfb = false
-    // Fabric's 1.21.10 test packet synchronizer can stall initial chunk loading on CI.
+    // Fabric's older test packet synchronizer can stall initial chunk loading on CI.
     // Native assertions still wait for actual client state; this affects only the test process.
     if (profile.getProperty("client_test_async_network") == "true")
         systemProperty "fabric.client.gametest.disableNetworkSynchronizer", ""

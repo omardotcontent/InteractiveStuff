@@ -38,3 +38,6 @@
 - First GitHub checks passed for 1.21.5, 1.21.11, 26.1.X and 26.2. The 1.21.10 client repeatedly timed out before joining its test world; its Fabric test-only network synchronizer is now disabled, with native state waits retained and a passing local suite.
 - 26.3's headless backend rejected the software GLX visual and waited in Minecraft's startup error dialog. SDL's EGL path passed the full native suite on local Mesa llvmpipe. Linux CI selects this path; ordinary desktop rendering is unchanged.
 - Reuse an explicitly supplied display instead of nesting Xvfb wrappers; split CI build/client steps and bound client/job durations so failures return diagnostics.
+
+- GitHub confirmed the 1.21.10 synchronization workaround. 1.21.11 later showed the same initial-world-loading stall despite an earlier successful run; its test profile now uses the same mode and passed local native checks.
+- The 26.3 EGL CI retry reported a missing EGL library. Install libegl1, libegl-mesa0 and libgl1-mesa-dri on the ephemeral runner so it matches the locally verified software renderer.
