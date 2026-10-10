@@ -56,3 +56,13 @@ Additional native runs passed on Java 21/Minecraft 1.21.5 and Java 25/Minecraft 
 CI exercises both dependency combinations for every branch default. Missing-YACL runs use the separate `clientGameTestWithoutYacl` directory; diagnostics from both modes are uploaded. Development-only `localRuntime`/`modLocalRuntime` dependencies are excluded from publication and release JARs.
 
 The user confirmed that 0.8.0 has not been uploaded and requested keeping that version. The upload bundle and checksums were refreshed with the corrected builds.
+
+## Multi-project Gradle / IDE validation (2026-10-10)
+
+The repository now imports all eight Minecraft releases as separate modules. `prepareIde releaseAll` built every target in one Gradle invocation: **67 regression checks per target**, bytecode/metadata/release guards and upload ZIP checksums all passed. `prepareIde testAll` passed all eight real-client rendering/lifecycle suites and actual Mod Menu/YACL settings-screen checks. The `test26_2` shortcut also passed with YACL absent.
+
+The Gradle Tooling API's IDE model reported nine projects (root + eight Minecraft modules), 50 distinct Java source roots, correct Java 21/25 language levels and each target's own Minecraft library. Versioned client configurations invoke fully qualified Gradle tasks and select their Java runtime automatically. Existing Java 21 and 25 JDKs were discovered without installation environment overrides.
+
+Shortcut selection was checked for a legacy build, an explicit 26.2 launch and the 26.1.2 default-target patch. Temporary shared-resource additions and edits propagated to inherited copies; a native 26.3 override took precedence; removing the files removed all generated copies. The temporary probes were removed before final packaging. Qualified `:commands` prints help without configuring Minecraft modules.
+
+Artifacts from this setup are in `build/dist/0.8.0/` and `build/dist/InteractiveStuff-0.8.0-all-versions.zip`. Updated release hashes are recorded in `docs/RELEASE_CHECKSUMS.json`; see `docs/IDE_WORKFLOW.md` for current commands and source ownership.

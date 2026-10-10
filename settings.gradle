@@ -7,3 +7,12 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+rootProject.name = 'InteractiveStuff'
+
+// Every Minecraft classpath is a separate IDE/Gradle module.
+def targets = new groovy.json.JsonSlurper().parse(file('gradle/targets.json'))
+targets.each { target ->
+    include(target.module)
+    project(":${target.module}").projectDir = file(target.directory)
+}
