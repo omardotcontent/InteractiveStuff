@@ -8,7 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
 /** Version-dependent client access kept outside the shared script runtime. */
 public final class MinecraftAccess {
     private MinecraftAccess() {}
-    public static void openDirectory(java.nio.file.Path path) { net.minecraft.util.Util.getPlatform().openFile(path.toFile()); }
+    public static void openDirectory(java.nio.file.Path path) { net.minecraft.Util.getPlatform().openFile(path.toFile()); }
     public static void chat(LocalPlayer player, net.minecraft.network.chat.Component message) { player.displayClientMessage(message, false); }
     public static long dayTime(net.minecraft.world.level.Level level) { return level.getDayTime(); }
     public static int foliageTint(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) { return net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(level, pos); }

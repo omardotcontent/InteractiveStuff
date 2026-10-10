@@ -26,17 +26,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y libegl1 libegl-mesa0 libgl1-mesa-dri
       - name: Build the branch target
-        run: bash ./gradlew --no-daemon build
+        run: bash ./gradlew --no-daemon :buildSelected
       - name: Test the real client
         timeout-minutes: 5
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
-        run: xvfb-run -a bash ./gradlew --no-daemon runClientGameTest
+        run: xvfb-run -a bash ./gradlew --no-daemon :testSelected
       - name: Test Mod Menu without YACL
         timeout-minutes: 5
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
-        run: xvfb-run -a bash ./gradlew --no-daemon -Pconfig_screen_test_yacl=false runClientGameTest
+        run: xvfb-run -a bash ./gradlew --no-daemon -Pconfig_screen_test_yacl=false :testSelected
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
