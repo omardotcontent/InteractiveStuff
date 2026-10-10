@@ -28,7 +28,7 @@ public abstract class SoundListenerMixin {
         if (client.player == null || client.level == null) {
             return;
         }
-        if (sound.getSound() == null || sound.getSource() == SoundSource.UI || sound.getSource() == SoundSource.AMBIENT) {
+        if (sound.getSound() == null || "UI".equals(sound.getSource().name()) || sound.getSource() == SoundSource.AMBIENT) {
             return;
         }
         ScriptInterpreter.onPlaySound(new Sound(

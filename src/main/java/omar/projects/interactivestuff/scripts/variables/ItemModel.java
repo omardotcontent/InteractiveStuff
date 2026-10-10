@@ -190,6 +190,17 @@ public class ItemModel {
         return isHandContext() && !mainHand;
     }
 
+    /** Physical arm used by rendering, independent of the player's dominant hand. */
+    @VynFunc
+    public boolean isLeftHand() {
+        return isHandContext() && displayContext.leftHand();
+    }
+
+    @VynFunc
+    public boolean isRightHand() {
+        return isHandContext() && !displayContext.leftHand();
+    }
+
     private boolean isHandContext() {
         return displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
                 || displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND

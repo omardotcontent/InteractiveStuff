@@ -164,15 +164,15 @@ public final class ModMenuIntegration implements ModMenuApi {
 
         cat.option(ButtonOption.createBuilder()
                 .name(Component.translatable("interactive_stuff.config.settings.config.export"))
-                .action((_, _) -> ConfigHandler.INSTANCE.openConfigDirectory())
+                .action((ignoredFirst, ignoredSecond) -> ConfigHandler.INSTANCE.openConfigDirectory())
                 .build()
         );
 
         cat.option(ButtonOption.createBuilder()
                 .name(Component.translatable("interactive_stuff.config.settings.config.reload"))
-                .action((_, _) -> {
+                .action((ignoredFirst, ignoredSecond) -> {
                     ConfigHandler.INSTANCE.reload();
-                    Minecraft.getInstance().setScreenAndShow(
+                    omar.projects.interactivestuff.compat.MinecraftAccess.openScreen(Minecraft.getInstance(),
                             createConfigScreen(parent)
                     );
                 })
@@ -313,7 +313,7 @@ public final class ModMenuIntegration implements ModMenuApi {
         matCat.option(ButtonOption.createBuilder()
                 .name(Component.translatable("interactive_stuff.config.preview_sound"))
                 .description(OptionDescription.of(Component.translatable("interactive_stuff.config.preview_sound.tooltip")))
-                .action((_, _) ->
+                .action((ignoredFirst, ignoredSecond) ->
                         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(mat.getSoundEvent(),
                                 mat.randomPitch ? mat.pitch + (random.nextFloat() * 1.5F) : mat.pitch)))
                 .build()

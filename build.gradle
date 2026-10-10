@@ -1,14 +1,33 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.17.19'
+    id 'net.fabricmc.fabric-loom' version '1.17.19' apply false
+    id 'net.fabricmc.fabric-loom-remap' version '1.17.19' apply false
     id 'java'
     id 'maven-publish'
 }
+
+// Select one target per Gradle invocation so Loom never mixes Minecraft classpaths.
+def selectedTarget = providers.gradleProperty("target_version").get()
+def profileFile = file("versions/${selectedTarget}/version.properties")
+if (!profileFile.isFile()) throw new GradleException("Unknown target ${selectedTarget}; see versions/")
+def profile = new Properties()
+profileFile.withInputStream { profile.load(it) }
+profile.each { key, value -> project.ext.set(key.toString(), value.toString()) }
+if (providers.gradleProperty("minecraftPatch").isPresent()) {
+    def patch = providers.gradleProperty("minecraftPatch").get()
+    if (selectedTarget != "26.1.X" || !(patch in ["26.1", "26.1.1", "26.1.2"]))
+        throw new GradleException("minecraftPatch is supported only for the 26.1.X patch family")
+    project.ext.minecraft_version = patch
+}
+apply plugin: (project.mapped == "true" ? "net.fabricmc.fabric-loom-remap" : "net.fabricmc.fabric-loom")
+
+buildDir = file("build/${selectedTarget}/${project.minecraft_version}")
+def targetJavaVersion = project.java_version.toInteger()
 
 version = project.mod_version
 group = project.maven_group
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = "${project.archives_base_name}-${project.minecraft_version}"
 }
 
 
@@ -26,10 +45,18 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
-    compileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    if (project.mapped == "true") mappings loom.officialMojangMappings()
+    if (project.mapped == "true") {
+        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+        modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+        modCompileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    } else {
+        implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+        compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+        compileOnly "dev.isxander:yet-another-config-lib:${project.yacl_version}"
+    }
 
     implementation files("libs/Vyn.jar")
 }
@@ -38,16 +65,19 @@ processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
+    inputs.property "java_version", targetJavaVersion
+    inputs.property "minecraft_compatibility", selectedTarget == "26.1.X" ? "~26.1" : "~${project.minecraft_version}"
     filteringCharset "UTF-8"
 
-    filesMatching("fabric.mod.json") {
+    filesMatching(["fabric.mod.json", "interactivestuff.mixins.json", "resourcepacks/interactive_resourcepack/pack.mcmeta"]) {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
-                "loader_version": project.loader_version
+                "loader_version": project.loader_version,
+                "java_version": targetJavaVersion,
+                "minecraft_compatibility": selectedTarget == "26.1.X" ? "~26.1" : "~${project.minecraft_version}"
     }
 }
 
-def targetJavaVersion = 25
 tasks.withType(JavaCompile).configureEach {
 
     it.options.encoding = "UTF-8"
@@ -112,15 +142,19 @@ fabricApi.configureTests {
     enableClientGameTests = true
     eula = false
 }
+loom.runs.named("clientGameTest") {
+    runDir("build/${selectedTarget}/${project.minecraft_version}/run/clientGameTest")
+}
 
 
 tasks.register("verifyReleaseJar") {
     group = "verification"
     description = "Checks bundled interpreter, license, metadata and release/test separation."
-    dependsOn tasks.named("jar")
-    inputs.file(tasks.named("jar").flatMap { it.archiveFile })
+    def releaseJar = tasks.named(project.mapped == "true" ? "remapJar" : "jar")
+    dependsOn releaseJar
+    inputs.file(releaseJar.flatMap { it.archiveFile })
     doLast {
-        new java.util.zip.ZipFile(tasks.named("jar").get().archiveFile.get().asFile).withCloseable { archive ->
+        new java.util.zip.ZipFile(releaseJar.get().archiveFile.get().asFile).withCloseable { archive ->
             def entries = archive.entries().collect { it.name }
             ["fabric.mod.json", "interactivestuff.mixins.json", "me/abdelaziz/main/VynMain.class",
              "LICENSE.txt_${project.base.archivesName.get()}"].each { required ->
@@ -129,10 +163,96 @@ tasks.register("verifyReleaseJar") {
             if (entries.any { it.startsWith("net/minecraft/") || it.contains("ClientRenderChecks") || it.contains("RuntimeRegressionChecks") }) {
                 throw new GradleException("Release JAR contains game or test classes")
             }
+            entries.findAll { it.endsWith(".class") }.each { path ->
+                byte[] header = archive.getInputStream(archive.getEntry(path)).withCloseable { it.readNBytes(8) }
+                int major = ((header[6] & 255) << 8) | (header[7] & 255)
+                if (major > targetJavaVersion + 44 || (path.startsWith("omar/") && major != targetJavaVersion + 44))
+                    throw new GradleException("${path} has incompatible Java class version ${major}")
+            }
+            def mixinMetadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry("interactivestuff.mixins.json")))
+            if (mixinMetadata.compatibilityLevel != "JAVA_${targetJavaVersion}")
+                throw new GradleException("Mixin Java compatibility does not match the target")
             def metadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry("fabric.mod.json")))
-            if (metadata.depends.minecraft != "~${project.minecraft_version}" || metadata.depends.java != ">=25") {
+            if (metadata.depends.minecraft != (selectedTarget == "26.1.X" ? "~26.1" : "~${project.minecraft_version}") || metadata.depends.java != ">=${targetJavaVersion}") {
                 throw new GradleException("Release metadata does not match the selected Minecraft/Java target")
             }
         }
     }
 }
+
+// Native adapters may inherit a nearby version; only changed files need an override.
+def overlayTargets = []
+def visited = [] as Set
+def cursorTarget = selectedTarget
+while (cursorTarget) {
+    if (!visited.add(cursorTarget)) throw new GradleException("Cyclic version adapter inheritance")
+    overlayTargets.add(0, cursorTarget)
+    def inheritedProfile = new Properties()
+    file("versions/${cursorTarget}/version.properties").withInputStream { inheritedProfile.load(it) }
+    cursorTarget = inheritedProfile.getProperty("base_target")
+}
+def configureJavaOverlays = { sourceSet, category ->
+    def roots = [file("src/${category}/java")] + overlayTargets.collect { file("versions/${it}/src/${category}/java") }
+    def winners = [:]
+    roots.each { root ->
+        if (root.isDirectory()) fileTree(root).matching { include "**/*.java" }.files.each { source ->
+            winners[root.toPath().relativize(source.toPath()).toString().replace('\\', '/')] = source
+        }
+    }
+    def adaptedRoot = file("${buildDir}/generated/sources/${category}")
+    def adapted = [:]
+    if (profile.getProperty("legacy_names") == "true") {
+        winners.each { path, source ->
+            def original = source.getText("UTF-8")
+            def renamed = original.replaceAll(/\bIdentifier\b/, "ResourceLocation")
+                    .replace(".identifier()", ".location()")
+                    .replace(".getIdentifier()", ".getLocation()")
+                    .replace("net.minecraft.util.Util", "net.minecraft.Util")
+                    .replace("net.minecraft.client.renderer.rendertype.RenderType", "net.minecraft.client.renderer.RenderType")
+            if (renamed != original) adapted[path] = renamed
+        }
+    }
+    def adapterTask = tasks.register("generate${category.capitalize()}Adapters") {
+        inputs.files(winners.values().toList())
+        inputs.property("legacy_names", profile.getProperty("legacy_names", "false"))
+        outputs.dir(adaptedRoot)
+        doLast {
+            delete(adaptedRoot)
+            adaptedRoot.mkdirs()
+            adapted.each { path, code ->
+                def output = new File(adaptedRoot, path)
+                output.parentFile.mkdirs()
+                output.setText(code, "UTF-8")
+            }
+        }
+    }
+    adapted.each { path, code -> winners[path] = new File(adaptedRoot, path) }
+    sourceSet.java.setSrcDirs(roots + [adaptedRoot])
+    tasks.named(sourceSet.compileJavaTaskName) { dependsOn adapterTask }
+    if (category == "main") tasks.named("sourcesJar") { dependsOn adapterTask }
+    sourceSet.java.exclude { element ->
+        !element.directory && winners[element.relativePath.pathString] != element.file
+    }
+}
+configureJavaOverlays(sourceSets.main, "main")
+configureJavaOverlays(sourceSets.regression, "regression")
+configureJavaOverlays(sourceSets.gametest, "gametest")
+
+// Verify old releases on their actual Java runtime, while release compilation uses --release.
+tasks.named("runClientGameTest", JavaExec) {
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(targetJavaVersion) }
+}
+
+// Resource overrides obey the same inheritance as Java adapters.
+def resourceRoots = [file("src/main/resources")] + overlayTargets.collect { file("versions/${it}/src/main/resources") }
+def resourceWinners = [:]
+resourceRoots.each { root ->
+    if (root.isDirectory()) fileTree(root).files.each { source ->
+        resourceWinners[root.toPath().relativize(source.toPath()).toString().replace('\\', '/')] = source
+    }
+}
+sourceSets.main.resources.setSrcDirs(resourceRoots)
+sourceSets.main.resources.exclude { element ->
+    !element.directory && resourceWinners[element.relativePath.pathString] != element.file
+}
+if (profile.getProperty("excluded_resources")) sourceSets.main.resources.exclude(profile.getProperty("excluded_resources").split(","))

@@ -33,7 +33,7 @@ task onItemUpdate takes itemRendered do
             end
 
             make lootModel = new ItemModel(currentLootItem)
-            check itemRendered.isMainHand() do
+            check itemRendered.isRightHand() do
                 lootModel.setPivot(0.02, 0.05, 0.02)
                 lootModel.translate(-0.05, 0.15, 0)
             otherwise

@@ -7,6 +7,6 @@ import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 public final class GetDelta extends NativeFunction {
 
     public GetDelta() {
-        super((_, _) -> new Value(RenderTickHandler.normalizedDelta));
+        super((ignoredFirst, ignoredSecond) -> new Value(RenderTickHandler.normalizedDelta));
     }
 }

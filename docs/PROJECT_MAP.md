@@ -1,12 +1,12 @@
 # InteractiveStuff project map
 
-Updated 2026-10-10 for the 26.2 system overhaul. The original checkout's 26.3 edits are preserved separately.
+Updated 2026-10-10 for the shared overhaul and six version targets. The original checkout's uncommitted 26.3 edits are preserved separately.
 
 ## Product and build
 
-InteractiveStuff is a client-only Fabric mod. Minecraft events enter Java adapters, which dispatch Vyn callbacks from resource packs. Scripts modify temporary visual item models and create extra models; Minecraft's render queue draws them. The mod does not change inventory contents or add networking.
+InteractiveStuff is a client-only Fabric mod. Minecraft events enter Java adapters, which dispatch Vyn callbacks from resource packs. Scripts modify temporary visual item models and create extra models; Minecraft's native renderer draws them. The mod does not change inventory contents or add networking.
 
-The base targets Minecraft 26.2, Fabric Loader 0.19.3, Fabric API 0.158.0+26.2, Java 25 and Loom 1.17.19. Mod Menu 20.0.1 and YACL 3.9.6+26.2-fabric are optional integrations. The normal mod JAR bundles the local `libs/Vyn.jar` interpreter. The source JAR and client test mod are separate.
+The shared base targets Minecraft 26.2, Fabric Loader 0.19.5, Fabric API 0.158.0+26.2, Java 25 and Loom 1.17.19. Six version profiles under `versions/` select native adapters, dependencies and Java 21/25 release levels. Mod Menu 20.0.1 and YACL 3.9.6+26.2-fabric are optional integrations. The normal mod JAR bundles the local `libs/Vyn.jar` interpreter. The source JAR and client test mod are separate.
 
 ```mermaid
 flowchart TD
@@ -35,6 +35,7 @@ Paths are relative to `src/main/java/omar/projects/interactivestuff`.
 | Script core | `scripts/ScriptRuntime`, `scripts/objects/Script`, `PackScripts` | Cache parsed ASTs, load libraries, manage states, index callbacks and item filters |
 | Deferred ownership | `scripts/ScriptExecutionContext`, `WaitStatement`, `WaitHandler` | Retain a wait's environment and owner; reject work after reload; isolate callback failures |
 | Resources | `scripts/ScriptLoader` | Discover full relative script paths and preserve resource-pack priority |
+| Client API boundary | `compat/MinecraftAccess` | Keep client, player-state and biome API differences outside shared bindings |
 | Minecraft bindings | `scripts/ScriptInterpreter`, `scripts/variables/*` | Live player/world views, native types/functions, client-thread event dispatch and session cleanup |
 | Extra models | `scripts/Utilities/ItemModelRenderRegistry` | Scope models to one rendered item, inherit actual hand, assign stable seeds, close safely |
 | Visual state | `scripts/variables/ItemModel` | Transform, hierarchy, tint, lighting, glint, quad selection and stack copy-on-mutation |
@@ -84,7 +85,7 @@ The held-item mixin skips unrelated items before constructing a visual wrapper. 
 
 `ItemModel` lazily allocates its quaternion, tint map and shear matrix. Visual edits mark the model modified without copying its stack. Component/model changes first copy the stack. `copy()` clones visual properties and tint/rotation state; subsequent component edits detach its stack independently.
 
-Hand identity uses both the display side and the player's dominant arm. Extra models inherit it. Resolver seeds use stable slots within a render, avoiding per-frame random model changes.
+Main/off-hand identity uses both the display side and the player's dominant arm; physical left/right identity uses only the render side. Mirrored angles in bundled scripts use `isLeftHand()`/`isRightHand()`. Extra models inherit both identities. Resolver seeds use stable slots within a render, avoiding per-frame random model changes.
 
 For full models without color changes, the adapter uses native state submission. Partial or colored baked layers use native layer transforms, preserving local transforms and foil. Colors are indexed by material tint index. Untinted quads receive a dedicated slot; explicit script tints override native tint and color multipliers compose with the remaining native color. Recolored geometry is immutable, bounded to 128 cached layouts, and invalidated on resource reload. Per-submission tint arrays and render states remain separate because Minecraft queues them for later consumption.
 
@@ -122,3 +123,5 @@ Custom models live under `assets/interactivestuff/items` and `models/item`; text
 `bash ./gradlew build` includes 66 deterministic regression checks from `src/regression`. `bash ./gradlew runClientGameTest` uses a separate `src/gametest` mod and `build/run/clientGameTest`, exercises actual Minecraft rendering/lifecycle, and exits automatically. It requires a graphics display; it is not required by the ordinary headless build.
 
 See [26.2_OVERHAUL.md](26.2_OVERHAUL.md) for changes, evidence and limits, and [VERSION_PORTING.md](VERSION_PORTING.md) for the version boundary.
+
+The current adapter layout, build commands and branch workflow are documented in [VERSION_PORTING.md](VERSION_PORTING.md). Latest per-version evidence is in [MULTIVERSION_VALIDATION.md](MULTIVERSION_VALIDATION.md).

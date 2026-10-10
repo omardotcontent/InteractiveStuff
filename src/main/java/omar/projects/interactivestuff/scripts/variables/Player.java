@@ -115,7 +115,7 @@ public final class Player {
 
     @VynFunc
     public ItemModel getActiveItem() {
-        return (player != null) ? new ItemModel(player.getActiveItem()) : null;
+        return (player != null) ? new ItemModel(omar.projects.interactivestuff.compat.MinecraftAccess.activeItem(player)) : null;
     }
 
     @VynFunc
@@ -270,7 +270,7 @@ public final class Player {
 
     @VynFunc
     public float getCameraPitchVelocity() {
-        final Camera camera = client.gameRenderer.mainCamera();
+        final Camera camera = omar.projects.interactivestuff.compat.MinecraftAccess.camera(client);
         if (camera instanceof CameraVelocityAccessor acc) {
             return acc.interactivestuff$getPitchVelocity();
         }
@@ -279,7 +279,7 @@ public final class Player {
 
     @VynFunc
     public float getCameraYawVelocity() {
-        final Camera camera = client.gameRenderer.mainCamera();
+        final Camera camera = omar.projects.interactivestuff.compat.MinecraftAccess.camera(client);
         if (camera instanceof CameraVelocityAccessor acc) {
             return acc.interactivestuff$getYawVelocity();
         }
@@ -318,7 +318,7 @@ public final class Player {
 
     @VynFunc
     public boolean isFlyingVehicle() {
-        return player != null && player.isFlyingVehicle();
+        return player != null && omar.projects.interactivestuff.compat.MinecraftAccess.isFlyingVehicle(player);
     }
 
     @VynFunc
@@ -393,7 +393,7 @@ public final class Player {
 
     @VynFunc
     public boolean isAtCloudHeight() {
-        return player != null && player.isInClouds();
+        return player != null && omar.projects.interactivestuff.compat.MinecraftAccess.isInClouds(player);
     }
 
     @VynFunc
@@ -418,7 +418,7 @@ public final class Player {
 
     @VynFunc
     public boolean isJumping() {
-        return player != null && player.isJumping();
+        return player != null && omar.projects.interactivestuff.compat.MinecraftAccess.isJumping(player);
     }
 
     @VynFunc
@@ -489,7 +489,7 @@ public final class Player {
 
     @VynFunc
     public int getPermissionLevel() {
-        return player != null ? player.getPermissionContext().permissionLevel().id() : 0;
+        return omar.projects.interactivestuff.compat.MinecraftAccess.permissionLevel(player);
     }
 
     @VynFunc
@@ -645,7 +645,7 @@ public final class Player {
         if (player == null) {
             return;
         }
-        player.sendSystemMessage(Component.literal("§e[InteractiveStuff] " + message));
+        omar.projects.interactivestuff.compat.MinecraftAccess.chat(player, Component.literal("§e[InteractiveStuff] " + message));
     }
 
     public LocalPlayer getPlayer() {

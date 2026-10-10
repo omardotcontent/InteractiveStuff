@@ -1,52 +1,43 @@
-# Use 26.2 as the shared base
+# Shared 26.2 base and version adapters
 
-Start each new Minecraft port from the reviewed 26.2 overhaul commit/branch. Keep future fixes to the shared runtime and bundled behavior on this base first, then carry them into the version branches. The existing unfinished 26.3 checkout has been preserved for comparison.
+The root `src/` is the corrected 26.2 overhaul. All version branches carry this same multi-version tree. `gradle.properties` selects the branch's default `target_version`; `-Ptarget_version=<folder>` overrides it.
 
-This remains the repository's branch-per-version model. The overhaul separates responsibilities inside the code; it does not create a multi-loader/multi-version build framework.
+| Folder | Runtime Java | Native boundary |
+| --- | --- | --- |
+| `versions/1.21.5` | 21 | Immediate `MultiBufferSource` rendering, legacy keyboard/sound hooks |
+| `versions/1.21.10` | 21 | Submission queue with packed vertex-array quads |
+| `versions/1.21.11` | 21 | Submission queue with position/UV quad records |
+| `versions/26.1.X` | 25 | 26.1 client access and permission API |
+| `versions/26.2` | 25 | Shared baseline; no redundant source copy |
+| `versions/26.3` | 25 | Extracted first-person state, `ItemQuads` batches, updated pose/material/swing APIs |
 
-## Shared systems
+## Source and resource selection
 
-Keep these consistent across versions unless the dependency or language level changes:
+Build one target per Gradle invocation. Profiles select the correct Loom plugin: the 1.21 releases use official Mojang mappings and the remapping plugin; 26.x uses the unobfuscated plugin. Release JARs and test directories have distinct target/version paths.
 
-- `runtime/TickScheduler` and `FrameClock`
-- `scripts/ScriptRuntime`, `ScriptExecutionContext`, `objects/Script`, `PackScripts`
-- Import/exclusion logic and deferred ownership
-- Item filter contract, callback indexes and deterministic pack ordering
-- `render/ColorMath` and `QuadSelection`
-- Feature scripts and their public native API
-- Regression fixtures and behavior checks
+For a Java or resource path, the selected target wins over its `base_target`, which wins over root `src/`. 1.21.5 inherits the 1.21.10 adapters, and 1.21.10 inherits 1.21.11. All inherit the shared root. Only native boundaries are overridden; the scheduler, frame clock, script/runtime/import logic, callback dispatch, Vyn scripts, config logic and most player/model bindings remain shared.
 
-The shared scheduler/clock/script core has no Minecraft imports. Tests use the same local Vyn interpreter as production.
+`legacy_names=true` generates only the sources needing deterministic Minecraft name substitutions (`Identifier`/`ResourceLocation`, resource-key and sound identifier access, and the older `Util`/`RenderType` packages). Generated files go under the selected build directory and are never committed. This keeps the bindings shared without reflection or runtime version checks. API behavior differences belong in `MinecraftAccess` or a native renderer/mixin override.
 
-## Version boundaries
+When adding an adapter file, match the shared relative path. The build replaces that path, preventing duplicate classes/resources. A version-specific fixture under `src/gametest/java` or `src/regression/java` follows the same rule. Source JARs contain the selected, compilable sources.
 
-| Boundary | What to verify on the target Minecraft JAR |
-| --- | --- |
-| `render/MinecraftItemRenderer` | Item resolver entry point, item/layer render states, collector submission shape, foil types, native tint representation |
-| `render/ColoredQuadCache` | Baked quad and material representation, tint index and immutable geometry fields |
-| `render/RenderTransforms` | Quaternion and matrix operations on the pose stack; keep normal-matrix updates intact |
-| `mixin/render/HeldItemRendererMixin` | Item-only first-person hook, local player/context detection, resolver ownership, cancellation point |
-| Render accessors/invokers | Native layer fields, submission and transform methods |
-| Game/camera mixins | Render/rotation hook signatures; frame timing stays backend-independent |
-| Other mixins | Swing, key input, sound result and HUD extraction signatures |
-| `ScriptInterpreter`, `ScriptLoader`, `BackgroundLoopHandler` | Fabric lifecycle/resource APIs and main-thread dispatch |
-| Native variable wrappers/components | Registry IDs, camera/player/world methods, component codecs |
-| Config/UI | Platform folder-opening API, optional Mod Menu/YACL versions |
-| Gradle/resources/CI | Minecraft/loader/API versions, Java target, pack formats, mixin target compatibility and supported-version metadata |
+## 26.1 patch family
 
-For 26.3, inspect the newer first-person renderer's item submission path. The older `ItemInHandRenderer` resolver field is not a valid shadow on the newer renderer. An arm-level cancellation hook can omit arm/use/swing transforms, so choose an item-only boundary or explicitly preserve those transforms. Keep timing in `FrameClock`; do not substitute SDL milliseconds into a seconds-based delta formula.
+The family profile compiles against 26.1 and declares `~26.1` compatibility. Build another patch with:
 
-Older branches may use different names/mappings and baked-quad layouts. Check their actual Java target and native APIs rather than copying 26.2 accessor names. The public Vyn function names should remain stable even when the Java adapter changes.
+```sh
+bash ./gradlew -Ptarget_version=26.1.X -PminecraftPatch=26.1.1 build runClientGameTest
+bash ./gradlew -Ptarget_version=26.1.X -PminecraftPatch=26.1.2 build runClientGameTest
+```
 
-## Port process
+Unknown targets and patches fail at configuration time. Verify each supported patch; do not extend the metadata range across untested major/minor releases.
 
-1. Create the version branch from the finished base; use a separate checkout/worktree.
-2. Update version dependencies, metadata, pack formats and mixin compatibility.
-3. Compile to find changed native symbols. Check cached/source Minecraft and Fabric APIs for exact signatures.
-4. Change the version adapter/mixins and affected native wrappers. Keep runtime algorithms and callback semantics intact.
-5. Run `bash ./gradlew build` to exercise shared regression checks.
-6. Adapt and run `bash ./gradlew runClientGameTest` on that version. Check plain items, baked tint, special renderer, split quads, extras, both hands, left-handed preference, resource reload and disconnect.
-7. Inspect captured frames, logs and the release JAR. Confirm Vyn/license inclusion and absence of test/game classes.
-8. Fix shared behavior on the base too, so a port does not become an independent implementation of the runtime.
+## Hand identity in Vyn
 
-The release metadata uses the selected Minecraft version's minor range rather than claiming compatibility with all future versions. Every port needs its own compiled and tested artifact.
+`isMainHand()`/`isOffHand()` identify the actual inventory hand, including left-handed players. `isLeftHand()`/`isRightHand()` identify the physical render arm. Use physical-side checks for mirrored yaw, pivots or movement; use main/off checks for inventory/gameplay behavior. Bundled item-frame, chest and vault scripts now use physical sides for their angles. Extra models inherit both identities from the active render scope.
+
+## Port verification
+
+Run `build` for shared regression and distributable checks, then `runClientGameTest` with the target Java runtime and a working display/OpenGL context. Test real native model resolution/submission, native special renderers, tint slots, partial/complementary geometry, both physical arms under either hand identity, matrix/color toggles, copy-on-component changes, config persistence, waits, resource reload and disconnect. Inspect logs for missing mod textures and render fallbacks; compiler success alone does not validate mixin targets.
+
+The suite uses its own automatically reset game directory. It never opens user saves. Keep known results in `docs/MULTIVERSION_VALIDATION.md` and `MODLOG.md`.

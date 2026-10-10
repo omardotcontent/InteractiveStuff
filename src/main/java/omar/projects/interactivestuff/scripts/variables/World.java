@@ -3,7 +3,6 @@ package omar.projects.interactivestuff.scripts.variables;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.client.renderer.BiomeColors;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
@@ -30,12 +29,12 @@ public final class World {
 
     @VynFunc
     public boolean isDay() {
-        return sourceWorld != null && sourceWorld.isBrightOutside();
+        return sourceWorld != null && omar.projects.interactivestuff.compat.MinecraftAccess.isDay(sourceWorld);
     }
 
     @VynFunc
     public long getTimeOfDay() {
-        return sourceWorld == null ? 0 : sourceWorld.getDefaultClockTime();
+        return sourceWorld == null ? 0 : omar.projects.interactivestuff.compat.MinecraftAccess.dayTime(sourceWorld);
     }
 
     @VynFunc
@@ -55,7 +54,7 @@ public final class World {
 
     @VynFunc
     public int getBiomeColorAt(final int x, final int y, final int z) {
-        return sourceWorld == null ? 0xFFFFFF : sourceWorld.getClientLeafTintColor(new BlockPos(x, y, z));
+        return sourceWorld == null ? 0xFFFFFF : omar.projects.interactivestuff.compat.MinecraftAccess.foliageTint(sourceWorld, new BlockPos(x, y, z));
     }
 
     @VynFunc
@@ -65,27 +64,27 @@ public final class World {
 
     @VynFunc
     public int getGrassColor(final Position position) {
-        return sourceWorld == null ? 0xFFFFFF : BiomeColors.getAverageGrassColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : omar.projects.interactivestuff.compat.MinecraftAccess.grassTint(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getDryFoliageColor(final Position position) {
-        return sourceWorld == null ? 0xFFFFFF : BiomeColors.getAverageDryFoliageColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : omar.projects.interactivestuff.compat.MinecraftAccess.dryFoliageTint(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getFoliageColor(final Position position) {
-        return sourceWorld == null ? 0xFFFFFF : BiomeColors.getAverageFoliageColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : omar.projects.interactivestuff.compat.MinecraftAccess.foliageTint(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getWaterColor(final Position position) {
-        return sourceWorld == null ? 0xFFFFFF : BiomeColors.getAverageWaterColor((BlockAndTintGetter) sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : omar.projects.interactivestuff.compat.MinecraftAccess.waterTint(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc
     public int getBiomeColorAt(final Position position) {
-        return sourceWorld == null ? 0xFFFFFF : sourceWorld.getClientLeafTintColor(new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return sourceWorld == null ? 0xFFFFFF : omar.projects.interactivestuff.compat.MinecraftAccess.foliageTint(sourceWorld, new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @VynFunc

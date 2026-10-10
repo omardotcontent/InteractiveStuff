@@ -23,6 +23,7 @@ public final class RenderRegressionChecks {
         check.accept(model.getFinalColorForIndex(0, 0xFFABCDEF) == 0xFF445566, "indexed tint overrides global tint");
         model.setDisplayContext(ItemDisplayContext.FIRST_PERSON_LEFT_HAND, true);
         check.accept(model.isMainHand() && !model.isOffHand(), "left-handed main hand is identified correctly");
+        check.accept(model.isLeftHand() && !model.isRightHand(), "physical left side is independent of main-hand identity");
         model.setLight(15);
         check.accept(model.getLight() == 0x00F000F0, "packed light uses both correct sky and block offsets");
         ItemModel copy = model.copy();

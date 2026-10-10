@@ -4,7 +4,6 @@ import com.google.gson.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import omar.projects.interactivestuff.objects.InteractionMaterial;
@@ -29,7 +28,7 @@ public final class ConfigHandler {
 
     private static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
-            .registerTypeHierarchyAdapter(Item.class, (JsonSerializer<Item>) (src, _, _) ->
+            .registerTypeHierarchyAdapter(Item.class, (JsonSerializer<Item>) (src, ignoredType, ignoredContext) ->
                     new JsonPrimitive(BuiltInRegistries.ITEM.getKey(src).toString()))
             .registerTypeHierarchyAdapter(Item.class, (JsonDeserializer<Item>) (json, typeOfT, context) -> {
                 final String idStr = json.getAsString();
@@ -87,7 +86,7 @@ public final class ConfigHandler {
 
     public void openConfigDirectory() {
         try {
-            Util.getPlatform().openFile(FabricLoader.getInstance().getConfigDir().toFile());
+            omar.projects.interactivestuff.compat.MinecraftAccess.openDirectory(FabricLoader.getInstance().getConfigDir());
         } catch (final Exception e) {
             System.err.println("[InteractiveStuff] Failed to open config.");
             e.printStackTrace();

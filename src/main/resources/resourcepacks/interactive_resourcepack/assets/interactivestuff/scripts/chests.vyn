@@ -75,7 +75,7 @@ task onItemUpdate takes itemRendered do
 		chestTop.setParent(itemRendered)
 	end
 
-    check itemRendered.isMainHand() do
+    check itemRendered.isRightHand() do
         chestTop.setPivot(0.12, 0.17, -0.063)
         chestTop.rotateAxis(-90 * (openProgress / 100), 1, 0, 1.25)
     otherwise

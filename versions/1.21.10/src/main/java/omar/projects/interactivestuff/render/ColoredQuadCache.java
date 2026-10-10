@@ -1,0 +1,57 @@
+package omar.projects.interactivestuff.render;
+
+import net.minecraft.client.renderer.block.model.BakedQuad;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/** Bounded immutable geometry cache; tint slot zero makes previously untinted quads colorable. */
+final class ColoredQuadCache {
+    private static final int MAX_MODELS = 128;
+    private final Map<Key, Geometry> entries = new LinkedHashMap<>(32, 0.75f, true);
+
+    Geometry get(List<BakedQuad> quads) {
+        Key lookup = new Key(quads);
+        Geometry cached = entries.get(lookup);
+        if (cached != null) return cached;
+        List<BakedQuad> recolored = new ArrayList<>(quads.size());
+        int slots = 1;
+        for (BakedQuad quad : quads) {
+            int tintIndex = quad.tintIndex();
+            int slot = Math.max(0, tintIndex + 1);
+            slots = Math.max(slots, slot + 1);
+            recolored.add(new BakedQuad(quad.vertices().clone(), slot, quad.direction(), quad.sprite(),
+                    quad.shade(), quad.lightEmission()));
+        }
+        Geometry geometry = new Geometry(List.copyOf(recolored), slots);
+        entries.put(new Key(List.copyOf(quads)), geometry);
+        if (entries.size() > MAX_MODELS) entries.remove(entries.keySet().iterator().next());
+        return geometry;
+    }
+
+    void clear() { entries.clear(); }
+
+    record Geometry(List<BakedQuad> quads, int slots) {}
+
+    private static final class Key {
+        private final List<BakedQuad> quads;
+        private final int hash;
+
+        Key(List<BakedQuad> quads) {
+            this.quads = quads;
+            int value = 1;
+            for (BakedQuad quad : quads) value = 31 * value + System.identityHashCode(quad);
+            hash = value;
+        }
+
+        @Override public int hashCode() { return hash; }
+
+        @Override public boolean equals(Object other) {
+            if (!(other instanceof Key key) || key.quads.size() != quads.size()) return false;
+            for (int i = 0; i < quads.size(); i++) if (quads.get(i) != key.quads.get(i)) return false;
+            return true;
+        }
+    }
+}

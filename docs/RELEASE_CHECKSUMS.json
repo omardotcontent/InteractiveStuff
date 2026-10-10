@@ -1,0 +1,50 @@
+[
+  {
+    "minecraft": "1.21.5",
+    "target": "1.21.5",
+    "jar": "interactivestuff-1.21.5-0.7.1.jar",
+    "sha256": "3a0933b0e12a9ad2fddaefc2addc6c6e66588ea161047bad3d66a1292500ebc1"
+  },
+  {
+    "minecraft": "1.21.10",
+    "target": "1.21.10",
+    "jar": "interactivestuff-1.21.10-0.7.1.jar",
+    "sha256": "d9daafc7057b18858a03afcbc3349c7d540262ba25a2d58f2339f174771f4a3b"
+  },
+  {
+    "minecraft": "1.21.11",
+    "target": "1.21.11",
+    "jar": "interactivestuff-1.21.11-0.7.1.jar",
+    "sha256": "62f9c986fedf6192b9778dd51ddc64b8f151f15da2ff93fb4770619006c8f005"
+  },
+  {
+    "minecraft": "26.1",
+    "target": "26.1.X",
+    "jar": "interactivestuff-26.1-0.7.1.jar",
+    "sha256": "23f8a2ac938d59a0525119c590e7df7785b55d1569baa7b6061167e91107d50b"
+  },
+  {
+    "minecraft": "26.1.1",
+    "target": "26.1.X",
+    "jar": "interactivestuff-26.1.1-0.7.1.jar",
+    "sha256": "5276ab7fbbc1d2fc197bffb11af8f7841c28bed4d3e96717c44ac1e2dc8aaaeb"
+  },
+  {
+    "minecraft": "26.1.2",
+    "target": "26.1.X",
+    "jar": "interactivestuff-26.1.2-0.7.1.jar",
+    "sha256": "011993f29c010924eb8940d605fd7e0c550378b08c397abfb46da044d40599f1"
+  },
+  {
+    "minecraft": "26.2",
+    "target": "26.2",
+    "jar": "interactivestuff-26.2-0.7.1.jar",
+    "sha256": "4ad9469206e075f26608d35a417b62805e6c6b71a235a5b4d6a229f821bef756"
+  },
+  {
+    "minecraft": "26.3",
+    "target": "26.3",
+    "jar": "interactivestuff-26.3-0.7.1.jar",
+    "sha256": "0fbf2964f11d028790537501234f69a6a363165fcbff7cf00e6f25909717e9a6"
+  }
+]

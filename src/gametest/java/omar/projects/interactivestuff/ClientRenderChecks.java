@@ -37,6 +37,8 @@ public final class ClientRenderChecks implements FabricClientGameTest {
             context.runOnClient(client -> {
                 checkScripts();
                 components();
+                ClientStateChecks.run(client);
+                handOrientation();
                 renderAdapter(client);
                 configPersistence();
                 client.player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.NOTE_BLOCK));
@@ -127,6 +129,22 @@ public final class ClientRenderChecks implements FabricClientGameTest {
         check(model.hasDataComponent("custom_data") && !copy.hasDataComponent("custom_data"), "copied stacks mutate independently");
         model.setItemModel("minecraft:stone");
         check(model.getDataComponent("item_model").contains("minecraft:stone"), "bare model ID shorthand decodes");
+    }
+
+    private static void handOrientation() {
+        for (boolean main : new boolean[]{true, false}) {
+            ItemModel right = ScriptInterpreter.itemUpdate(new ItemStack(Items.ITEM_FRAME),
+                    ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, main);
+            ItemModel left = ScriptInterpreter.itemUpdate(new ItemStack(Items.ITEM_FRAME),
+                    ItemDisplayContext.FIRST_PERSON_LEFT_HAND, main);
+            check(right != null && left != null, "frame script modifies both physical arms");
+            check(right.isRightHand() && !right.isLeftHand() && left.isLeftHand() && !left.isRightHand(),
+                    "physical arm is independent of main/off hand");
+            check(right.isMainHand() == main && left.isMainHand() == main,
+                    "logical main/off hand identity remains correct");
+            check(right.getRotationY() > 0 && left.getRotationY() < 0,
+                    "frame yaw follows the physical arm with either dominant-hand preference");
+        }
     }
 
     private static void configPersistence() {

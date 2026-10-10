@@ -12,7 +12,7 @@ task onItemUpdate takes itemRendered do
             itemRendered.setPivot(0, 0.4, 0)
             itemRendered.rotate(angleX, 0, -angleZ)
 
-            check itemRendered.isMainHand() do
+            check itemRendered.isRightHand() do
 				check !modLoader.isModLoaded("punchy") do
 					itemRendered.rotateY(65)
 					itemRendered.rotateX(25)

@@ -58,10 +58,10 @@ public final class ScriptInterpreter {
             environment.defineFunction("excludeScript", new ExcludeScript(RUNTIME));
             environment.defineFunction("debugText", new DebugText());
             environment.defineFunction("getDelta", new GetDelta());
-            environment.defineFunction("getFrameId", new NativeFunction((_, _) -> new Value(RenderTickHandler.getFrameId())));
+            environment.defineFunction("getFrameId", new NativeFunction((ignoredFirst, ignoredSecond) -> new Value(RenderTickHandler.getFrameId())));
         });
-        ClientPlayConnectionEvents.JOIN.register((_, _, client) -> updateSession(client));
-        ClientPlayConnectionEvents.DISCONNECT.register((_, client) -> {
+        ClientPlayConnectionEvents.JOIN.register((ignoredHandler, ignoredSender, client) -> updateSession(client));
+        ClientPlayConnectionEvents.DISCONNECT.register((ignoredHandler, client) -> {
             ready = false;
             sessionWorld = null;
             PLAYER.setPlayer(null);
@@ -128,7 +128,7 @@ public final class ScriptInterpreter {
     }
 
     public static void onKeyPress(int key) {
-        if (!ready || Minecraft.getInstance().gui.screen() != null) return;
+        if (!ready || omar.projects.interactivestuff.compat.MinecraftAccess.screen(Minecraft.getInstance()) != null) return;
         for (Script script : RUNTIME.callbacks(FunctionType.ON_KEY_PRESS)) script.call(FunctionType.ON_KEY_PRESS, key);
     }
 
