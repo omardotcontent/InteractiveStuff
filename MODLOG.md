@@ -34,3 +34,7 @@
 - Client fixtures and temporary saves are isolated by target/version. Test state, actual native setters, lifecycle, render geometry, component codec behavior, both hand preferences and resource reload are exercised on the target runtime.
 - Original checkout edits and user saves remain untouched. Source and release verification evidence is recorded in docs/MULTIVERSION_VALIDATION.md.
 - Final local result: all eight Minecraft releases passed build + real-client validation, 67 shared regression checks each. 26.1 patch mod class entries are byte-identical; artifact Java and remapped mixin selectors were verified.
+
+- First GitHub checks passed for 1.21.5, 1.21.11, 26.1.X and 26.2. The 1.21.10 client repeatedly timed out before joining its test world; its Fabric test-only network synchronizer is now disabled, with native state waits retained and a passing local suite.
+- 26.3's headless backend rejected the software GLX visual and waited in Minecraft's startup error dialog. SDL's EGL path passed the full native suite on local Mesa llvmpipe. Linux CI selects this path; ordinary desktop rendering is unchanged.
+- Reuse an explicitly supplied display instead of nesting Xvfb wrappers; split CI build/client steps and bound client/job durations so failures return diagnostics.
