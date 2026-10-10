@@ -21,6 +21,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
+      - name: Install software graphics libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y libegl1 libegl-mesa0 libgl1-mesa-dri
       - name: Build the branch target
         run: bash ./gradlew --no-daemon build
       - name: Test the real client

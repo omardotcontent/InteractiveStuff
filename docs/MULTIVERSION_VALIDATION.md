@@ -41,4 +41,4 @@ Dependency profiles were resolved against the published releases and compiled/ru
 
 GitHub Actions runs build and isolated client checks for each version branch default; screenshots/logs are uploaded as diagnostic artifacts.
 
-Additional CI-environment validation: 1.21.10 passed the native suite with the test packet synchronizer disabled; 26.3 passed on Mesa llvmpipe 25.2.8/OpenGL 4.5 using EGL. The CI setup and initial diagnostic failures are documented in [VERSION_PORTING.md](VERSION_PORTING.md#ci-client-execution).
+Additional CI-environment validation: 1.21.10 and 1.21.11 passed their native suites with the test packet synchronizer disabled; 26.3 passed on Mesa llvmpipe 25.2.8/OpenGL 4.5 using EGL. The CI setup and initial diagnostic failures are documented in [VERSION_PORTING.md](VERSION_PORTING.md#ci-client-execution).
