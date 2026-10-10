@@ -5,6 +5,9 @@
   "name": "InteractiveStuff client regression tests",
   "environment": "client",
   "entrypoints": {
-    "fabric-client-gametest": ["omar.projects.interactivestuff.ClientRenderChecks"]
+    "fabric-client-gametest": [
+      "omar.projects.interactivestuff.ClientConfigScreenChecks",
+      "omar.projects.interactivestuff.ClientRenderChecks"
+    ]
   }
 }

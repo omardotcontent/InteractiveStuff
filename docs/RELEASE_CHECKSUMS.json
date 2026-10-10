@@ -3,48 +3,48 @@
     "minecraft": "1.21.5",
     "target": "1.21.5",
     "jar": "interactivestuff-1.21.5-0.8.0.jar",
-    "sha256": "89187e5a4949299e9c487eebee26c644b502c263b6d48e054fe3e8d664de450c"
+    "sha256": "2c7e1c3c428f35c5b340267f0024ac443fc0eb13d1b7e47777f5e46002c5a90d"
   },
   {
     "minecraft": "1.21.10",
     "target": "1.21.10",
     "jar": "interactivestuff-1.21.10-0.8.0.jar",
-    "sha256": "0e64138b0b1e1620af99b6b8a938bf8f6799bb47334d3aebbc345ce66ef284b0"
+    "sha256": "b36a8030cf85d534fbf9532e487682e3411210b92590de8515e14a9b92a444d8"
   },
   {
     "minecraft": "1.21.11",
     "target": "1.21.11",
     "jar": "interactivestuff-1.21.11-0.8.0.jar",
-    "sha256": "ecd2088e308deacda20bf063ddd5bf21b93a56f5ef48dfa08e4135efcfc1a10b"
+    "sha256": "f87ae2372372e4508f02f592f59a46c96437a5e28707cf93ad308d93adec166b"
   },
   {
     "minecraft": "26.1",
     "target": "26.1.X",
     "jar": "interactivestuff-26.1-0.8.0.jar",
-    "sha256": "1dfeb58d1236c992353ee8a093d577b7a0edc8dadd57a6db8f32e9ae1b3912ea"
+    "sha256": "fedd88a8800ec0dc6a52dc86862f515242849edf20d8c95fdb28471e1246a4b6"
   },
   {
     "minecraft": "26.1.1",
     "target": "26.1.X",
     "jar": "interactivestuff-26.1.1-0.8.0.jar",
-    "sha256": "b787b36ef045322ab101b3a4a1c8e6f86dac9064545b604001e81d5bb3ba1e24"
+    "sha256": "81f738d93051cf8fe58f049bed441fdca265e6f3e3c5f7d48fc2ebb399f3e16e"
   },
   {
     "minecraft": "26.1.2",
     "target": "26.1.X",
     "jar": "interactivestuff-26.1.2-0.8.0.jar",
-    "sha256": "4ebbd8918546b978f996cdaa27a37546b2ba0699dafe2624b0b4d7bd1dda4f28"
+    "sha256": "54c06b5513783fba423863500ab2a71390a533d8472c08feb32c277242dcbc83"
   },
   {
     "minecraft": "26.2",
     "target": "26.2",
     "jar": "interactivestuff-26.2-0.8.0.jar",
-    "sha256": "ed7064ddd98df1f445bf4c8080de0792d54403e99f9a8bdddea145acd3b23005"
+    "sha256": "64ac1b9bdebef0526b09c5aebfa63de6990526603a856bdbf76f7f99353490c3"
   },
   {
     "minecraft": "26.3",
     "target": "26.3",
     "jar": "interactivestuff-26.3-0.8.0.jar",
-    "sha256": "c4b2ee43787ebe60f13090445523cd36ccf980349a03d26bea2ef6f057724649"
+    "sha256": "7d4911261858417b2d572c8556e89d0fd0fe2e36d685e63ac3f5a02a92973f17"
   }
 ]

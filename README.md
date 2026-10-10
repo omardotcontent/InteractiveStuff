@@ -26,6 +26,6 @@ The branch default lives in `gradle.properties`. Outputs are separated under `bu
 bash ./gradlew -Ptarget_version=26.3 runClientGameTest
 ```
 
-It needs a working display/OpenGL context and the target Java runtime. It creates and deletes its own test directory under `build/<target>/<minecraft>/run/clientGameTest/`; it does not use player saves. Screenshots and client logs are kept there after the run. CI uses Xvfb and runs both build and client tests for the branch target.
+It needs a working display/OpenGL context and the target Java runtime. It creates and deletes its own test directory under `build/<target>/<minecraft>/run/clientGameTest/`; it does not use player saves. Screenshots and client logs are kept there after the run. CI uses Xvfb and runs both build and client tests for the branch target. Development clients include Mod Menu and YACL through local runtime dependencies; they are not bundled or made required by the release. The client suite opens and renders the actual IS settings screen through Mod Menu. Use `-Pconfig_screen_test_yacl=false` to verify the optional fallback without YACL; that fixture uses a separate `clientGameTestWithoutYacl` directory. CI exercises both dependency combinations.
 
 See [the architecture map](docs/PROJECT_MAP.md), [the shared base overhaul](docs/26.2_OVERHAUL.md), [version porting](docs/VERSION_PORTING.md), and [validation results](docs/MULTIVERSION_VALIDATION.md).
