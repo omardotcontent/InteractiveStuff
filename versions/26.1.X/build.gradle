@@ -1,0 +1,2 @@
+// Shared source selection, dependencies and verification live in one build script.
+apply from: rootProject.file('gradle/minecraft.gradle')

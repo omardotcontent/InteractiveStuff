@@ -32,7 +32,7 @@ public abstract class SoundListenerMixin {
             return;
         }
         ScriptInterpreter.onPlaySound(new Sound(
-                sound.getIdentifier().toString(),
+                sound.getLocation().toString(),
                 sound.getVolume(),
                 sound.getPitch(),
                 new Position((int) sound.getX(), (int) sound.getY(), (int) sound.getZ())));

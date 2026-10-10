@@ -56,3 +56,15 @@
 - User requested keeping 0.8.0 because it has not been uploaded.
 - The missing-YACL fixture reproduced a second error: Mod Menu could not register IS because entrypoint verification loaded `dev.isxander.yacl3.api.Option` before the guard. Moved the unchanged YACL screen-building code into a separately loaded `YaclConfigScreen`; the Mod Menu entrypoint references only Mod Menu/Fabric types until the presence check succeeds.
 - Final local validation: all eight builds passed 67 shared regression checks and actual Mod Menu/YACL screen opening, rendering and return-navigation checks, alongside the native render/lifecycle suite. Java 21/1.21.5 and Java 25/26.2 also passed with Mod Menu alone. CI now covers both combinations in separate test directories.
+
+## All-in-one Gradle / IDE workspace (2026-10-10)
+
+- Replaced the single-target root project with eight independently typed Minecraft modules: 1.21.5, 1.21.10, 1.21.11, 26.1, 26.1.1, 26.1.2, 26.2 and 26.3. The target catalog is `gradle/targets.json`; all module build rules live in `gradle/minecraft.gradle`.
+- The 26.2 module owns editable shared sources. Other modules own native adapters and compile generated copies of inherited sources/resources, keeping IDE source roots unique. Native 1.21.5/1.21.10 adapter names now use their actual API directly instead of requiring generation of editable files.
+- Added version build/run/test/source commands, `prepareIde`, `buildAll`, `checkAll`, `testAll`, `cleanAll`, `releaseAll`, and default-target conveniences. Unqualified `build` builds every version; branch CI uses qualified `:buildSelected` / `:testSelected`.
+- Configured each module's compiler and JavaExec launcher for Java 21 or 25. Existing IntelliJ-downloaded JDKs were detected automatically without the explicit Java installation environment variables.
+- Generated eight Gradle-backed IntelliJ client configurations. Archived obsolete root-module Loom configurations under `build/ide-config-backups`. Development saves are isolated under `run/<minecraft>` and survive cleaning build outputs. A shared Gradle build service serializes graphical clients even under parallel execution.
+- `releaseAll` collects actual verified release artifacts into `build/dist/<mod_version>`, adds SHA-256 checksums and creates the all-version ZIP. Legacy JAR checksums changed after compiling on their native Java 21 JDK; runtime behavior remained covered by the same suites.
+- Validation: all eight `buildAll` targets passed 67 deterministic checks and release guards; all eight `testAll` native clients passed rendering/lifecycle and actual Mod Menu/YACL screen checks. Minecraft 26.2 additionally passed without YACL through the new shortcut command.
+- The actual Gradle IDE model contained root + eight target modules, 50 unique Java source directories, correct Java 21/25 language levels and target-specific Minecraft libraries. Command selection, branch-default patch selection, shared-resource additions/updates, native override precedence and stale-copy removal were checked independently.
+- Full usage and command reference: `docs/IDE_WORKFLOW.md`. Mod version remains 0.8.0.
