@@ -3,19 +3,19 @@
     "minecraft": "1.21.5",
     "target": "1.21.5",
     "jar": "interactivestuff-1.21.5-0.8.0.jar",
-    "sha256": "2c7e1c3c428f35c5b340267f0024ac443fc0eb13d1b7e47777f5e46002c5a90d"
+    "sha256": "1ac0587277af60e88cae30b6c5023a1aed5ac714389e4e594a94aa125692677f"
   },
   {
     "minecraft": "1.21.10",
     "target": "1.21.10",
     "jar": "interactivestuff-1.21.10-0.8.0.jar",
-    "sha256": "b36a8030cf85d534fbf9532e487682e3411210b92590de8515e14a9b92a444d8"
+    "sha256": "81fd1d247ebcba4eb0da9cce8bb1a2a35e35d8dc537f6ac5bf66162c713bf519"
   },
   {
     "minecraft": "1.21.11",
     "target": "1.21.11",
     "jar": "interactivestuff-1.21.11-0.8.0.jar",
-    "sha256": "f87ae2372372e4508f02f592f59a46c96437a5e28707cf93ad308d93adec166b"
+    "sha256": "e1c0496d53077642631ab7e5a4ae54e71d04d87bf46a6aa94041b0b6ee7a0347"
   },
   {
     "minecraft": "26.1",
