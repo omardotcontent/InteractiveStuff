@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java 21 runtime
@@ -20,10 +21,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-      - name: Build and test the branch target
+      - name: Build the branch target
+        run: bash ./gradlew --no-daemon build
+      - name: Test the real client
+        timeout-minutes: 5
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
-        run: xvfb-run -a bash ./gradlew --no-daemon build runClientGameTest
+        run: xvfb-run -a bash ./gradlew --no-daemon runClientGameTest
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
