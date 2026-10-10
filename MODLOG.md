@@ -41,3 +41,9 @@
 
 - GitHub confirmed the 1.21.10 synchronization workaround. 1.21.11 later showed the same initial-world-loading stall despite an earlier successful run; its test profile now uses the same mode and passed local native checks.
 - The 26.3 EGL CI retry reported a missing EGL library. Install libegl1, libegl-mesa0 and libgl1-mesa-dri on the ephemeral runner so it matches the locally verified software renderer.
+
+## 0.8.0 release preparation
+
+- Bumped the shared mod version from 0.7.1 to 0.8.0 to reflect the overhaul since 0.7.0.
+- Added a user-facing changelog and rebuilt the eight supported Minecraft targets.
+- Release artifacts and SHA-256 checksums are generated from the final 0.8.0 builds.
