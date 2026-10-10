@@ -41,3 +41,11 @@ Unknown targets and patches fail at configuration time. Verify each supported pa
 Run `build` for shared regression and distributable checks, then `runClientGameTest` with the target Java runtime and a working display/OpenGL context. Test real native model resolution/submission, native special renderers, tint slots, partial/complementary geometry, both physical arms under either hand identity, matrix/color toggles, copy-on-component changes, config persistence, waits, resource reload and disconnect. Inspect logs for missing mod textures and render fallbacks; compiler success alone does not validate mixin targets.
 
 The suite uses its own automatically reset game directory. It never opens user saves. Keep known results in `docs/MULTIVERSION_VALIDATION.md` and `MODLOG.md`.
+
+## CI client execution
+
+An existing `DISPLAY` disables Loom's extra Xvfb wrapper, so CI uses a single virtual display. The workflow checks builds and client tests separately and bounds client execution to five minutes.
+
+The 1.21.10 profile disables Fabric's test-only packet synchronizer after reproducible initial-world-loading stalls on CI. Assertions still wait for actual native client state; production networking is unaffected. This mode also passed the local native suite.
+
+26.3 requests an accelerated GLX visual, which CI's Mesa software renderer rejects. Linux CI uses SDL's [EGL context path](https://wiki.libsdl.org/SDL3/SDL_HINT_VIDEO_FORCE_EGL); the complete native suite also passed locally on Mesa llvmpipe through this path. Desktop runs retain their default graphics configuration.
