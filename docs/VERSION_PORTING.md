@@ -46,6 +46,6 @@ The suite uses its own automatically reset game directory. It never opens user s
 
 An existing `DISPLAY` disables Loom's extra Xvfb wrapper, so CI uses a single virtual display. The workflow checks builds and client tests separately and bounds client execution to five minutes.
 
-The 1.21.10 profile disables Fabric's test-only packet synchronizer after reproducible initial-world-loading stalls on CI. Assertions still wait for actual native client state; production networking is unaffected. This mode also passed the local native suite.
+The 1.21.10 and 1.21.11 profiles disable Fabric's test-only packet synchronizer after reproducible initial-world-loading stalls on CI. Assertions still wait for actual native client state; production networking is unaffected. Both modes also passed their local native suites.
 
-26.3 requests an accelerated GLX visual, which CI's Mesa software renderer rejects. Linux CI uses SDL's [EGL context path](https://wiki.libsdl.org/SDL3/SDL_HINT_VIDEO_FORCE_EGL); the complete native suite also passed locally on Mesa llvmpipe through this path. Desktop runs retain their default graphics configuration.
+26.3 requests an accelerated GLX visual, which CI's Mesa software renderer rejects. The workflow installs Mesa's EGL loader and driver libraries. Linux CI uses SDL's [EGL context path](https://wiki.libsdl.org/SDL3/SDL_HINT_VIDEO_FORCE_EGL); the complete native suite also passed locally on Mesa llvmpipe through this path. Desktop runs retain their default graphics configuration.
