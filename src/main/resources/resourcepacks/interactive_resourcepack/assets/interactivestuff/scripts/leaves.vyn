@@ -1,7 +1,12 @@
+make textureChangesOption = new ConfigOption("texture_changes", "toggle", true)
+textureChangesOption.setLabel("interactive_stuff.config.menu.pack.textures")
+textureChangesOption.setCategory("interactive_stuff.config.menu.pack.category.effects")
+textureChangesOption.setTooltip("interactive_stuff.config.menu.pack.textures.tooltip")
+
 lock interactiveItems = ["minecraft:grass_block", "minecraft:oak_leaves", "minecraft:spruce_leaves", "minecraft:jungle_leaves", "minecraft:acacia_leaves", "minecraft:dark_oak_leaves"]
 
 task onItemUpdate takes itemRendered do
-    check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
+    check textureChangesOption.getBoolean() && player.getGamemode() != "spectator" do
         check isItemleaves(itemRendered) do
             itemRendered.setItemModel(itemRendered.getName())
 
@@ -9,7 +14,7 @@ task onItemUpdate takes itemRendered do
         end
         check itemRendered.getName() == "minecraft:grass_block" do
             itemRendered.setItemModel(itemRendered.getName())
-            itemRendered.setTint(player.getWorld().getGrassColor(player.getSteppingBlock().getPosition()))
+            itemRendered.setTint(0,player.getWorld().getGrassColor(player.getSteppingBlock().getPosition()))
         end
     end
 end

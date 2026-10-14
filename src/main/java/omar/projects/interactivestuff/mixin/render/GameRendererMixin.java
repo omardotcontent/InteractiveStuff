@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GameRendererMixin {
     @Inject(method = "render", at = @At("HEAD"))
     private void interactivestuff$beginFrame(CallbackInfo ci) {
+        omar.projects.interactivestuff.render.ModelDebugMarkers.clear();
         RenderTickHandler.beginFrame(Minecraft.getInstance().isPaused());
         omar.projects.interactivestuff.particles.ParticleSystem.INSTANCE.beginFrame(RenderTickHandler.normalizedDelta / 3.0);
     }

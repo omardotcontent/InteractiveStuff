@@ -33,12 +33,9 @@ public final class ConfigHandler {
             .registerTypeHierarchyAdapter(Item.class, (JsonDeserializer<Item>) (json, typeOfT, context) -> {
                 final String idStr = json.getAsString();
                 final Identifier id = Identifier.parse(idStr);
-                return BuiltInRegistries.ITEM.get(id)
-                        .map(net.minecraft.core.Holder.Reference::value)
-                        .orElseGet(() -> {
-                            System.err.println("[InteractiveStuff] Unknown item id in config, skipping: " + idStr);
-                            return null;
-                        });
+                Item item = omar.projects.interactivestuff.compat.MinecraftRegistries.item(id);
+                if (item == null) System.err.println("[InteractiveStuff] Unknown item id in config, skipping: " + idStr);
+                return item;
             }).create();
 
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("interactivestuff.json");
@@ -46,15 +43,13 @@ public final class ConfigHandler {
 
 
     public boolean enableInteractiveHits = true;
-    public boolean specializedNoteblockHits = true;
-    public boolean enableSculkSensorFeature = true;
-    public boolean enableNoteBlockCrouchFeature = true;
-    public boolean enableTextureChanges = true;
     public int HitCooldownTicks = 4;
 
     public boolean resourcePackDebugMode = false;
     public boolean resourcePackMatrixEditing = true;
     public boolean resourcePackColorChanging = true;
+    public boolean menuAnimations = true;
+    public Map<String, Map<String, Object>> packOptionValues = new LinkedHashMap<>();
     public boolean enableParticles = true;
     public int particleDensity = 100;
     public int particleLimit = 512;
@@ -72,25 +67,19 @@ public final class ConfigHandler {
     public void reload() {
         final ConfigHandler loaded = load();
 
-        this.specializedNoteblockHits = loaded.specializedNoteblockHits;
-        this.enableNoteBlockCrouchFeature = loaded.enableNoteBlockCrouchFeature;
-        this.enableSculkSensorFeature = loaded.enableSculkSensorFeature;
+        copyFrom(loaded);
+        omar.projects.interactivestuff.config.PackOptions.commit(packOptionValues);
+    }
 
-        this.resourcePackMatrixEditing = loaded.resourcePackMatrixEditing;
-        this.resourcePackColorChanging = loaded.resourcePackColorChanging;
-        this.resourcePackDebugMode = loaded.resourcePackDebugMode;
-        this.enableParticles = loaded.enableParticles;
-        this.particleDensity = loaded.particleDensity;
-        this.particleLimit = loaded.particleLimit;
-        this.particleDebugCounters = loaded.particleDebugCounters;
-        this.particleEmitterMarkers = loaded.particleEmitterMarkers;
+    /** Gson uses the same item adapters for drafts as it does for the on-disk format. */
+    public ConfigHandler copy() { return GSON.fromJson(GSON.toJson(this), ConfigHandler.class); }
 
-        this.enableInteractiveHits = loaded.enableInteractiveHits;
-        this.enableTextureChanges = loaded.enableTextureChanges;
-        this.HitCooldownTicks = loaded.HitCooldownTicks;
-        this.excludedBlocks = loaded.excludedBlocks;
-        this.materials = loaded.materials;
-
+    public void copyFrom(ConfigHandler source) {
+        ConfigHandler copy = source.copy();
+        try {
+            for (var field : ConfigHandler.class.getFields())
+                if (!java.lang.reflect.Modifier.isStatic(field.getModifiers())) field.set(this, field.get(copy));
+        } catch (IllegalAccessException impossible) { throw new IllegalStateException(impossible); }
         refreshCache();
     }
 
@@ -107,7 +96,7 @@ public final class ConfigHandler {
     public static ConfigHandler load() {
         if (Files.exists(CONFIG_PATH)) {
             try (final Reader reader = Files.newBufferedReader(CONFIG_PATH, StandardCharsets.UTF_8)) {
-                final ConfigHandler loaded = GSON.fromJson(reader, ConfigHandler.class);
+                final ConfigHandler loaded = readConfig(reader);
                 if (loaded != null) {
                     loaded.refreshCache();
                     return loaded;
@@ -135,7 +124,7 @@ public final class ConfigHandler {
             }
 
             try (final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-                final ConfigHandler defaults = GSON.fromJson(reader, ConfigHandler.class);
+                final ConfigHandler defaults = readConfig(reader);
                 if (defaults != null) {
                     defaults.refreshCache();
                     return defaults;
@@ -149,7 +138,22 @@ public final class ConfigHandler {
         return null;
     }
 
+    private static ConfigHandler readConfig(Reader reader) {
+        JsonElement json = JsonParser.parseReader(reader);
+        final ConfigHandler loaded = GSON.fromJson(json, ConfigHandler.class);
+        if (loaded != null && json.isJsonObject()) {
+            if (loaded.packOptionValues == null) loaded.packOptionValues = new LinkedHashMap<>();
+            omar.projects.interactivestuff.config.LegacyPackOptions.migrate(json.getAsJsonObject(), loaded.packOptionValues);
+        }
+        return loaded;
+    }
+
     public void save() {
+        try { saveChecked(); } catch (Exception error) { IS.LOGGER.error("Failed to save config", error); }
+    }
+
+    /** A screen can report failure and retain its draft instead of closing as if saved. */
+    public void saveChecked() throws java.io.IOException {
         refreshCache();
         Path temporary = null;
         try {
@@ -163,8 +167,6 @@ public final class ConfigHandler {
             } catch (AtomicMoveNotSupportedException unsupported) {
                 Files.move(temporary, CONFIG_PATH, StandardCopyOption.REPLACE_EXISTING);
             }
-        } catch (Exception error) {
-            IS.LOGGER.error("Failed to save config", error);
         } finally {
             if (temporary != null) {
                 try { Files.deleteIfExists(temporary); }
@@ -175,6 +177,7 @@ public final class ConfigHandler {
 
     public void refreshCache() {
         itemLookupCache.clear();
+        if (packOptionValues == null) packOptionValues = new LinkedHashMap<>();
         HitCooldownTicks = Math.max(0, HitCooldownTicks);
         particleDensity = Math.max(0, Math.min(200, particleDensity));
         particleLimit = Math.max(0, Math.min(4096, particleLimit));

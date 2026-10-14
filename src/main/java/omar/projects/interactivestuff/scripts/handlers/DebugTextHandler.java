@@ -16,8 +16,8 @@ public final class DebugTextHandler {
         var result = new ArrayList<String>();
         if (config.resourcePackDebugMode) result.addAll(renderedTexts);
         var particles = omar.projects.interactivestuff.particles.ParticleSystem.INSTANCE;
-        result.add("IS particles: " + particles.getCount() + "/" + config.particleLimit
-                + "  emitters: " + particles.getEmitterCount() + "  dropped: " + particles.getDroppedCount());
+        result.add(omar.projects.interactivestuff.handlers.config.SettingsText.text("debug.counters",
+                particles.getCount(), config.particleLimit, particles.getEmitterCount(), particles.getDroppedCount()));
         return result;
     }
     public void addText(String text) { textBuffer.add(text); }

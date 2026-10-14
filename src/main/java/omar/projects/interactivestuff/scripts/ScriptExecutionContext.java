@@ -25,7 +25,9 @@ public final class ScriptExecutionContext {
         if (owner == null) return action;
         long generation = owner.getGeneration();
         return () -> {
-            if (owner.getState() != Script.State.LOADED || generation != owner.getGeneration()) return;
+            // Config-only scripts remain importable but can own committed change callbacks.
+            if ((owner.getState() != Script.State.LOADED && owner.getState() != Script.State.IMPORTABLE)
+                    || generation != owner.getGeneration()) return;
             try {
                 run(owner, action);
             } catch (Exception error) {

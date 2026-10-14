@@ -9,6 +9,7 @@ import org.joml.Matrix4fc;
 public final class ParticleView {
     private ParticleView() {}
     public static Matrix4f capture(Matrix4fc model) {
+        ParticleCameraCapture.update();
         return new Matrix4f(RenderSystem.getModelViewStack()).mul(model);
     }
     public static PoseStack pose() {

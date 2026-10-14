@@ -23,6 +23,7 @@ public final class MinecraftAccess {
     public static boolean isInClouds(LocalPlayer player) { return player.isInClouds(); }
     public static Screen screen(Minecraft client) { return client.gui.screen(); }
     public static Camera camera(Minecraft client) { return client.gameRenderer.mainCamera(); }
+    public static net.minecraft.world.phys.Vec3 cameraPosition(Camera camera) { return camera.position(); }
     public static int permissionLevel(LocalPlayer player) {
         return player == null ? 0 : player.getPermissionContext().permissionLevel().id();
     }

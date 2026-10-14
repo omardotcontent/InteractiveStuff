@@ -1,7 +1,21 @@
+make sculkEnabledOption = new ConfigOption("sculk_sensors", "toggle", true)
+sculkEnabledOption.setLabel("interactive_stuff.config.menu.pack.sculk")
+sculkEnabledOption.setCategory("interactive_stuff.config.menu.pack.category.sculk")
+sculkEnabledOption.setTooltip("interactive_stuff.config.menu.pack.sculk.tooltip")
+
 lock interactiveItems = ["minecraft:sculk_sensor", "minecraft:calibrated_sculk_sensor"]
 
+make sculkParticleOption = new ConfigOption("sculk_particles", "toggle", true)
+sculkParticleOption.setLabel("interactive_stuff.config.menu.pack.sculk_particles")
+sculkParticleOption.setCategory("interactive_stuff.config.menu.pack.category.sculk")
+sculkParticleOption.setTooltip("interactive_stuff.config.menu.pack.sculk_particles.tooltip")
+make sculkBurstOption = new ConfigOption("sculk_burst", "number", 6)
+sculkBurstOption.setLabel("interactive_stuff.config.menu.pack.sculk_burst")
+sculkBurstOption.setCategory("interactive_stuff.config.menu.pack.category.sculk")
+sculkBurstOption.setRange(0, 32, 1)
+
 make sculkParticles = new ParticleEmitter("minecraft:smoke")
-sculkParticles.setPosition(0.5, 0.78, 0.5)
+sculkParticles.setPosition(0.5, 0.7, 0.5)
 sculkParticles.setSpread(0.28, 0.06, 0.28)
 sculkParticles.setLifetime(16)
 sculkParticles.setVelocity(0, 0.01, 0)
@@ -9,7 +23,7 @@ sculkParticles.setVelocitySpread(0.012, 0.004, 0.012)
 sculkParticles.setSizeOverLife(0.025, 0.065, "easeOutCubic")
 sculkParticles.setOpacityOverLife(0.9, 0, "easeInQuad")
 sculkParticles.setLight(15)
-sculkParticles.setAttached(true)
+sculkParticles.setSpace("world")
 sculkParticles.setColor(27,111,117)
 sculkParticles.setColorOverLife(27,111,117, 255, 0, 10, "easeInQuad")
 
@@ -28,7 +42,7 @@ lock IGNORED_SOUND_IDS = new List
 IGNORED_SOUND_IDS.add("minecraft:block.sculk_sensor.clicking", "minecraft:block.sculk_sensor.clicking_stop", "minecraft:block.wool.fall", "minecraft:block.wool.break", "minecraft:block.wool.place", "minecraft:block.wool.step", "minecraft:block.wool.hit")
 
 task onTick do
-    check config.isSculkSensorFeatureEnabled() && player.isFirstPerson() do
+    check sculkEnabledOption.getBoolean() && player.isFirstPerson() do
         make isOnGround = player.isOnGround()
         check !wasOnGround && isOnGround do
             handleLanding()
@@ -46,7 +60,7 @@ task handleLanding do
 end
 
 task onPlaySound takes sound do
-    check config.isSculkSensorFeatureEnabled() && player.isFirstPerson() do
+    check sculkEnabledOption.getBoolean() && player.isFirstPerson() do
         check !IGNORED_SOUND_IDS.contains(sound.getName()) do
             processVibration(sound.getPosition())
         end
@@ -70,7 +84,9 @@ task handleSensor takes distance do
     check !vibrating do
         check distance <= RANGE_NORMAL do
             make vibrating = true
-            sculkParticles.burst(6)
+            check sculkParticleOption.getBoolean() do
+                sculkParticles.burst(sculkBurstOption.getNumber())
+            end
             player.playSound("minecraft:block.sculk_sensor.clicking", 1.0, 1.0)
             pulse()
             wait COOLDOWN_NORMAL do
@@ -87,7 +103,9 @@ task handleCalibratedSensor takes distance do
     check !calibratedVibrating do
         check distance <= RANGE_CALIBRATED do
             make calibratedVibrating = true
-            sculkParticles.burst(6)
+            check sculkParticleOption.getBoolean() do
+                sculkParticles.burst(sculkBurstOption.getNumber())
+            end
             player.playSound("minecraft:block.sculk_sensor.clicking", 1.0, 1.0)
             pulse()
             wait COOLDOWN_CALIBRATED do
@@ -101,16 +119,10 @@ task handleCalibratedSensor takes distance do
 end
 
 task onItemUpdate takes itemRendered do
-    check !config.isSculkSensorFeatureEnabled() || player.getGamemode() == "spectator" do
+    check !sculkEnabledOption.getBoolean() || player.getGamemode() == "spectator" do
         reply nothing
     end
     sculkParticles.setRate(0)
-    check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do
-        sculkParticles.setRate(0.3)
-    end
-    check calibratedVibrating && itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
-        sculkParticles.setRate(0.3)
-    end
     sculkParticles.attach(itemRendered)
 	check itemRendered.getName() == "minecraft:sculk_sensor" || itemRendered.getName() == "minecraft:calibrated_sculk_sensor" do
 		check vibrating && itemRendered.getName() == "minecraft:sculk_sensor" do

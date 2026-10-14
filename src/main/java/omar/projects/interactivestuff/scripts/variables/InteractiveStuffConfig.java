@@ -3,9 +3,15 @@ package omar.projects.interactivestuff.scripts.variables;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import omar.projects.interactivestuff.handlers.config.ConfigHandler;
+import omar.projects.interactivestuff.config.PackOptions;
+import omar.projects.interactivestuff.scripts.ScriptExecutionContext;
 
 @VynType(name = "InteractiveStuffConfig")
 public final class InteractiveStuffConfig {
+    private static boolean packToggle(String id) {
+        var owner = ScriptExecutionContext.current();
+        return owner == null || PackOptions.toggleValue(owner.getPackId(), id, true);
+    }
     @VynFunc public boolean isParticlesEnabled() { return ConfigHandler.INSTANCE.enableParticles; }
     @VynFunc public int getParticleLimit() { return ConfigHandler.INSTANCE.particleLimit; }
     @VynFunc public int getParticleDensity() { return ConfigHandler.INSTANCE.particleDensity; }
@@ -18,9 +24,10 @@ public final class InteractiveStuffConfig {
         return ConfigHandler.INSTANCE.enableInteractiveHits;
     }
 
-    @VynFunc
+    /** @deprecated Declare and read a pack-owned ConfigOption instead. */
+    @Deprecated @VynFunc
     public boolean isSculkSensorFeatureEnabled() {
-        return ConfigHandler.INSTANCE.enableSculkSensorFeature;
+        return packToggle("sculk_sensors");
     }
 
     @VynFunc
@@ -28,14 +35,16 @@ public final class InteractiveStuffConfig {
         return ConfigHandler.INSTANCE.HitCooldownTicks;
     }
 
-    @VynFunc
+    /** @deprecated Declare and read a pack-owned ConfigOption instead. */
+    @Deprecated @VynFunc
     public boolean isTextureChangesEnabled() {
-        return ConfigHandler.INSTANCE.enableTextureChanges;
+        return packToggle("texture_changes");
     }
 
-    @VynFunc
+    /** @deprecated Declare and read a pack-owned ConfigOption instead. */
+    @Deprecated @VynFunc
     public boolean isNoteBlockCrouchFeatureEnabled() {
-        return ConfigHandler.INSTANCE.enableNoteBlockCrouchFeature;
+        return packToggle("note_block_crouch");
     }
 
     @VynFunc
@@ -43,9 +52,10 @@ public final class InteractiveStuffConfig {
         return ConfigHandler.INSTANCE.HitCooldownTicks;
     }
 
-    @VynFunc
+    /** @deprecated Declare and read a pack-owned ConfigOption instead. */
+    @Deprecated @VynFunc
     public boolean isSpecializedNoteblockHitsEnabled() {
-        return ConfigHandler.INSTANCE.specializedNoteblockHits;
+        return packToggle("note_block_hits");
     }
 
     @VynFunc

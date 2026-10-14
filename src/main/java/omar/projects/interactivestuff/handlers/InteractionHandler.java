@@ -2,7 +2,6 @@ package omar.projects.interactivestuff.handlers;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -40,9 +39,9 @@ public final class InteractionHandler {
             return;
         }
 
-        final MobEffectInstance haste = player.getEffect(MobEffects.HASTE);
+        final int haste = omar.projects.interactivestuff.compat.MinecraftBindings.haste(player);
         final MobEffectInstance conduit = player.getEffect(MobEffects.CONDUIT_POWER);
-        final int amplifier = (haste != null ? haste.getAmplifier() + 1 : 0) + (conduit != null ? conduit.getAmplifier() + 1 : 0);
+        final int amplifier = haste + (conduit != null ? conduit.getAmplifier() + 1 : 0);
 
         BackgroundLoopHandler.getInstance().waitTicks(COOLDOWN_ID, Math.max(0, (ConfigHandler.INSTANCE.HitCooldownTicks) - amplifier), () -> {});
 
@@ -51,7 +50,7 @@ public final class InteractionHandler {
             return;
         }
 
-        if (player.isSpectator() || player.gameMode() == GameType.ADVENTURE) {
+        if (player.isSpectator() || omar.projects.interactivestuff.compat.MinecraftBindings.gameMode(player) == GameType.ADVENTURE) {
             return;
         }
 
@@ -72,7 +71,7 @@ public final class InteractionHandler {
         final float basePitch = material.getPitch(stack);
         final float pitch = material.randomPitch ? basePitch + (RANDOM.nextFloat() * 1.5F) : basePitch;
 
-        client.level.playPlayerSound(material.getSoundEvent(), SoundSource.BLOCKS, material.volume, pitch);
+        omar.projects.interactivestuff.compat.MinecraftBindings.playInteractionSound(client, material.getSoundEvent(), material.volume, pitch);
     }
 
 }

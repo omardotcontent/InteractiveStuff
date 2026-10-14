@@ -1,6 +1,5 @@
 package omar.projects.interactivestuff.render;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -15,19 +14,25 @@ import java.util.List;
 /** Small native boundary; submitted geometry retains immutable per-frame particle snapshots. */
 public final class MinecraftParticleRenderer {
     private MinecraftParticleRenderer() {}
-    public static void clearCaches() { ParticleTextures.clear(); }
+    public static void clearCaches() { ParticleTextures.clear(); ModelDebugMarkers.clear(); }
     public static void submit(SubmitNodeCollector queue) {
         var client = Minecraft.getInstance();
         var config = ConfigHandler.INSTANCE;
-        if (!config.enableParticles || client.player == null || !client.options.getCameraType().isFirstPerson()) return;
+        if (client.player == null || !client.options.getCameraType().isFirstPerson()) return;
+        ParticleCameraCapture.update();
         var pose = ParticleView.pose();
         var batches = new LinkedHashMap<RenderType, List<ParticleSystem.DrawParticle>>();
-        for (var particle : ParticleSystem.INSTANCE.snapshot(config.particleEmitterMarkers)) {
-            RenderType type = particle.marker() ? RenderTypes.debugQuads() : particle.depth()
+        var draws = new java.util.ArrayList<ParticleSystem.DrawParticle>();
+        if (config.enableParticles) draws.addAll(ParticleSystem.INSTANCE.snapshot(config.particleEmitterMarkers));
+        if (config.resourcePackDebugMode) draws.addAll(ModelDebugMarkers.snapshot());
+        for (var particle : draws) {
+            RenderType type = particle.marker() ? RenderTypes.textSeeThrough(ParticleTextures.MARKER) : particle.depth()
                     ? RenderTypes.text(ParticleTextures.texture(particle)) : RenderTypes.textSeeThrough(ParticleTextures.texture(particle));
             batches.computeIfAbsent(type, ignored -> new ArrayList<>()).add(particle);
         }
-        batches.forEach((type, particles) -> queue.submitCustomGeometry(pose, type, (matrix, vertices) -> {
+        // Custom geometry in the item bucket can be consumed before its solid models.
+        var effects = queue.order(1);
+        batches.forEach((type, particles) -> effects.submitCustomGeometry(pose, type, (matrix, vertices) -> {
             for (var particle : particles) ParticleGeometry.draw(particle, matrix, vertices);
         }));
     }

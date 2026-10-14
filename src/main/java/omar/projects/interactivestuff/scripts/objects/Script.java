@@ -18,6 +18,8 @@ import java.util.function.Supplier;
 /** Parsed code is reusable; runtime state belongs to one resource-pack script and one session. */
 public final class Script {
     private final String filename;
+    private final String packId;
+    private final String scriptName;
     private final String code;
     private final Supplier<Environment> environmentFactory;
     private final Consumer<String> errors;
@@ -30,8 +32,14 @@ public final class Script {
     private long generation;
 
     public Script(String code, String filename, Supplier<Environment> environmentFactory, Consumer<String> errors) {
+        this(code, "standalone", filename, environmentFactory, errors);
+    }
+
+    public Script(String code, String packId, String scriptName, Supplier<Environment> environmentFactory, Consumer<String> errors) {
         this.code = code;
-        this.filename = filename;
+        this.packId = packId;
+        this.scriptName = scriptName;
+        this.filename = packId + "/" + scriptName;
         this.environmentFactory = environmentFactory;
         this.errors = errors;
     }
@@ -128,6 +136,20 @@ public final class Script {
         java.util.Arrays.fill(callables, null);
     }
 
+    /** Callbacks are isolated to the same script generation as their declaration. */
+    public void callTask(String name, Object... arguments) {
+        if (state != State.LOADED && state != State.IMPORTABLE) return;
+        try {
+            ScriptExecutionContext.run(this, () -> {
+                if (!environment.hasFunction(name)) throw new IllegalArgumentException("Missing config callback task: " + name);
+                environment.getFunction(name).call(environment, java.util.Arrays.stream(arguments)
+                        .map(argument -> NativeBinder.toValue(environment, argument)).toList());
+            });
+        } catch (Exception error) { fail("config " + name, error); }
+    }
+
+    public String getPackId() { return packId; }
+    public String getScriptName() { return scriptName; }
     public long getGeneration() { return generation; }
 
     public State getState() { return state; }

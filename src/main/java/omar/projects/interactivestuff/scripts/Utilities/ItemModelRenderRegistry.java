@@ -10,6 +10,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.Collections;
 import java.util.function.Supplier;
 import org.joml.Matrix4f;
 
@@ -41,6 +43,12 @@ public final class ItemModelRenderRegistry {
         scope.particles.add(new ParticleBinding(emitter, item));
     }
 
+    /** Keep only the final pivot for each model in this item-render scope. */
+    public static void pivot(ItemModel model) {
+        Scope scope = SCOPES.get().peek();
+        if (scope != null) scope.pivots.add(model);
+    }
+
     public record ParticleBinding(ParticleEmitter emitter, ItemModel item) {}
 
     public static final class Scope implements AutoCloseable {
@@ -48,6 +56,7 @@ public final class ItemModelRenderRegistry {
         private final boolean mainHand;
         private final List<ItemModel> models = new ArrayList<>();
         private final List<ParticleBinding> particles = new ArrayList<>();
+        private final Set<ItemModel> pivots = Collections.newSetFromMap(new IdentityHashMap<>());
         private final Map<ItemModel, Matrix4f> anchors = new IdentityHashMap<>();
         private boolean closed;
 
@@ -58,6 +67,7 @@ public final class ItemModelRenderRegistry {
 
         public List<ItemModel> models() { return models; }
         public List<ParticleBinding> particles() { return particles; }
+        public Set<ItemModel> pivots() { return pivots; }
         public Matrix4f anchor(ItemModel model, Supplier<Matrix4f> resolve) {
             return anchors.computeIfAbsent(model, ignored -> resolve.get());
         }
@@ -70,6 +80,7 @@ public final class ItemModelRenderRegistry {
             scopes.pop();
             models.clear();
             particles.clear();
+            pivots.clear();
             anchors.clear();
             if (scopes.isEmpty()) SCOPES.remove();
         }

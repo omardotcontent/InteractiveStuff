@@ -41,7 +41,10 @@ public abstract class HeldItemRendererMixin {
             for (var binding : scope.particles()) {
                 var model = binding.item();
                 omar.projects.interactivestuff.particles.ParticleSystem.INSTANCE.bind(binding.emitter(), mainHand,
-                        stack.getItem().toString(), scope.anchor(model, () -> MinecraftItemRenderer.anchor(model, itemModelResolver, entity, mode, matrices)), light);
+                        net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString(), scope.anchor(model, () -> MinecraftItemRenderer.anchor(model, itemModelResolver, entity, mode, matrices)), light);
+            }
+            for (var model : scope.pivots()) {
+                omar.projects.interactivestuff.render.ModelDebugMarkers.capture(model, matrices);
             }
             // Extra-only callbacks must keep the original item visible through Minecraft's normal renderer.
             if (item != null) ci.cancel();

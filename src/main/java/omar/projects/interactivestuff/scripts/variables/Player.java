@@ -99,7 +99,7 @@ public final class Player {
 
     @VynFunc
     public String getGamemode() {
-        return (player != null && player.gameMode() != null) ? player.gameMode().getName() : null;
+        return (player != null && omar.projects.interactivestuff.compat.MinecraftBindings.gameMode(player) != null) ? omar.projects.interactivestuff.compat.MinecraftBindings.gameMode(player).getName() : null;
     }
 
     @VynFunc
@@ -130,13 +130,13 @@ public final class Player {
 
     @VynFunc
     public ItemModel getBlockingItem() {
-        return livingEntity != null && livingEntity.getItemBlockingWith() != null
-                ? new ItemModel(livingEntity.getItemBlockingWith()) : null;
+        return livingEntity != null && omar.projects.interactivestuff.compat.MinecraftBindings.blockingItem(livingEntity) != null
+                ? new ItemModel(omar.projects.interactivestuff.compat.MinecraftBindings.blockingItem(livingEntity)) : null;
     }
 
     @VynFunc
     public ItemModel getWeaponItem() {
-        return (livingEntity != null) ? new ItemModel(livingEntity.getWeaponItem()) : null;
+        return (livingEntity != null) ? new ItemModel(omar.projects.interactivestuff.compat.MinecraftBindings.weaponItem(livingEntity)) : null;
     }
 
     @VynFunc
@@ -161,7 +161,7 @@ public final class Player {
 
     @VynFunc
     public float getNauseaIntensity() {
-        return player != null ? player.portalEffectIntensity : 0.0f;
+        return player != null ? omar.projects.interactivestuff.compat.MinecraftBindings.nausea(player) : 0.0f;
     }
 
     @VynFunc
@@ -254,8 +254,7 @@ public final class Player {
             nearbyQueries.clear();
         }
         return nearbyQueries.computeIfAbsent(new NearbyQuery(blockId, radius), query -> {
-            var block = BuiltInRegistries.BLOCK.get(Identifier.parse(query.blockId()))
-                    .map(net.minecraft.core.Holder.Reference::value).orElse(null);
+            var block = omar.projects.interactivestuff.compat.MinecraftRegistries.block(Identifier.parse(query.blockId()));
             if (block == null) return false;
             BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
             for (int x = -radius; x <= radius; x++)
@@ -303,7 +302,7 @@ public final class Player {
 
     @VynFunc
     public boolean isInFluid() {
-        return player != null && player.isInLiquid();
+        return player != null && omar.projects.interactivestuff.compat.MinecraftBindings.inLiquid(player);
     }
 
     @VynFunc
@@ -408,7 +407,7 @@ public final class Player {
 
     @VynFunc
     public boolean isLimitedCraftingEnabled() {
-        return player != null && player.getDoLimitedCrafting();
+        return player != null && omar.projects.interactivestuff.compat.MinecraftBindings.limitedCrafting(player);
     }
 
     @VynFunc
@@ -510,7 +509,7 @@ public final class Player {
 
     @VynFunc
     public boolean hasLandedInFluid() {
-        return livingEntity != null && livingEntity.hasLandedInLiquid();
+        return livingEntity != null && omar.projects.interactivestuff.compat.MinecraftBindings.landedInLiquid(livingEntity);
     }
 
     @VynFunc
@@ -520,7 +519,7 @@ public final class Player {
 
     @VynFunc
     public float getScaleFactor() {
-        return livingEntity != null ? livingEntity.getAgeScale() : 1.0f;
+        return livingEntity != null ? omar.projects.interactivestuff.compat.MinecraftBindings.ageScale(livingEntity) : 1.0f;
     }
 
     @VynFunc
@@ -530,7 +529,7 @@ public final class Player {
 
     @VynFunc
     public boolean shouldSwimInFluids() {
-        return livingEntity != null && livingEntity.isAffectedByFluids();
+        return livingEntity != null && omar.projects.interactivestuff.compat.MinecraftBindings.affectedByFluids(livingEntity);
     }
 
     @VynFunc
@@ -550,7 +549,7 @@ public final class Player {
 
     @VynFunc
     public float getLuck() {
-        return livingEntity != null ? livingEntity.getLuck() : 0.0f;
+        return livingEntity != null ? omar.projects.interactivestuff.compat.MinecraftBindings.luck(livingEntity) : 0.0f;
     }
 
     @VynFunc
@@ -560,7 +559,7 @@ public final class Player {
 
     @VynFunc
     public float getMaxAbsorption() {
-        return livingEntity != null ? livingEntity.getMaxAbsorption() : 0.0f;
+        return livingEntity != null ? omar.projects.interactivestuff.compat.MinecraftBindings.maxAbsorption(livingEntity) : 0.0f;
     }
 
     @VynFunc
@@ -597,7 +596,7 @@ public final class Player {
     @VynFunc
     public void playSound(final String soundId, final double volume, final double pitch) {
         if (player != null) {
-            player.playSound(BuiltInRegistries.SOUND_EVENT.get(Identifier.parse(soundId)).orElseThrow().value(), (float) volume, (float) pitch);
+            player.playSound(java.util.Optional.ofNullable(omar.projects.interactivestuff.compat.MinecraftRegistries.sound(Identifier.parse(soundId))).orElseThrow(), (float) volume, (float) pitch);
         }
     }
 
@@ -606,7 +605,7 @@ public final class Player {
         if (player == null) {
             return;
         }
-        player.playSound(BuiltInRegistries.SOUND_EVENT.get(Identifier.parse(sound.getName())).orElseThrow().value(), (float) sound.getVolume(), (float) sound.getPitch());
+        player.playSound(java.util.Optional.ofNullable(omar.projects.interactivestuff.compat.MinecraftRegistries.sound(Identifier.parse(sound.getName()))).orElseThrow(), (float) sound.getVolume(), (float) sound.getPitch());
     }
 
     @VynFunc
@@ -618,7 +617,7 @@ public final class Player {
                 position.getX(),
                 position.getY(),
                 position.getZ(),
-                BuiltInRegistries.SOUND_EVENT.get(Identifier.parse(soundId)).orElseThrow().value(),
+                java.util.Optional.ofNullable(omar.projects.interactivestuff.compat.MinecraftRegistries.sound(Identifier.parse(soundId))).orElseThrow(),
                 SoundSource.BLOCKS,
                 (float) volume,
                 (float) pitch,
@@ -634,7 +633,7 @@ public final class Player {
                 position.getX(),
                 position.getY(),
                 position.getZ(),
-                BuiltInRegistries.SOUND_EVENT.get(Identifier.parse(sound.getName())).orElseThrow().value(),
+                java.util.Optional.ofNullable(omar.projects.interactivestuff.compat.MinecraftRegistries.sound(Identifier.parse(sound.getName()))).orElseThrow(),
                 SoundSource.BLOCKS,
                 (float) sound.getVolume(),
                 (float) sound.getPitch(),

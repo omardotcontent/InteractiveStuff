@@ -27,7 +27,7 @@ public final class ParticleGeometry {
     private static void vertex(DrawParticle particle, PoseStack.Pose pose, VertexConsumer vertices,
                                float x, float y, float cosine, float sine, float u, float v) {
         var position = particle.position();
-        vertices.addVertex(pose, position.x + x * cosine - y * sine, position.y + x * sine + y * cosine, position.z)
-                .setColor(particle.color()).setUv(u, v).setLight(particle.light());
+        ParticleVertex.write(vertices, pose, position.x + x * cosine - y * sine,
+                position.y + x * sine + y * cosine, position.z, particle.color(), u, v, particle.light());
     }
 }

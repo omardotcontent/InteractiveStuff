@@ -3,9 +3,11 @@ package omar.projects.interactivestuff.scripts.variables;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import omar.projects.interactivestuff.particles.ParticleCurve;
+import omar.projects.interactivestuff.particles.ParticleCamera;
 import omar.projects.interactivestuff.particles.ParticleStyle;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector3d;
 
 @VynType(name = "Particle")
 public final class Particle {
@@ -13,12 +15,17 @@ public final class Particle {
     public final double lifetime;
     public final int variant;
     public final boolean mainHand;
+    private final double spawnX, spawnY, spawnZ;
     public double x, y, z, previousX, previousY, previousZ, velocityX, velocityY, velocityZ;
     public double age;
     private boolean alive = true;
     private Matrix4f finishedAnchor;
 
     public Particle(ParticleStyle style, java.util.Random random, Matrix4f anchor, boolean mainHand) {
+        this(style, random, anchor, mainHand, ParticleCamera.IDENTITY);
+    }
+
+    public Particle(ParticleStyle style, java.util.Random random, Matrix4f anchor, boolean mainHand, ParticleCamera camera) {
         this.style = style;
         this.mainHand = mainHand;
         lifetime = Math.max(1, style.lifetime + jitter(random, style.lifetimeSpread));
@@ -28,12 +35,17 @@ public final class Particle {
         velocityY = style.velocityY + jitter(random, style.velocitySpreadY);
         velocityZ = style.velocityZ + jitter(random, style.velocitySpreadZ);
         if (!style.attached) {
-            var point = anchor.transformPosition(new Vector3f((float) x, (float) y, (float) z));
-            var velocity = anchor.transformDirection(new Vector3f((float) velocityX, (float) velocityY, (float) velocityZ));
+            var point = new Vector3d(x, y, z).mulPosition(anchor);
+            var velocity = new Vector3d(velocityX, velocityY, velocityZ).mulDirection(anchor);
+            if (style.worldSpace) {
+                point = camera.toWorld(point.x, point.y, point.z);
+                velocity = camera.directionToWorld(velocity.x, velocity.y, velocity.z);
+            }
             x = point.x; y = point.y; z = point.z;
             velocityX = velocity.x; velocityY = velocity.y; velocityZ = velocity.z;
         }
         previousX = x; previousY = y; previousZ = z;
+        spawnX = x; spawnY = y; spawnZ = z;
     }
 
     private static double jitter(java.util.Random random, double amount) { return (random.nextDouble() * 2 - 1) * amount; }
@@ -50,8 +62,18 @@ public final class Particle {
     }
 
     public Vector3f position(Matrix4f anchor, double interpolation) {
-        var position = new Vector3f((float) (previousX + (x - previousX) * interpolation),
-                (float) (previousY + (y - previousY) * interpolation), (float) (previousZ + (z - previousZ) * interpolation));
+        return position(anchor, interpolation, ParticleCamera.IDENTITY);
+    }
+
+    public Vector3f position(Matrix4f anchor, double interpolation, ParticleCamera camera) {
+        double px = previousX + (x - previousX) * interpolation;
+        double py = previousY + (y - previousY) * interpolation;
+        double pz = previousZ + (z - previousZ) * interpolation;
+        if (style.worldSpace) {
+            var view = camera.toView(px, py, pz);
+            return new Vector3f((float) view.x, (float) view.y, (float) view.z);
+        }
+        var position = new Vector3f((float) px, (float) py, (float) pz);
         return style.attached ? (finishedAnchor == null ? anchor : finishedAnchor).transformPosition(position) : position;
     }
 
@@ -66,6 +88,9 @@ public final class Particle {
     @VynFunc public double getX() { return x; }
     @VynFunc public double getY() { return y; }
     @VynFunc public double getZ() { return z; }
+    @VynFunc public double getSpawnX() { return spawnX; }
+    @VynFunc public double getSpawnY() { return spawnY; }
+    @VynFunc public double getSpawnZ() { return spawnZ; }
     @VynFunc public boolean isAlive() { return alive; }
     @VynFunc public boolean isMainHand() { return mainHand; }
     @VynFunc public boolean isOffHand() { return !mainHand; }

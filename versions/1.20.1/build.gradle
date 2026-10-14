@@ -1,0 +1,2 @@
+// Shared build, with a dedicated legacy native boundary.
+apply from: rootProject.file('gradle/minecraft.gradle')

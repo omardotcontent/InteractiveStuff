@@ -37,7 +37,7 @@ def delegateTask = { String taskName, String module, String action, String taskD
 }
 minecraftTargets.each { target ->
     delegateTask("build${target.suffix}", target.module, 'build', "Builds and checks Minecraft ${target.module}.")
-    delegateTask("run${target.suffix}", target.module, 'runClient', "Launches Minecraft ${target.module} with IS, Mod Menu and YACL.")
+    delegateTask("run${target.suffix}", target.module, 'runClient', "Launches Minecraft ${target.module} with IS and optional Mod Menu.")
     delegateTask("test${target.suffix}", target.module, 'runClientGameTest', "Runs the real client tests on Minecraft ${target.module}.")
     delegateTask("sources${target.suffix}", target.module, 'genSources', "Generates Minecraft ${target.module} sources for browsing in the IDE.")
 }
@@ -52,11 +52,11 @@ def aggregate = { String taskName, String action, String taskDescription ->
         dependsOn minecraftTargets.collect { ":${it.module}:${action}" }
     }
 }
-aggregate('buildAll', 'build', 'Builds and checks all eight Minecraft releases.')
+aggregate('buildAll', 'build', 'Builds and checks all supported Minecraft releases.')
 aggregate('checkAll', 'check', 'Runs shared regression and release-JAR checks for every target.')
 aggregate('testAll', 'runClientGameTest', 'Runs all real-client tests sequentially; needs a graphics display.')
 aggregate('cleanAll', 'clean', 'Deletes target build outputs; keeps version-specific development saves.')
-aggregate('prepareIde', 'ideaSyncTask', 'Refreshes inherited sources/resources and creates all eight IntelliJ client run configurations.')
+aggregate('prepareIde', 'ideaSyncTask', 'Refreshes inherited sources/resources and creates all IntelliJ client run configurations.')
 tasks.named('prepareIde') {
     doLast {
         // The former root module no longer exists. Preserve old Loom-generated configs before removing them.
@@ -78,15 +78,37 @@ tasks.named('prepareIde') {
 
 tasks.named('build') { dependsOn tasks.named('buildAll') }
 tasks.named('check') { dependsOn tasks.named('checkAll') }
+// A missing/invalid translation must fail ordinary per-version builds as well as releases.
+tasks.register('verifyTranslations') {
+    group = 'verification'
+    description = 'Checks locale coverage and translation format arguments.'
+    def languages = file('src/main/resources/assets/interactivestuff/lang')
+    inputs.dir(languages)
+    doLast {
+        def expected = ['en_us', 'nl_nl', 'fil_ph', 'fr_fr', 'fr_ca', 'pl_pl', 'zh_cn', 'es_ar', 'es_mx', 'tr_tr', 'uk_ua', 'th_th', 'hi_in', 'en_gb', 'en_ca', 'en_au']
+        def source = new groovy.json.JsonSlurper().parse(new File(languages, 'en_us.json'), 'UTF-8')
+        def arguments = { String text -> (text =~ /%[0-9]+[$]s/).findAll().sort() }
+        expected.each { locale ->
+            def translated = new groovy.json.JsonSlurper().parse(new File(languages, "${locale}.json"), 'UTF-8')
+            if (translated.keySet() != source.keySet()) throw new GradleException("Translation keys differ for ${locale}")
+            source.each { key, value ->
+                if (!(translated[key] instanceof String) || translated[key].isEmpty()
+                        || arguments(translated[key]) != arguments(value))
+                    throw new GradleException("Invalid translation/format arguments: ${locale}:${key}")
+            }
+        }
+        println "Verified ${expected.size()} complete locales (${source.size()} keys each)."
+    }
+}
+
 // Stage only verified distributables, never development/source JARs or old directory contents.
 def distributionDirectory = layout.buildDirectory.dir("dist/${version}")
 def stageRelease = tasks.register('stageRelease', Sync) {
     group = 'distribution'
-    description = 'Collects the eight verified release JARs and release notes.'
+    description = 'Collects the verified release JARs and release notes.'
     dependsOn tasks.named('buildAll')
     into distributionDirectory
     from('LICENSE.txt', 'CHANGELOG.md', 'README.md')
-    from('docs/VYN_PARTICLES.md') { into 'docs' }
 }
 subprojects { targetProject ->
     targetProject.afterEvaluate {
@@ -104,7 +126,7 @@ def releaseChecksums = tasks.register('releaseChecksums') {
     outputs.file(distributionDirectory.map { it.file('SHA256SUMS.txt') })
     doLast {
         def jars = jarFiles.get().files.sort { it.name }
-        if (jars.size() != minecraftTargets.size()) throw new GradleException('Release staging does not contain exactly eight JARs')
+        if (jars.size() != minecraftTargets.size()) throw new GradleException('Release staging does not match the target catalog')
         def lines = jars.collect { jar ->
             def digest = java.security.MessageDigest.getInstance('SHA-256')
             jar.withInputStream { input ->

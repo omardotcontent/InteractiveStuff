@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-/** Client-only simulation in model/view coordinates. Never touches a Minecraft world or particle engine. */
+/** Client-only item/view/world coordinate simulation. Never adds particles to Minecraft's world engine. */
 @VynType(name = "Particles")
 public final class ParticleSystem {
     public static final ParticleSystem INSTANCE = new ParticleSystem();
@@ -20,6 +20,9 @@ public final class ParticleSystem {
     private long tick, frame, generation, dropped;
     private double interpolation;
     private boolean visible = true;
+    private ParticleCamera camera = ParticleCamera.IDENTITY;
+
+    public void setCamera(ParticleCamera camera) { this.camera = camera; }
 
     public void register(ParticleEmitter emitter) {
         if (emitters.size() >= 256) throw new IllegalArgumentException("Maximum 256 particle emitters per session");
@@ -35,6 +38,7 @@ public final class ParticleSystem {
         channel.item = item; channel.anchor = new Matrix4f(anchor); channel.light = light; channel.boundTick = tick;
         channel.boundFrame = frame;
         channel.style = emitter.style.copy(); channel.rate = emitter.rate;
+        channel.camera = camera;
     }
 
     public void beginFrame(double deltaTicks) { frame++; interpolation = Math.min(1, interpolation + Math.max(0, deltaTicks)); }
@@ -81,7 +85,7 @@ public final class ParticleSystem {
             channel.fraction -= (int) channel.fraction;
             for (int i = 0; i < births; i++) {
                 if (live >= maximum) { dropped += births - i; break; }
-                var particle = new Particle(channel.style.copy(), emitter.random, channel.anchor, channel.mainHand);
+                var particle = new Particle(channel.style.copy(), emitter.random, channel.anchor, channel.mainHand, channel.camera);
                 channel.particles.add(particle);
                 live++;
                 emitter.callback(particle.style.onSpawn, particle);
@@ -102,7 +106,7 @@ public final class ParticleSystem {
                     if (!particle.isAlive()) continue;
                     double progress = particle.progress(interpolation);
                     double size = Math.max(0, Math.min(100, particle.style.size.sample(progress)));
-                    var position = particle.position(channel.anchor, interpolation);
+                    var position = particle.position(channel.anchor, interpolation, camera);
                     int alpha = color(particle.style.opacity.sample(progress));
                     if (size == 0 || alpha == 0 || !position.isFinite()) continue;
                     int rgba = alpha << 24 | color(particle.style.red.sample(progress)) << 16
@@ -112,9 +116,8 @@ public final class ParticleSystem {
                             particle.style.type, particle.style.texture, particle.style.animation, particle.style.frameTicks,
                             Math.max(0, particle.age - 1 + interpolation), progress, particle.variant, particle.style.depth, false));
                 }
-                if (markers && channel.boundTick == tick) result.add(new DrawParticle(
-                        channel.anchor.transformPosition(new Vector3f((float) channel.style.x, (float) channel.style.y, (float) channel.style.z)),
-                        0.025f, 0, channel.mainHand ? 0xFF40FF70 : 0xFFFFA040, 0xF000F0, "", "", "first", 1, 0, 0, 0, false, true));
+                if (markers && channel.boundTick == tick) result.add(DrawParticle.markerAt(
+                        channel.anchor.transformPosition(new Vector3f((float) channel.style.x, (float) channel.style.y, (float) channel.style.z)), channel.mainHand));
             }
         }
         result.sort(Comparator.comparingDouble(particle -> particle.position.z));
@@ -126,7 +129,12 @@ public final class ParticleSystem {
     @VynFunc public int getEmitterCount() { return emitters.size(); }
     @VynFunc public long getDroppedCount() { return dropped; }
     @VynFunc public void clear() { generation++; for (var emitter : emitters) emitter.clear(); }
-    public void reset() { clear(); emitters.clear(); interpolation = 0; dropped = 0; }
+    public void reset() { clear(); emitters.clear(); interpolation = 0; dropped = 0; camera = ParticleCamera.IDENTITY; }
     public record DrawParticle(Vector3f position, float size, float rotation, int color, int light, String type, String texture,
-                               String animation, double frameTicks, double age, double progress, int variant, boolean depth, boolean marker) {}
+                               String animation, double frameTicks, double age, double progress, int variant, boolean depth, boolean marker) {
+        public static DrawParticle markerAt(Vector3f position, boolean mainHand) {
+            return new DrawParticle(new Vector3f(position), 0.025f, 0, mainHand ? 0xFF40FF70 : 0xFFFFA040,
+                    0xF000F0, "", "", "first", 1, 0, 0, 0, false, true);
+        }
+    }
 }

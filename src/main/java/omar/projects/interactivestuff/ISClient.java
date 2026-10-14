@@ -14,7 +14,9 @@ public final class ISClient implements ClientModInitializer {
     public void onInitializeClient() {
         BackgroundLoopHandler.getInstance().register();
         ScriptInterpreter.register();
+        omar.projects.interactivestuff.compat.MinecraftBindings.registerModels();
         ScriptLoader.register();
+        omar.projects.interactivestuff.handlers.config.SettingsAccess.register();
     }
 
 }

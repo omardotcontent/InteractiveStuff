@@ -5,6 +5,7 @@ import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import me.abdelaziz.util.NativeBinder;
 import omar.projects.interactivestuff.particles.ParticleCurve;
+import omar.projects.interactivestuff.particles.ParticleCamera;
 import omar.projects.interactivestuff.particles.ParticleStyle;
 import omar.projects.interactivestuff.particles.ParticleSystem;
 import omar.projects.interactivestuff.scripts.ScriptExecutionContext;
@@ -44,7 +45,9 @@ public final class ParticleEmitter {
     @VynFunc public void stop() { enabled = false; for (var channel : channels) channel.pending = 0; }
     @VynFunc public void clear() { for (var channel : channels) { channel.particles.clear(); channel.pending = 0; channel.fraction = 0; } }
     @VynFunc public int getCount() { return channels[0].particles.size() + channels[1].particles.size(); }
-    @VynFunc public void setSeed(long seed) { random.setSeed(seed); }
+    // The bundled Vyn binder converts int parameters, but not Java long.
+    @VynFunc public void setSeed(int seed) { setSeed((long) seed); }
+    public void setSeed(long seed) { random.setSeed(seed); }
     @VynFunc public void setType(String type) {
         if (type == null || !type.matches("[a-z0-9_.-]+:[a-z0-9_./-]+")) throw new IllegalArgumentException("Particle type requires a namespaced ID");
         style.type = type;
@@ -63,7 +66,12 @@ public final class ParticleEmitter {
     @VynFunc public void setVelocitySpread(double x, double y, double z) { style.velocitySpreadX = range(x, 0, 100, "Velocity spread"); style.velocitySpreadY = range(y, 0, 100, "Velocity spread"); style.velocitySpreadZ = range(z, 0, 100, "Velocity spread"); }
     @VynFunc public void setGravity(double gravity) { style.gravity = ParticleCurve.finite(gravity); }
     @VynFunc public void setDrag(double drag) { style.drag = range(drag, 0, 1, "Drag"); }
-    @VynFunc public void setAttached(boolean attached) { style.attached = attached; }
+    @VynFunc public void setAttached(boolean attached) { setSpace(attached ? "item" : "view"); }
+    @VynFunc public void setSpace(String space) {
+        if (!List.of("item", "view", "world").contains(space)) throw new IllegalArgumentException("Particle space must be item, view or world");
+        style.attached = space.equals("item");
+        style.worldSpace = space.equals("world");
+    }
     @VynFunc public void setDepthTest(boolean depth) { style.depth = depth; }
     @VynFunc public void setClearOnItemChange(boolean clear) { clearOnItemChange = clear; }
     @VynFunc public void setLight(int light) {
@@ -118,6 +126,7 @@ public final class ParticleEmitter {
         public final boolean mainHand;
         public final Set<Particle> particles = new LinkedHashSet<>();
         public Matrix4f anchor = new Matrix4f();
+        public ParticleCamera camera = ParticleCamera.IDENTITY;
         public long boundTick = Long.MIN_VALUE;
         public long boundFrame = Long.MIN_VALUE;
         public String item = "";

@@ -27,6 +27,7 @@ public final class MinecraftAccess {
     }
     public static Screen screen(Minecraft client) { return client.screen; }
     public static Camera camera(Minecraft client) { return client.gameRenderer.getMainCamera(); }
+    public static net.minecraft.world.phys.Vec3 cameraPosition(Camera camera) { return camera.getPosition(); }
     public static int permissionLevel(LocalPlayer player) {
         return player == null ? 0 : player.getPermissionLevel();
     }

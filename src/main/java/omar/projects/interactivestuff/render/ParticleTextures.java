@@ -13,6 +13,7 @@ import java.util.List;
 /** Uses pack PNGs directly, so custom particles do not need a world-particle registration. */
 public final class ParticleTextures {
     private static final LinkedHashMap<String, List<Identifier>> TYPES = new LinkedHashMap<>();
+    public static final Identifier MARKER = Identifier.parse("interactivestuff:textures/debug/marker.png");
     private static final Identifier FALLBACK = Identifier.parse("minecraft:textures/particle/generic_0.png");
     private ParticleTextures() {}
     public static void clear() { TYPES.clear(); }

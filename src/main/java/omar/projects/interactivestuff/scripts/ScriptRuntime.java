@@ -31,13 +31,15 @@ public final class ScriptRuntime {
 
     public void addScript(String pack, String name, String code) {
         packs.computeIfAbsent(pack, ignored -> new PackScripts())
-                .addScript(name, new Script(code, pack + "/" + name, environments, errors));
+                .addScript(name, new Script(code, pack, name, environments, errors));
     }
 
     public void load() {
+        omar.projects.interactivestuff.config.PackOptions.beginRegistration();
         itemCallbacks.clear();
         for (PackScripts pack : packs.values()) for (Script script : pack.scripts()) script.reset();
         for (PackScripts pack : packs.values()) for (Script script : pack.scripts()) script.load();
+        omar.projects.interactivestuff.config.PackOptions.finishRegistration();
         for (FunctionType type : FunctionType.values()) {
             List<Script> indexed = new ArrayList<>();
             for (PackScripts pack : packs.values()) {
@@ -64,6 +66,7 @@ public final class ScriptRuntime {
     public Map<String, PackScripts> packs() { return Collections.unmodifiableMap(packs); }
 
     public void clear() {
+        omar.projects.interactivestuff.config.PackOptions.beginRegistration();
         packs.clear();
         itemCallbacks.clear();
         for (FunctionType type : FunctionType.values()) callbacks.put(type, List.of());

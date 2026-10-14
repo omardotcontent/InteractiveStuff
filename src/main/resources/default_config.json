@@ -1,9 +1,5 @@
 {
   "enableInteractiveHits": true,
-  "specializedNoteblockHits": true,
-  "enableSculkSensorFeature": true,
-  "enableNoteBlockCrouchFeature": true,
-  "enableTextureChanges": true,
   "HitCooldownTicks": 4,
   "resourcePackDebugMode": false,
   "resourcePackMatrixEditing": true,

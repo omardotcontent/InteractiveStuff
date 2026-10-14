@@ -58,6 +58,7 @@ public final class ScriptInterpreter {
             NativeBinder.bind(environment, Sound.class);
             NativeBinder.bind(environment, Position.class);
             NativeBinder.bind(environment, ParticleEmitter.class);
+            NativeBinder.bind(environment, ConfigOption.class);
             NativeBinder.bind(environment, Particle.class);
             NativeBinder.defineConstant(environment, "particles", ParticleSystem.INSTANCE);
             environment.defineFunction("importScript", new ImportScript(RUNTIME));
@@ -162,6 +163,7 @@ public final class ScriptInterpreter {
         clearSessionWork();
         MinecraftItemRenderer.clearCaches();
         MinecraftParticleRenderer.clearCaches();
+        omar.projects.interactivestuff.handlers.config.SoundPicker.clearCache();
         RUNTIME.clear();
     }
 

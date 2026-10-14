@@ -1,15 +1,58 @@
+make noteHitsOption = new ConfigOption("note_block_hits", "toggle", true)
+noteHitsOption.setLabel("interactive_stuff.config.menu.pack.note_hits")
+noteHitsOption.setCategory("interactive_stuff.config.menu.pack.category.notes")
+noteHitsOption.setTooltip("interactive_stuff.config.menu.pack.note_hits.tooltip")
+make noteCrouchOption = new ConfigOption("note_block_crouch", "toggle", true)
+noteCrouchOption.setLabel("interactive_stuff.config.menu.pack.note_crouch")
+noteCrouchOption.setCategory("interactive_stuff.config.menu.pack.category.notes")
+noteCrouchOption.setTooltip("interactive_stuff.config.menu.pack.note_crouch.tooltip")
+
+lock interactiveItems = ["minecraft:note_block"]
+
 make wasSneaking = false
 
 make pitchIndex = -1
+make notePitch = 0.5
+
+lock NOTE_SPAWN_Y = 1.05
+lock NOTE_RISE = 0.5
 
 lock song_pattern = new List
 song_pattern.add(0.5,0.5,0.5,0.5,0.75,0.6,0.6,0.6,0.75,0.6,0.8)
+
+make noteParticle = new ParticleEmitter("minecraft:note")
+noteParticle.setPosition(0.5, NOTE_SPAWN_Y, 0.5)
+noteParticle.setSpread(0.15, 0, 0.15)
+noteParticle.setLifetime(16)
+noteParticle.setRate(0)
+noteParticle.setSize(0.14)
+noteParticle.setSpace("world")
+noteParticle.setOnSpawn("colorNoteParticle")
+noteParticle.setOnUpdate("riseNoteParticle")
+
+task colorNoteParticle takes particle do
+    make normalizedPitch = max(0, min(1, (notePitch - 0.5) / 1.5))
+    make red = int(max(0, sin(normalizedPitch * 6.283185307) * 0.65 + 0.35) * 255)
+    make green = int(max(0, sin((normalizedPitch + 0.333333333) * 6.283185307) * 0.65 + 0.35) * 255)
+    make blue = int(max(0, sin((normalizedPitch + 0.666666667) * 6.283185307) * 0.65 + 0.35) * 255)
+    particle.setColor(red, green, blue)
+end
+
+task riseNoteParticle takes particle do
+    make remaining = 1 - particle.getProgress()
+    make eased = 1 - remaining * remaining * remaining
+    particle.setPosition(particle.getX(), particle.getSpawnY() + NOTE_RISE * eased, particle.getZ())
+end
+
+task onItemUpdate takes itemRendered do
+    noteParticle.attach(itemRendered)
+end
 
 task onTick do
     check player.getWorld() == nothing do
         reply nothing
     end
-    check config.isNoteBlockCrouchFeatureEnabled() && player.getGamemode() != "spectator" do
+    check noteCrouchOption.getBoolean() && player.getGamemode() != "spectator" do
         make isSneaking = player.isSneaking()
         check player.getSteppingBlock().getName() == "minecraft:redstone_block" && player.isHoldingItem("minecraft:note_block") && isSneaking && !wasSneaking do
             check pitchIndex < (song_pattern.size() - 1) do
@@ -17,14 +60,16 @@ task onTick do
             otherwise
                 make pitchIndex = 0
             end
-            player.playSound("minecraft:block.note_block.harp", 0.5, song_pattern.get(pitchIndex))
+            make notePitch = song_pattern.get(pitchIndex)
+            player.playSound("minecraft:block.note_block.harp", 0.5, notePitch)
+            noteParticle.burst(1)
         end
         make wasSneaking = isSneaking
     end
 end
 
 task onSwingHand do
-    check config.isSpecializedNoteblockHitsEnabled() do
+    check noteHitsOption.getBoolean() do
         check player.getGamemode() != "spectator" && player.getGamemode() != "adventure" && player.isHoldingItem("minecraft:note_block") && player.getTargetBlock() != nothing do
             make targetBlock = player.getTargetBlock()
             player.playSoundWorld(targetBlock.getPosition(), targetBlock.getInstrument(), 0.2, 1.0)

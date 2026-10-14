@@ -2,7 +2,6 @@ package omar.projects.interactivestuff.objects;
 
 
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Item;
@@ -11,7 +10,6 @@ import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public final class InteractionMaterial {
     public String name;
@@ -38,8 +36,7 @@ public final class InteractionMaterial {
     public SoundEvent getSoundEvent() {
         Identifier id = sound == null ? null : Identifier.tryParse(sound);
         if (id == null) return net.minecraft.sounds.SoundEvents.STONE_BREAK;
-        return BuiltInRegistries.SOUND_EVENT.get(id).map(net.minecraft.core.Holder.Reference::value)
-                .orElse(net.minecraft.sounds.SoundEvents.STONE_BREAK);
+        return java.util.Optional.ofNullable(omar.projects.interactivestuff.compat.MinecraftRegistries.sound(id)).orElse(net.minecraft.sounds.SoundEvents.STONE_BREAK);
     }
 
     public float getPitch(final ItemStack stack) {

@@ -2,7 +2,6 @@ package omar.projects.interactivestuff.scripts.variables;
 
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
-import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
@@ -49,7 +48,7 @@ public final class World {
 
     @VynFunc
     public String getBiomeAt(final int x, final int y, final int z) {
-        return sourceWorld == null ? "" : sourceWorld.getBiome(new BlockPos(x, y, z)).getRegisteredName();
+        return sourceWorld == null ? "" : omar.projects.interactivestuff.compat.MinecraftRegistries.holderName(sourceWorld.getBiome(new BlockPos(x, y, z)));
     }
 
     @VynFunc
@@ -59,7 +58,7 @@ public final class World {
 
     @VynFunc
     public String getBiomeAt(final Position position) {
-        return sourceWorld == null ? "" : sourceWorld.getBiome(new BlockPos(position.getX(), position.getY(), position.getZ())).getRegisteredName();
+        return sourceWorld == null ? "" : omar.projects.interactivestuff.compat.MinecraftRegistries.holderName(sourceWorld.getBiome(new BlockPos(position.getX(), position.getY(), position.getZ())));
     }
 
     @VynFunc

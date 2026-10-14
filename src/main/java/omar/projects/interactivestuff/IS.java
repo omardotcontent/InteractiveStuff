@@ -20,6 +20,7 @@ public final class IS implements ModInitializer {
     @Override
     public void onInitialize() {
         ConfigHandler.INSTANCE = ConfigHandler.load();
+        omar.projects.interactivestuff.config.PackOptions.bind(ConfigHandler.INSTANCE.packOptionValues);
         ResourceManagerHelper.registerBuiltinResourcePack(
                 Identifier.fromNamespaceAndPath(MOD_ID, "interactive_resourcepack"),
                 FabricLoader.getInstance()

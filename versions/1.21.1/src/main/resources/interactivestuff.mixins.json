@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "omar.projects.interactivestuff.mixin",
+  "compatibilityLevel": "JAVA_${java_version}",
+  "client": [
+    "client.MinecraftClientMixin",
+    "player.CameraMixin",
+    "player.ArmSwingMixin",
+    "client.KeyboardMixin",
+    "render.InGameHudMixin",
+    "render.GameRendererMixin",
+    "render.HeldItemRendererMixin",
+    "render.FirstPersonParticleMixin",
+    "sound.SoundListenerMixin",
+    "player.LivingEntityAccessor",
+    "render.ItemRendererAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

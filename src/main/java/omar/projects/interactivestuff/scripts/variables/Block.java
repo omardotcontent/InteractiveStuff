@@ -57,7 +57,7 @@ public final class Block {
 
     @VynFunc
     public String getInstrument() {
-        return blockState.instrument().getSoundEvent().getRegisteredName();
+        return omar.projects.interactivestuff.compat.MinecraftRegistries.holderName(blockState.instrument().getSoundEvent());
     }
 
     @VynFunc
@@ -77,7 +77,7 @@ public final class Block {
 
     @VynFunc
     public boolean isTransparent() {
-        return blockState.propagatesSkylightDown();
+        return omar.projects.interactivestuff.compat.MinecraftBindings.skylight(blockState, world, sourceBlock);
     }
 
     @VynFunc
@@ -87,7 +87,7 @@ public final class Block {
 
     @VynFunc
     public boolean isOpaqueFullCube() {
-        return blockState.isSolidRender();
+        return omar.projects.interactivestuff.compat.MinecraftBindings.solidRender(blockState, world, sourceBlock);
     }
 
     @VynFunc

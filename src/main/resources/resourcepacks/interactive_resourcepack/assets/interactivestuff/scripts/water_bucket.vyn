@@ -1,7 +1,12 @@
+make textureChangesOption = new ConfigOption("texture_changes", "toggle", true)
+textureChangesOption.setLabel("interactive_stuff.config.menu.pack.textures")
+textureChangesOption.setCategory("interactive_stuff.config.menu.pack.category.effects")
+textureChangesOption.setTooltip("interactive_stuff.config.menu.pack.textures.tooltip")
+
 lock interactiveItems = ["minecraft:water_bucket"]
 
 task onItemUpdate takes itemRendered do
-    check config.isTextureChangesEnabled() && player.getGamemode() != "spectator" do
+    check textureChangesOption.getBoolean() && player.getGamemode() != "spectator" do
         check itemRendered.getName() == "minecraft:water_bucket" do
             check player.isSubmergedInWater() do
                 itemRendered.setItemModel("minecraft:bucket")

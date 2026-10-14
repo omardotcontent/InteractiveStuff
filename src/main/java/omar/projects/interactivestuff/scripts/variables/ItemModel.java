@@ -5,14 +5,12 @@ import me.abdelaziz.api.annotation.VynConstructor;
 import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import omar.projects.interactivestuff.handlers.config.ConfigHandler;
-import omar.projects.interactivestuff.objects.PivotRendererBlock;
 import omar.projects.interactivestuff.scripts.Utilities.ItemModelRenderRegistry;
 import omar.projects.interactivestuff.scripts.Utilities.RenderTickHandler;
 import omar.projects.interactivestuff.scripts.Utilities.ScriptItemHandler;
@@ -73,7 +71,7 @@ public class ItemModel {
 
     private static ItemStack createStackFromId(final String itemId) {
         try {
-            return new ItemStack(BuiltInRegistries.ITEM.get(Identifier.parse(itemId)).get());
+            return new ItemStack(omar.projects.interactivestuff.compat.MinecraftRegistries.item(Identifier.parse(itemId)));
         } catch (final Exception e) {
             return new ItemStack(Items.AIR);
         }
@@ -168,7 +166,7 @@ public class ItemModel {
     }
 
     public void setDisplayContext(final ItemDisplayContext context) {
-        setDisplayContext(context, !context.leftHand());
+        setDisplayContext(context, !omar.projects.interactivestuff.compat.MinecraftBindings.leftHand(context));
     }
 
     public void setDisplayContext(final ItemDisplayContext context, boolean mainHand) {
@@ -193,12 +191,12 @@ public class ItemModel {
     /** Physical arm used by rendering, independent of the player's dominant hand. */
     @VynFunc
     public boolean isLeftHand() {
-        return isHandContext() && displayContext.leftHand();
+        return isHandContext() && omar.projects.interactivestuff.compat.MinecraftBindings.leftHand(displayContext);
     }
 
     @VynFunc
     public boolean isRightHand() {
-        return isHandContext() && !displayContext.leftHand();
+        return isHandContext() && !omar.projects.interactivestuff.compat.MinecraftBindings.leftHand(displayContext);
     }
 
     private boolean isHandContext() {
@@ -222,7 +220,7 @@ public class ItemModel {
     @VynFunc
     public void setItemModel(final String model) {
         ensureWorkingCopy();
-        workingStack.set(DataComponents.ITEM_MODEL, Identifier.parse(model));
+        ScriptItemHandler.apply(workingStack, "minecraft:item_model", model);
     }
 
     @VynFunc
@@ -438,7 +436,7 @@ public class ItemModel {
         this.py = y;
         this.pz = z;
         if (ConfigHandler.INSTANCE.resourcePackDebugMode)
-            new PivotRendererBlock(this);
+            ItemModelRenderRegistry.pivot(this);
     }
 
     public double getPivotX() {
