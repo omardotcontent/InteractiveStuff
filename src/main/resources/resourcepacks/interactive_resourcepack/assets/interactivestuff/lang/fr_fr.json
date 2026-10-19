@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "Particules IS : %1$s/%2$s  émetteurs : %3$s  rejetées : %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Texte de débogage Vyn",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "Afficher le texte de débogage des scripts Vyn de ce pack de ressources.",
+  "interactive_stuff.config.menu.setting.counter": "Compteurs de particules",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "Affichez le nombre de particules et d'émetteurs actifs.",
+  "interactive_stuff.config.menu.pack.category.debug": "Débogage",
+  "interactive_stuff.config.menu.pack.physics_enabled": "Activer la physique des objets",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "Interrupteur principal de la physique des objets de ce pack. Désactive tous les mouvements physiques tout en conservant les choix par objet. Animations et particules ont leurs propres réglages."
+}

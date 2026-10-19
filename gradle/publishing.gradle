@@ -1,0 +1,173 @@
+// One release per Minecraft target, using the same verified JARs as releaseAll.
+def releaseVersion = version.toString()
+def archiveBase = providers.gradleProperty('archives_base_name').get()
+def dryRunSetting = providers.gradleProperty('publish_dry_run').getOrElse('false').toLowerCase(Locale.ROOT)
+if (!(dryRunSetting in ['true', 'false'])) throw new GradleException('publish_dry_run must be true or false')
+def preview = gradle.startParameter.taskNames.any { it.tokenize(':').last() == 'previewPublish' }
+        || dryRunSetting == 'true'
+def selectedPlatforms = providers.gradleProperty('publish_platforms').getOrElse('modrinth,curseforge')
+        .split(',').collect { it.trim().toLowerCase(Locale.ROOT) }.toSet()
+if (selectedPlatforms.isEmpty() || !['modrinth', 'curseforge'].containsAll(selectedPlatforms))
+    throw new GradleException('publish_platforms must be modrinth, curseforge, or modrinth,curseforge')
+def releaseKind = providers.gradleProperty('release_type').getOrElse('release').toLowerCase(Locale.ROOT)
+def releaseKinds = [release: publishMods.STABLE, beta: publishMods.BETA, alpha: publishMods.ALPHA]
+if (!releaseKinds.containsKey(releaseKind)) throw new GradleException('release_type must be release, beta, or alpha')
+def changelogFile = file(providers.gradleProperty('changelog_file').getOrElse('changelog.md'))
+def changelogText = providers.provider {
+    if (!changelogFile.isFile())
+        throw new GradleException("Add your changelog to ${changelogFile.name}, or pass -Pchangelog_file=/path/to/notes.md")
+    def text = changelogFile.getText('UTF-8').trim()
+    if (text.isEmpty()) throw new GradleException('The publishing changelog must not be empty')
+    return text
+}
+def targets = minecraftTargets.collect { target ->
+    def properties = new Properties()
+    file("versions/${target.profile}/version.properties").withInputStream { properties.load(it) }
+    [minecraft: target.patch ?: properties.getProperty('minecraft_version'), suffix: target.suffix,
+     java: properties.getProperty('java_version').toInteger()]
+}
+def changelogTarget = providers.gradleProperty('changelog_target').getOrElse(targets.last().minecraft)
+if (!targets.any { it.minecraft == changelogTarget }) throw new GradleException('changelog_target must be a supported Minecraft release')
+// Publish the full notes last, even when the user selects a different changelog target.
+targets = targets.findAll { it.minecraft != changelogTarget } + targets.findAll { it.minecraft == changelogTarget }
+def fullNotesVersion = "${releaseVersion}+mc${changelogTarget}"
+def fullNotesUrls = [
+        modrinth: "https://modrinth.com/mod/interactivestuff/version/${java.net.URLEncoder.encode(fullNotesVersion, 'UTF-8')}",
+        curseforge: "https://www.curseforge.com/minecraft/mc-mods/interactivestuff/files/all?version=${changelogTarget}"
+]
+def credentials = [
+        modrinth: providers.environmentVariable('MODRINTH_TOKEN').orElse(providers.gradleProperty('MODRINTH_TOKEN')),
+        curseforge: providers.environmentVariable('CURSEFORGE_TOKEN').orElse(providers.gradleProperty('CURSEFORGE_TOKEN'))
+]
+def projectIds = [modrinth: providers.gradleProperty('modrinth_project_id').get(),
+                  curseforge: providers.gradleProperty('curseforge_project_id').get()]
+def receiptDirectory = layout.projectDirectory.dir(".publishing/${releaseVersion}").asFile
+def planFile = layout.buildDirectory.file("publishing/${releaseVersion}/plan.json")
+def publications = []
+def uploadTasks = []
+
+publishMods {
+    dryRun = preview
+    type = releaseKinds[releaseKind]
+    modLoaders.add('fabric')
+    // A timed-out upload may already have succeeded remotely. Avoid automatic POST retries.
+    maxRetries = 0
+}
+
+targets.each { target ->
+    def minecraft = target.minecraft
+    def jarFile = layout.buildDirectory.file("dist/${releaseVersion}/${archiveBase}-${minecraft}-${releaseVersion}.jar")
+    def versionNumber = "${releaseVersion}+mc${minecraft}".toString()
+    def title = "InteractiveStuff ${releaseVersion} - Minecraft ${minecraft} (Fabric)".toString()
+    selectedPlatforms.each { platform ->
+        def notes = minecraft == changelogTarget ? changelogText : providers.provider {
+            "InteractiveStuff ${releaseVersion} for Minecraft ${minecraft}.\n\nFull changelog: [${releaseVersion} for Minecraft ${changelogTarget}](${fullNotesUrls[platform]}).".toString()
+        }
+        def destination = "${platform}${target.suffix}"
+        def options = platform == 'modrinth' ? publishMods.modrinth(destination) {
+            projectId = projectIds.modrinth
+            accessToken = credentials.modrinth
+            environment = CLIENT_ONLY
+            minecraftVersions.add(minecraft)
+            requires('fabric-api')
+            optional('modmenu')
+        } : publishMods.curseforge(destination) {
+            projectId = projectIds.curseforge
+            projectSlug = 'interactivestuff'
+            accessToken = credentials.curseforge
+            client = true
+            server = false
+            javaVersions.add(JavaVersion.toVersion(target.java))
+            minecraftVersions.add(minecraft)
+            requires('fabric-api')
+            optional('modmenu')
+            changelogType = 'markdown'
+        }
+        options.configure {
+            file = jarFile
+            version = versionNumber
+            displayName = title
+            changelog = notes
+        }
+        def upload = tasks.named("publish${destination.capitalize()}")
+        def receipt = new File(receiptDirectory, "${destination}.json")
+        def publication = [platform: platform, project: projectIds[platform], minecraft: minecraft,
+                           java: target.java, version: versionNumber, title: title,
+                           file: jarFile, notes: notes, changelog: minecraft == changelogTarget ? 'full' : 'reference']
+        def identity = {
+            def jar = jarFile.get().asFile
+            [platform: platform, project: projectIds[platform], minecraft: minecraft, version: versionNumber,
+             releaseType: releaseKind, title: title, changelog: notes.get(),
+             java: target.java, loaders: ['fabric'], client: true, server: false,
+             required: ['fabric-api'], optional: ['modmenu'],
+             sha256: java.security.MessageDigest.getInstance('SHA-256').digest(jar.bytes).encodeHex().toString()]
+        }
+        publications.add(publication)
+        def precedingUploads = uploadTasks.toList()
+        uploadTasks.add(upload)
+        upload.configure {
+            dependsOn 'preparePublish'
+            // Keep each platform's newest upload and full changelog last, including --parallel runs.
+            mustRunAfter(precedingUploads)
+            onlyIf {
+                if (preview || !receipt.isFile()) return true
+                def previous = new groovy.json.JsonSlurper().parse(receipt, 'UTF-8')
+                if (previous.identity != identity())
+                    throw new GradleException("${destination} was already published with different content/settings. Use a new mod_version; check the existing remote file before changing its local receipt.")
+                logger.lifecycle("Skipping ${destination}: this exact file and release metadata already have a successful upload receipt.")
+                return false
+            }
+            doLast {
+                if (preview) return
+                // The plugin submits asynchronous workers. Record success only after they complete.
+                workerExecutor.await()
+                def outcome = new groovy.json.JsonSlurper().parse(result.get().asFile, 'UTF-8')
+                receipt.parentFile.mkdirs()
+                def temporary = new File(receipt.parentFile, "${receipt.name}.tmp")
+                temporary.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(
+                        [identity: identity(), result: outcome])), 'UTF-8')
+                java.nio.file.Files.move(temporary.toPath(), receipt.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            }
+        }
+    }
+}
+
+tasks.register('preparePublish') {
+    group = 'publishing'
+    description = 'Builds and validates all upload files, changelog and selected platform credentials.'
+    dependsOn tasks.named('releaseAll')
+    doLast {
+        changelogText.get()
+        if (!preview) selectedPlatforms.each { platform ->
+            if (!credentials[platform].isPresent() || credentials[platform].get().trim().isEmpty())
+                throw new GradleException("Set ${platform == 'modrinth' ? 'MODRINTH_TOKEN' : 'CURSEFORGE_TOKEN'} in your environment or private ~/.gradle/gradle.properties. Never put tokens in the repository.")
+        }
+        def plan = [modVersion: releaseVersion, releaseType: releaseKind, dryRun: preview,
+                    changelogTarget: changelogTarget, fullChangelogUrls: fullNotesUrls,
+                    uploads: publications.collect { entry ->
+                        def jar = entry.file.get().asFile
+                        if (!jar.isFile()) throw new GradleException("Missing verified upload JAR: ${jar.name}")
+                        [platform: entry.platform, project: entry.project, minecraft: entry.minecraft,
+                         java: entry.java, version: entry.version, title: entry.title, filename: jar.name,
+                         sha256: java.security.MessageDigest.getInstance('SHA-256').digest(jar.bytes).encodeHex().toString(),
+                         loaders: ['fabric'], client: true, server: false,
+                         required: ['fabric-api'], optional: ['modmenu'],
+                         changelogKind: entry.changelog, changelog: entry.notes.get()]
+                    }]
+        def output = planFile.get().asFile
+        output.parentFile.mkdirs()
+        output.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(plan)), 'UTF-8')
+        logger.lifecycle("${preview ? 'Preview' : 'Upload'} plan: ${output}")
+    }
+}
+
+tasks.register('previewPublish') {
+    group = 'interactivestuff'
+    description = 'Builds all versions and previews upload files/metadata locally, without tokens or uploads.'
+    dependsOn tasks.named('publishMods')
+}
+tasks.register('publishAll') {
+    group = 'interactivestuff'
+    description = 'Publishes all verified versions to Modrinth and CurseForge; newest target has the full changelog.'
+    dependsOn tasks.named('publishMods')
+}

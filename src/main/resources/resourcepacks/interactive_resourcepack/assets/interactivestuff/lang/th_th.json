@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "อนุภาค IS: %1$s/%2$s  ตัวปล่อย: %3$s  ทิ้ง: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "ข้อความดีบัก Vyn",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "แสดงข้อความดีบักจากสคริปต์ Vyn ของแพ็กทรัพยากรนี้",
+  "interactive_stuff.config.menu.setting.counter": "ตัวนับอนุภาค",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "แสดงจำนวนอนุภาคและตัวปล่อยที่ทำงาน",
+  "interactive_stuff.config.menu.pack.category.debug": "ดีบัก",
+  "interactive_stuff.config.menu.pack.physics_enabled": "เปิดใช้ฟิสิกส์ไอเทม",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "สวิตช์หลักของฟิสิกส์ไอเทมในแพ็กนี้ ปิดการเคลื่อนไหวทางฟิสิกส์ทั้งหมดโดยเก็บตัวเลือกของแต่ละไอเทมไว้ แอนิเมชันและอนุภาคมีตัวเลือกแยกต่างหาก"
+}

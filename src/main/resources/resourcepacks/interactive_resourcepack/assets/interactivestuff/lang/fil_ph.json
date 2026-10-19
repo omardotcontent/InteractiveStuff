@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "Mga IS particle: %1$s/%2$s  emitter: %3$s  tinanggihan: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Vyn debug text",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "Ipakita ang debug text mula sa mga Vyn script ng resource pack na ito.",
+  "interactive_stuff.config.menu.setting.counter": "Mga bilang ng particle",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "Ipakita ang bilang ng aktibong particle at emitter.",
+  "interactive_stuff.config.menu.pack.category.debug": "Pag-debug",
+  "interactive_stuff.config.menu.pack.physics_enabled": "Paganahin ang item physics",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "Pangunahing switch para sa item physics ng pack na ito. Pinapatay ang lahat ng galaw ng physics habang pinapanatili ang mga pagpili sa bawat item. Hiwalay ang mga kontrol ng animation at particle."
+}

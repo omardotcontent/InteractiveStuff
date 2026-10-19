@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "IS कण: %1$s/%2$s  उत्सर्जक: %3$s  छोड़े गए: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Vyn डीबग टेक्स्ट",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "इस रिसोर्स पैक की Vyn स्क्रिप्ट से भेजा गया डीबग टेक्स्ट दिखाएँ।",
+  "interactive_stuff.config.menu.setting.counter": "कण काउंटर",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "सक्रिय कणों और उत्सर्जकों की संख्या दिखाएँ।",
+  "interactive_stuff.config.menu.pack.category.debug": "डीबग",
+  "interactive_stuff.config.menu.pack.physics_enabled": "आइटम भौतिकी चालू करें",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "इस पैक की आइटम भौतिकी का मुख्य स्विच। हर आइटम की पसंद बनाए रखते हुए भौतिकी की सारी गति बंद करता है। एनिमेशन और कणों के अलग नियंत्रण हैं।"
+}

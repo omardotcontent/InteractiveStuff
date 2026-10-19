@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "IS particles: %1$s/%2$s  emitters: %3$s  dropped: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Vyn debug text",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "Show the debug text submitted by this resource pack’s Vyn scripts.",
+  "interactive_stuff.config.menu.setting.counter": "Particle counters",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "Show active particle and emitter counts.",
+  "interactive_stuff.config.menu.pack.category.debug": "Debug",
+  "interactive_stuff.config.menu.pack.physics_enabled": "Enable item physics",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "Master switch for this pack’s item physics. Disables all physics movement while preserving individual item choices. Animations and particles have separate controls."
+}

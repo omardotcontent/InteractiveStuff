@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "IS-deeltjes: %1$s/%2$s  emitters: %3$s  geweigerd: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Vyn-debugtekst",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "Toon de debugtekst van de Vyn-scripts van dit resourcepakket.",
+  "interactive_stuff.config.menu.setting.counter": "Deeltjestellers",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "Toon aantallen actieve deeltjes en emitters.",
+  "interactive_stuff.config.menu.pack.category.debug": "Foutopsporing",
+  "interactive_stuff.config.menu.pack.physics_enabled": "Itemfysica inschakelen",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "Hoofdschakelaar voor itemfysica van dit pakket. Schakelt alle fysicabeweging uit en bewaart de keuzes per item. Animaties en deeltjes hebben aparte instellingen."
+}

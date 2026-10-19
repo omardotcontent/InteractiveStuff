@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "IS 粒子：%1$s/%2$s  发射器：%3$s  丢弃：%4$s",
+  "interactive_stuff.config.menu.setting.debug": "Vyn 调试文本",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "显示此资源包的 Vyn 脚本提交的调试文本。",
+  "interactive_stuff.config.menu.setting.counter": "粒子计数器",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "显示活动粒子和发射器数量。",
+  "interactive_stuff.config.menu.pack.category.debug": "调试",
+  "interactive_stuff.config.menu.pack.physics_enabled": "启用物品物理效果",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "此资源包物品物理效果的总开关。关闭所有物理运动，并保留各物品的单独设置。动画和粒子由其他选项控制。"
+}

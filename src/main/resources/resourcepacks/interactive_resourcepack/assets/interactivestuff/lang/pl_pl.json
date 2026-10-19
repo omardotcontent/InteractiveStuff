@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "Cząsteczki IS: %1$s/%2$s  emitery: %3$s  pominięte: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Tekst debugowania Vyn",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "Pokaż tekst debugowania ze skryptów Vyn tego pakietu zasobów.",
+  "interactive_stuff.config.menu.setting.counter": "Liczniki cząsteczek",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "Pokaż liczbę aktywnych cząsteczek i emiterów.",
+  "interactive_stuff.config.menu.pack.category.debug": "Debugowanie",
+  "interactive_stuff.config.menu.pack.physics_enabled": "Włącz fizykę przedmiotów",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "Główny przełącznik fizyki przedmiotów tego pakietu. Wyłącza cały ruch fizyczny, zachowując ustawienia poszczególnych przedmiotów. Animacje i cząsteczki mają osobne opcje."
+}

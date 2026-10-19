@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "Частинки IS: %1$s/%2$s  випромінювачі: %3$s  пропущено: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Текст налагодження Vyn",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "Показувати текст налагодження зі скриптів Vyn цього пакета ресурсів.",
+  "interactive_stuff.config.menu.setting.counter": "Лічильники частинок",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "Показуйте кількість активних частинок і випромінювачів.",
+  "interactive_stuff.config.menu.pack.category.debug": "Налагодження",
+  "interactive_stuff.config.menu.pack.physics_enabled": "Увімкнути фізику предметів",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "Головний перемикач фізики предметів цього пакета. Вимикає всі фізичні рухи, зберігаючи окремі налаштування предметів. Анімації та частинки мають власні перемикачі."
+}

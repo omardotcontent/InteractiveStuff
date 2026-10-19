@@ -1,0 +1,63 @@
+task packToggle takes id, category do
+    make option = new ConfigOption(id, "toggle", true)
+    option.setLabel("interactive_stuff.config.menu.pack." + id)
+    option.setTooltip("interactive_stuff.config.menu.pack." + id + ".tooltip")
+    option.setCategory("interactive_stuff.config.menu.pack.category." + category)
+    reply option
+end
+
+task packShakeOption do
+    make option = new ConfigOption("shake_intensity", "number", 100)
+    option.setLabel("interactive_stuff.config.menu.pack.shake_intensity")
+    option.setTooltip("interactive_stuff.config.menu.pack.shake_intensity.tooltip")
+    option.setCategory("interactive_stuff.config.menu.pack.category.animation")
+    option.setRange(0, 200, 5)
+    reply option
+end
+
+make compatibility = new Map
+
+task hasMod takes id do
+    check !compatibility.containsKey(id) do
+        compatibility.put(id, modLoader.isModLoaded(id))
+    end
+    reply compatibility.get(id)
+end
+
+task createProgressState do
+    reply new Map
+end
+
+task smoothItemProgress takes state, item, target, speed do
+    make hand = "off"
+    check item.isMainHand() do make hand = "main" end
+    make frame = getFrameId()
+    make itemId = item.getName()
+    check !state.containsKey(hand + "Frame") do
+        state.put(hand + "Frame", -1)
+        state.put(hand + "Progress", 0)
+        state.put(hand + "Item", itemId)
+    end
+    check state.get(hand + "Item") != itemId || state.get(hand + "Frame") < (frame - 1) do
+        state.put(hand + "Progress", 0)
+        state.put(hand + "Item", itemId)
+        state.put(hand + "Frame", -1)
+    end
+    check state.get(hand + "Frame") != frame do
+        state.put(hand + "Progress", item.smooth(state.get(hand + "Progress"), target, speed))
+        state.put(hand + "Frame", frame)
+    end
+    reply state.get(hand + "Progress")
+end
+
+task resetItemProgress takes state, item do
+    make hand = "off"
+    check item.isMainHand() do make hand = "main" end
+    state.put(hand + "Progress", 0)
+    state.put(hand + "Frame", getFrameId())
+    state.put(hand + "Item", item.getName())
+end
+
+task isRedstonePowered do
+    reply player.isSneaking() && player.getSteppingBlock().getName() == "minecraft:redstone_block"
+end

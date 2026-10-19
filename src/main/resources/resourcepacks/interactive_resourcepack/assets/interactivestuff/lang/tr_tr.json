@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "IS parçacıkları: %1$s/%2$s  yayıcılar: %3$s  atlanan: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Vyn hata ayıklama metni",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "Bu kaynak paketinin Vyn betiklerinin gönderdiği hata ayıklama metnini göster.",
+  "interactive_stuff.config.menu.setting.counter": "Parçacık sayaçları",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "Etkin parçacık ve yayıcı sayılarını gösterin.",
+  "interactive_stuff.config.menu.pack.category.debug": "Hata ayıklama",
+  "interactive_stuff.config.menu.pack.physics_enabled": "Öğe fiziğini etkinleştir",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "Bu paketin öğe fiziği için ana anahtar. Her öğenin seçimini koruyarak tüm fizik hareketlerini kapatır. Animasyonların ve parçacıkların ayrı ayarları vardır."
+}

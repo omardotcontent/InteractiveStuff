@@ -1,0 +1,10 @@
+{
+  "interactivestuff.debug.particles": "Partículas IS: %1$s/%2$s  emisores: %3$s  descartadas: %4$s",
+  "interactive_stuff.config.menu.setting.debug": "Texto de depuración Vyn",
+  "interactive_stuff.config.menu.setting.debug.tooltip": "Mostrar el texto de depuración de los scripts Vyn de este pack de recursos.",
+  "interactive_stuff.config.menu.setting.counter": "Contadores de partículas",
+  "interactive_stuff.config.menu.setting.counter.tooltip": "Mostrá la cantidad de partículas y emisores activos.",
+  "interactive_stuff.config.menu.pack.category.debug": "Depuración",
+  "interactive_stuff.config.menu.pack.physics_enabled": "Activar física de objetos",
+  "interactive_stuff.config.menu.pack.physics_enabled.tooltip": "Interruptor general de la física de objetos de este pack. Desactiva todos los movimientos físicos y conserva las opciones de cada objeto. Las animaciones y partículas tienen controles separados."
+}
