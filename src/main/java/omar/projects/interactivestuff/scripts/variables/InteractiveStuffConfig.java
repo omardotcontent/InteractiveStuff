@@ -12,12 +12,18 @@ public final class InteractiveStuffConfig {
         var owner = ScriptExecutionContext.current();
         return owner == null || PackOptions.toggleValue(owner.getPackId(), id, true);
     }
+    private static boolean packToggle(String id, String legacyId) {
+        var owner = ScriptExecutionContext.current();
+        return owner == null || PackOptions.toggleValue(owner.getPackId(), id,
+                PackOptions.toggleValue(owner.getPackId(), legacyId, true));
+    }
     @VynFunc public boolean isParticlesEnabled() { return ConfigHandler.INSTANCE.enableParticles; }
     @VynFunc public int getParticleLimit() { return ConfigHandler.INSTANCE.particleLimit; }
     @VynFunc public int getParticleDensity() { return ConfigHandler.INSTANCE.particleDensity; }
+    @VynFunc public boolean isParticleDebugCountersEnabled() { return omar.projects.interactivestuff.config.PackDebugOptions.currentCounters(); }
 
     @VynFunc
-    public boolean isResourcePackDebugModeEnabled () {return ConfigHandler.INSTANCE.resourcePackDebugMode;}
+    public boolean isResourcePackDebugModeEnabled () {return omar.projects.interactivestuff.config.PackDebugOptions.currentMode();}
 
     @VynFunc
     public boolean isInteractiveHitsEnabled() {
@@ -27,7 +33,7 @@ public final class InteractiveStuffConfig {
     /** @deprecated Declare and read a pack-owned ConfigOption instead. */
     @Deprecated @VynFunc
     public boolean isSculkSensorFeatureEnabled() {
-        return packToggle("sculk_sensors");
+        return packToggle("animate_sculk_sensor", "sculk_sensors");
     }
 
     @VynFunc
@@ -44,7 +50,7 @@ public final class InteractiveStuffConfig {
     /** @deprecated Declare and read a pack-owned ConfigOption instead. */
     @Deprecated @VynFunc
     public boolean isNoteBlockCrouchFeatureEnabled() {
-        return packToggle("note_block_crouch");
+        return packToggle("note_block_sounds", "note_block_crouch");
     }
 
     @VynFunc
@@ -55,7 +61,7 @@ public final class InteractiveStuffConfig {
     /** @deprecated Declare and read a pack-owned ConfigOption instead. */
     @Deprecated @VynFunc
     public boolean isSpecializedNoteblockHitsEnabled() {
-        return packToggle("note_block_hits");
+        return packToggle("note_block_sounds", "note_block_hits");
     }
 
     @VynFunc

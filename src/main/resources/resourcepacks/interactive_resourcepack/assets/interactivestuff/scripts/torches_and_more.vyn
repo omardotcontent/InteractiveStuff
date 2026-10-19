@@ -1,7 +1,9 @@
-make textureChangesOption = new ConfigOption("texture_changes", "toggle", true)
-textureChangesOption.setLabel("interactive_stuff.config.menu.pack.textures")
-textureChangesOption.setCategory("interactive_stuff.config.menu.pack.category.effects")
-textureChangesOption.setTooltip("interactive_stuff.config.menu.pack.textures.tooltip")
+importScript("interactivestuff:interactive_resourcepack", "effect_helpers")
+
+make shakeOption = packShakeOption()
+
+make effectOption = packToggle("torch_extinguish", "animation")
+effectOption.setOnChange("onTorchOptionChanged")
 
 lock interactiveItems = ["minecraft:campfire", "minecraft:torch", "minecraft:redstone_torch", "minecraft:soul_campfire", "minecraft:soul_torch", "minecraft:wall_torch", "minecraft:copper_torch"]
 
@@ -11,38 +13,33 @@ HOT_ITEMS.add("minecraft:campfire", "minecraft:torch", "minecraft:redstone_torch
 make wasSubmerged = false
 make intensity = 0.0
 
+task onTorchOptionChanged takes option, previous, value do
+    make wasSubmerged = nothing
+    make intensity = 0
+end
+
 task onTick do
-    check textureChangesOption.getBoolean() && player.getGamemode() != "spectator" && player.isFirstPerson() do
-
-        make isSubmerged = player.isSubmergedInWater()
-
-        check wasSubmerged != isSubmerged do
-            make wasSubmerged = isSubmerged
-
-            check isPlayerHoldingAnyHotItem() do
-                check isSubmerged do
-                    player.playSound("minecraft:block.fire.extinguish", 0.6, 1.0)
-                    make intensity = 0.015
-                otherwise
-                    player.playSound("minecraft:item.flintandsteel.use", 0.6, 1.0)
-                end
-            end
-        end
-
-        check intensity > 0.0 do
-            make intensity = intensity - 0.001
-            check intensity < 0.0 do
-                make intensity = 0.0
+    check !effectOption.getBoolean() do reply nothing end
+    make isSubmerged = player.isSubmergedInWater()
+    check player.getGamemode() != "spectator" && player.isFirstPerson() && wasSubmerged != nothing && wasSubmerged != isSubmerged do
+        check isPlayerHoldingAnyHotItem() do
+            check isSubmerged do
+                player.playSound("minecraft:block.fire.extinguish", 0.6, 1.0)
+                make intensity = 0.015
+            otherwise
+                player.playSound("minecraft:item.flintandsteel.use", 0.6, 1.0)
             end
         end
     end
+    make wasSubmerged = isSubmerged
+    make intensity = max(0, intensity - 0.001)
 end
 
 task onItemUpdate takes itemRendered do
-    check textureChangesOption.getBoolean() && player.getGamemode() != "spectator" do
+    check effectOption.getBoolean() && player.getGamemode() != "spectator" do
         check player.isSubmergedInWater() do
             make isTheItem = false
-            check isWaterTorch(itemRendered) do
+            check isWaterTorch(itemRendered) && itemRendered.getName() != "minecraft:redstone_torch" do
                 itemRendered.setItemModel("interactivestuff:torch_off")
                 make isTheItem = true
             end
@@ -55,14 +52,12 @@ task onItemUpdate takes itemRendered do
                 make isTheItem = true
             end
             check isTheItem do
-                itemRendered.translate(((random() - 0.5) * intensity), ((random() - 0.5) * intensity), 0)
+                itemRendered.translate(((random() - 0.5) * intensity * shakeOption.getNumber() / 100), ((random() - 0.5) * intensity * shakeOption.getNumber() / 100), 0)
             end
         otherwise
             check isHoldingHotItem(itemRendered) do
-                itemRendered.setLight(15)
-                make fireType = "minecraft:flame"
-                check itemRendered.getName() == "minecraft:soul_torch" || itemRendered.getName() == "minecraft:soul_campfire" do
-                    make fireType = "minecraft:soul_fire_flame"
+                check itemRendered.getName() != "minecraft:redstone_torch" || !isRedstonePowered() do
+                    itemRendered.setLight(15)
                 end
             end
         end
@@ -76,12 +71,7 @@ end
 
 
 task isPlayerHoldingAnyHotItem do
-    cycle i from 0 to HOT_ITEMS.size() - 1 do
-        check player.isHoldingItem(HOT_ITEMS.get(i)) do
-            reply true
-        end
-    end
-    reply false
+    reply HOT_ITEMS.contains(player.getMainHandItem().getName()) || HOT_ITEMS.contains(player.getOffHandItem().getName())
 end
 
 task isWaterTorch takes itemHeld do

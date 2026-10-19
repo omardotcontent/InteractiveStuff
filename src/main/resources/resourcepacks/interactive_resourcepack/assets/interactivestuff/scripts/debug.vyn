@@ -1,5 +1,16 @@
+make debugModeOption = new ConfigOption("debug_mode", "toggle", false)
+debugModeOption.setLabel("interactive_stuff.config.menu.setting.debug")
+debugModeOption.setCategory("interactive_stuff.config.menu.pack.category.debug")
+debugModeOption.setTooltip("interactive_stuff.config.menu.setting.debug.tooltip")
+
+make debugCounterOption = new ConfigOption("debug_counters", "toggle", false)
+debugCounterOption.setLabel("interactive_stuff.config.menu.setting.counter")
+debugCounterOption.setCategory("interactive_stuff.config.menu.pack.category.debug")
+debugCounterOption.setTooltip("interactive_stuff.config.menu.setting.counter.tooltip")
+
 task onTick do
-    check !config.isResourcePackDebugModeEnabled() do
+    check !debugModeOption.getBoolean() do
+        showParticleCounters()
         reply nothing
     end
     debugText("§6Game version: " + modLoader.getRawGameVersion())
@@ -34,4 +45,11 @@ task onTick do
     debugText("§bZ Velocity: " + player.getVelocityZ())
     debugText("§bCamera Pitch: " + player.getCameraPitchVelocity())
     debugText("§bCamera Yaw: " + player.getCameraYawVelocity())
+    showParticleCounters()
+end
+
+task showParticleCounters do
+    check debugCounterOption.getBoolean() do
+        debugText(translateText("interactivestuff.debug.particles", particles.getCount(), config.getParticleLimit(), particles.getEmitterCount(), particles.getDroppedCount()), true)
+    end
 end

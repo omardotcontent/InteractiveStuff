@@ -4,6 +4,7 @@ import me.abdelaziz.api.annotation.VynFunc;
 import me.abdelaziz.api.annotation.VynType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import omar.projects.interactivestuff.compat.MinecraftAccess;
 
 @VynType(name = "ModLoader")
 public final class ModLoader {
@@ -32,7 +33,7 @@ public final class ModLoader {
 
     @VynFunc
     public String getRawGameVersion() {
-        return loader.getRawGameVersion();
+        return MinecraftAccess.gameVersion();
     }
 
 }

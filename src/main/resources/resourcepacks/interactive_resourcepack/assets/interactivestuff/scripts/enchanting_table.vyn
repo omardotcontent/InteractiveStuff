@@ -1,6 +1,20 @@
+importScript("interactivestuff:interactive_resourcepack", "effect_helpers")
+
+make particleOption = packToggle("particles_enchanting_table", "particles")
+particleOption.setOnChange("onParticleOptionChanged")
+
+make showBookOption = packToggle("show_enchanting_book", "appearance")
+showBookOption.setOnChange("onBookOptionChanged")
+
+make animateBookOption = packToggle("animate_enchanting_book", "animation")
+animateBookOption.setOnChange("onBookOptionChanged")
+
 lock interactiveItems = ["minecraft:enchanting_table"]
 
+make openingState = createProgressState()
+make glyphState = createProgressState()
 make openingProgress = 0
+make glyphProgress = 0
 
 make glyphParticles = new ParticleEmitter("minecraft:enchant")
 glyphParticles.setSpace("world")
@@ -18,12 +32,31 @@ glyphParticles.setAnimation("random", 1)
 glyphParticles.setLight(15)
 
 
+task syncParticleEmission do
+    check particleOption.getBoolean() do
+        glyphParticles.start()
+    otherwise
+        glyphParticles.stop()
+    end
+end
+
+task onParticleOptionChanged takes option, oldValue, newValue do
+    syncParticleEmission()
+end
+
+task onBookOptionChanged takes option, oldValue, newValue do
+    make openingState = createProgressState()
+    make openingProgress = 0
+end
+
+syncParticleEmission()
+
 task onItemUpdate takes itemRendered do
 
     check itemRendered.getName() != "minecraft:enchanting_table" do
         reply nothing
     otherwise
-		check modLoader.isModLoaded("punchy") do
+		check hasMod("punchy") do
 			itemRendered.translate(0,0.2,0)
 			itemRendered.scale(0.8,0.8,0.8)
 		end
@@ -36,9 +69,21 @@ task onItemUpdate takes itemRendered do
         make progress = 100
     end
 
-    make openingProgress = itemRendered.smooth(openingProgress, progress, 0.2)
-    glyphParticles.setRate(0.2 + (openingProgress / 100) * 0.3)
+    make glyphProgress = smoothItemProgress(glyphState, itemRendered, progress, 0.2)
+    glyphParticles.setRate(0.2 + (glyphProgress / 100) * 0.3)
+    syncParticleEmission()
     glyphParticles.attach(itemRendered)
+    check !showBookOption.getBoolean() do
+        make openingProgress = 0
+        resetItemProgress(openingState, itemRendered)
+        reply nothing
+    end
+    check animateBookOption.getBoolean() do
+        make openingProgress = smoothItemProgress(openingState, itemRendered, progress, 0.2)
+    otherwise
+        make openingProgress = 0
+        resetItemProgress(openingState, itemRendered)
+    end
     make book_left = new ItemModel("minecraft:book")
     make book_right = new ItemModel("minecraft:book")
 	book_left.setParent(itemRendered)

@@ -64,6 +64,7 @@ public final class ScriptInterpreter {
             environment.defineFunction("importScript", new ImportScript(RUNTIME));
             environment.defineFunction("excludeScript", new ExcludeScript(RUNTIME));
             environment.defineFunction("debugText", new DebugText());
+            environment.defineFunction("translateText", new TranslateText());
             environment.defineFunction("getDelta", new GetDelta());
             environment.defineFunction("getFrameId", new NativeFunction((ignoredFirst, ignoredSecond) -> new Value(RenderTickHandler.getFrameId())));
         });

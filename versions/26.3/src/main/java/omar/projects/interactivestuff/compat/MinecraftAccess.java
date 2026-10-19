@@ -8,10 +8,11 @@ import net.minecraft.client.player.LocalPlayer;
 /** Version-dependent client access kept outside the shared script runtime. */
 public final class MinecraftAccess {
     private MinecraftAccess() {}
+    public static String gameVersion() { return net.minecraft.SharedConstants.getCurrentVersion().name(); }
     public static void openDirectory(java.nio.file.Path path) { org.lwjgl.sdl.SDLMisc.SDL_OpenURL(path.toUri().toString()); }
     public static void chat(LocalPlayer player, net.minecraft.network.chat.Component message) { player.sendSystemMessage(message); }
     public static long dayTime(net.minecraft.world.level.Level level) { return level.getDefaultClockTime(); }
-    public static int foliageTint(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) { return level.getClientLeafTintColor(pos); }
+    public static int foliageTint(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) { return net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor((net.minecraft.client.renderer.block.BlockAndTintGetter) level, pos); }
     public static int grassTint(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) { return net.minecraft.client.renderer.BiomeColors.getAverageGrassColor((net.minecraft.client.renderer.block.BlockAndTintGetter) level, pos); }
     public static int dryFoliageTint(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) { return net.minecraft.client.renderer.BiomeColors.getAverageDryFoliageColor((net.minecraft.client.renderer.block.BlockAndTintGetter) level, pos); }
     public static int waterTint(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) { return net.minecraft.client.renderer.BiomeColors.getAverageWaterColor((net.minecraft.client.renderer.block.BlockAndTintGetter) level, pos); }

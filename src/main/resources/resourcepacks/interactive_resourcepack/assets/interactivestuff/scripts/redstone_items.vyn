@@ -1,12 +1,16 @@
+importScript("interactivestuff:interactive_resourcepack", "effect_helpers")
+
+make lampOption = packToggle("animate_redstone_lamp", "animation")
+
 lock interactiveItems = ["minecraft:redstone_lamp", "minecraft:redstone_torch"]
 
 task onItemUpdate takes itemRendered do
     check player.getGamemode() != "spectator" do
-        check itemRendered.getName() == "minecraft:redstone_lamp" && player.getSteppingBlock().getName() == "minecraft:redstone_block" && player.isSneaking() do
+        check lampOption.getBoolean() && itemRendered.getName() == "minecraft:redstone_lamp" && isRedstonePowered() do
             itemRendered.setItemModel("interactivestuff:redstone_lamp_on")
             itemRendered.setLight(15)
         end
-        check itemRendered.getName() == "minecraft:redstone_torch" && player.getSteppingBlock().getName() == "minecraft:redstone_block" && player.isSneaking() do
+        check itemRendered.getName() == "minecraft:redstone_torch" && isRedstonePowered() do
             itemRendered.setItemModel("interactivestuff:redstone_torch_off")
         end
     end

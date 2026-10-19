@@ -1,79 +1,39 @@
+importScript("interactivestuff:interactive_resourcepack", "effect_helpers")
+
+make animationOption = packToggle("animate_chests", "animation")
+animationOption.setOnChange("onAnimationChanged")
+
 lock interactiveItems = ["minecraft:chest", "minecraft:ender_chest", "minecraft:trapped_chest", "minecraft:copper_chest", "minecraft:waxed_copper_chest", "minecraft:exposed_copper_chest", "minecraft:waxed_exposed_copper_chest", "minecraft:weathered_copper_chest", "minecraft:waxed_weathered_copper_chest", "minecraft:oxidized_copper_chest", "minecraft:waxed_oxidized_copper_chest"]
 
-make chestProgress = 0
-make enderProgress = 0
-make trappedProgress = 0
-make copperProgress = 0
-make exposedProgress = 0
-make weatheredProgress = 0
-make oxidizedProgress = 0
+lock chestVariants = new Map
+chestVariants.put("minecraft:chest", "chest")
+chestVariants.put("minecraft:ender_chest", "ender_chest")
+chestVariants.put("minecraft:trapped_chest", "trapped_chest")
+chestVariants.put("minecraft:copper_chest", "copper_chest")
+chestVariants.put("minecraft:waxed_copper_chest", "copper_chest")
+chestVariants.put("minecraft:exposed_copper_chest", "exposed_copper_chest")
+chestVariants.put("minecraft:waxed_exposed_copper_chest", "exposed_copper_chest")
+chestVariants.put("minecraft:weathered_copper_chest", "weathered_copper_chest")
+chestVariants.put("minecraft:waxed_weathered_copper_chest", "weathered_copper_chest")
+chestVariants.put("minecraft:oxidized_copper_chest", "oxidized_copper_chest")
+chestVariants.put("minecraft:waxed_oxidized_copper_chest", "oxidized_copper_chest")
+
+make openingState = createProgressState()
+
+task onAnimationChanged takes option, previous, value do
+    make openingState = createProgressState()
+end
 
 task onItemUpdate takes itemRendered do
+    check !animationOption.getBoolean() do reply nothing end
+    make variant = chestVariants.get(itemRendered.getName())
+    check variant == nothing do reply nothing end
 
-    make chestTop = nothing
-    make openProgress = 0
-
-    check itemRendered.getName() == "minecraft:chest" do
-        itemRendered.setItemModel("interactivestuff:chest_base")
-        make chestTop = new ItemModel("minecraft:chest")
-        chestTop.setItemModel("interactivestuff:chest_top")
-        make chestProgress = chestTop.smooth(chestProgress, getFallTarget(), 0.2)
-        make openProgress = chestProgress
-    end
-
-    check itemRendered.getName() == "minecraft:ender_chest" do
-        itemRendered.setItemModel("interactivestuff:ender_chest_base")
-        make chestTop = new ItemModel("minecraft:ender_chest")
-        chestTop.setItemModel("interactivestuff:ender_chest_top")
-        make enderProgress = chestTop.smooth(enderProgress, getFallTarget(), 0.2)
-        make openProgress = enderProgress
-    end
-
-    check itemRendered.getName() == "minecraft:trapped_chest" do
-        itemRendered.setItemModel("interactivestuff:trapped_chest_base")
-        make chestTop = new ItemModel("minecraft:trapped_chest")
-        chestTop.setItemModel("interactivestuff:trapped_chest_top")
-        make trappedProgress = chestTop.smooth(trappedProgress, getFallTarget(), 0.2)
-        make openProgress = trappedProgress
-    end
-
-    check itemRendered.getName() == "minecraft:copper_chest" || itemRendered.getName() == "minecraft:waxed_copper_chest" do
-        itemRendered.setItemModel("interactivestuff:copper_chest_base")
-        make chestTop = new ItemModel("minecraft:copper_chest")
-        chestTop.setItemModel("interactivestuff:copper_chest_top")
-        make copperProgress = chestTop.smooth(copperProgress, getFallTarget(), 0.2)
-        make openProgress = copperProgress
-    end
-
-    check itemRendered.getName() == "minecraft:exposed_copper_chest" || itemRendered.getName() == "minecraft:waxed_exposed_copper_chest" do
-        itemRendered.setItemModel("interactivestuff:exposed_copper_chest_base")
-        make chestTop = new ItemModel("minecraft:exposed_copper_chest")
-        chestTop.setItemModel("interactivestuff:exposed_copper_chest_top")
-        make exposedProgress = chestTop.smooth(exposedProgress, getFallTarget(), 0.2)
-        make openProgress = exposedProgress
-    end
-
-    check itemRendered.getName() == "minecraft:weathered_copper_chest" || itemRendered.getName() == "minecraft:waxed_weathered_copper_chest" do
-        itemRendered.setItemModel("interactivestuff:weathered_copper_chest_base")
-        make chestTop = new ItemModel("minecraft:weathered_copper_chest")
-        chestTop.setItemModel("interactivestuff:weathered_copper_chest_top")
-        make weatheredProgress = chestTop.smooth(weatheredProgress, getFallTarget(), 0.2)
-        make openProgress = weatheredProgress
-    end
-
-    check itemRendered.getName() == "minecraft:oxidized_copper_chest" || itemRendered.getName() == "minecraft:waxed_oxidized_copper_chest" do
-        itemRendered.setItemModel("interactivestuff:oxidized_copper_chest_base")
-        make chestTop = new ItemModel("minecraft:oxidized_copper_chest")
-        chestTop.setItemModel("interactivestuff:oxidized_copper_chest_top")
-        make oxidizedProgress = chestTop.smooth(oxidizedProgress, getFallTarget(), 0.2)
-        make openProgress = oxidizedProgress
-    end
-
-    check chestTop == nothing do
-        reply nothing
-    otherwise
-		chestTop.setParent(itemRendered)
-	end
+    itemRendered.setItemModel("interactivestuff:" + variant + "_base")
+    make chestTop = new ItemModel("minecraft:" + variant)
+    chestTop.setItemModel("interactivestuff:" + variant + "_top")
+    chestTop.setParent(itemRendered)
+    make openProgress = smoothItemProgress(openingState, itemRendered, getFallTarget(), 0.2)
 
     check itemRendered.isRightHand() do
         chestTop.setPivot(0.12, 0.17, -0.063)
@@ -85,13 +45,5 @@ task onItemUpdate takes itemRendered do
 end
 
 task getFallTarget do
-    make vy = player.getVelocityY()
-    make fallTarget = vy * -100
-    check fallTarget > 100 do
-        make fallTarget = 100
-    end
-    check fallTarget < -7 do
-        make fallTarget = -7
-    end
-    reply fallTarget
+    reply max(-7, min(100, player.getVelocityY() * -100))
 end

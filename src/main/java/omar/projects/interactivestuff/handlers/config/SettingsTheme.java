@@ -13,6 +13,10 @@ public final class SettingsTheme {
     public static final int BARS = 0xF20F3448;
     public static final int ROW_LIGHT = 0x70304D61;
     public static final int ROW_DARK = 0x30132938;
+    public static final int DROPDOWN_SURFACE = 0xFF0A1B25;
+    public static final int DROPDOWN_EDGE = 0xFF587584;
+    public static final int DROPDOWN_HOVER = 0xFF214455;
+    public static final int DROPDOWN_SELECTED = 0xFF203747;
     public static final int SLOT_SHADOW = 0xFF373737;
     public static final int SLOT_LIGHT = 0xFFFFFFFF;
     public static final int SLOT_FILL = 0xFF8B8B8B;

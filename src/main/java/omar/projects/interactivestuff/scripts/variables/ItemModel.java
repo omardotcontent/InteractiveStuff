@@ -435,7 +435,7 @@ public class ItemModel {
         this.px = x;
         this.py = y;
         this.pz = z;
-        if (ConfigHandler.INSTANCE.resourcePackDebugMode)
+        if (ConfigHandler.INSTANCE.pivotMarkers)
             ItemModelRenderRegistry.pivot(this);
     }
 

@@ -1,29 +1,45 @@
+importScript("interactivestuff:interactive_resourcepack","physics_lib")
+
+make framePhysicsOption = packToggle("physics_item_frames", "physics")
+framePhysicsOption.setOnChange("onItemPhysicsChanged")
+
+make paintingPhysicsOption = packToggle("physics_paintings", "physics")
+paintingPhysicsOption.setOnChange("onItemPhysicsChanged")
+
+make signPhysicsOption = packToggle("physics_hanging_signs", "physics")
+signPhysicsOption.setOnChange("onItemPhysicsChanged")
+
+task onItemPhysicsChanged takes option, previous, value do
+    resetPhysicsEngine()
+end
+
 lock interactiveItems = ["minecraft:item_frame", "minecraft:glow_item_frame", "minecraft:painting", "minecraft:oak_hanging_sign", "minecraft:spruce_hanging_sign", "minecraft:birch_hanging_sign", "minecraft:jungle_hanging_sign", "minecraft:acacia_hanging_sign", "minecraft:dark_oak_hanging_sign", "minecraft:crimson_hanging_sign", "minecraft:warped_hanging_sign", "minecraft:cherry_hanging_sign", "minecraft:mangrove_hanging_sign", "minecraft:pale_oak_hanging_sign", "minecraft:bamboo_hanging_sign"]
 
-importScript("interactivestuff:interactive_resourcepack","physics_lib")
 
 lock FRAME_ITEMS = new List
 FRAME_ITEMS.add("minecraft:item_frame", "minecraft:glow_item_frame", "minecraft:painting", "minecraft:oak_hanging_sign", "minecraft:spruce_hanging_sign", "minecraft:birch_hanging_sign", "minecraft:jungle_hanging_sign", "minecraft:acacia_hanging_sign", "minecraft:dark_oak_hanging_sign", "minecraft:crimson_hanging_sign", "minecraft:warped_hanging_sign", "minecraft:cherry_hanging_sign", "minecraft:mangrove_hanging_sign", "minecraft:pale_oak_hanging_sign", "minecraft:bamboo_hanging_sign")
 
 task onItemUpdate takes itemRendered do
     check player.getGamemode() != "spectator" && isFrame(itemRendered) do
-        check !modLoader.isModLoaded("holdmyitems") do
-            runPhysicsEngine(0.01, 0.1, 0.6, 0.3, 0.2, 0.8, 60, 0)
+        check !hasMod("holdmyitems") do
             itemRendered.setPivot(0, 0.4, 0)
-            itemRendered.rotate(angleX, 0, -angleZ)
+            check isPhysicsEnabled(itemRendered) do
+                runPhysicsEngine(0.01, 0.1, 0.6, 0.3, 0.2, 0.8, 60, 0)
+                itemRendered.rotate(angleX, 0, -angleZ)
+            end
 
             check itemRendered.isRightHand() do
-				check !modLoader.isModLoaded("punchy") do
+				check !hasMod("punchy") do
 					itemRendered.rotateY(65)
 					itemRendered.rotateX(25)
 				end
             otherwise
-				check !modLoader.isModLoaded("punchy") do
+				check !hasMod("punchy") do
 					itemRendered.rotateY(-65)
 					itemRendered.rotateX(25)
 				end
             end
-			check modLoader.isModLoaded("punchy") do
+			check hasMod("punchy") do
 				itemRendered.translate(0,-0.6,0)
 			end
         end
@@ -32,4 +48,15 @@ end
 
 task isFrame takes item do
     reply FRAME_ITEMS.contains(item.getName())
+end
+
+task isPhysicsEnabled takes item do
+    check !masterPhysicsOption.getBoolean() do reply false end
+    check item.getName() == "minecraft:item_frame" || item.getName() == "minecraft:glow_item_frame" do
+        reply framePhysicsOption.getBoolean()
+    end
+    check item.getName() == "minecraft:painting" do
+        reply paintingPhysicsOption.getBoolean()
+    end
+    reply signPhysicsOption.getBoolean()
 end

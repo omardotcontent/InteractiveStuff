@@ -3,6 +3,7 @@ plugins {
     id 'net.fabricmc.fabric-loom-remap' version '1.17.19' apply false
     id 'base'
     id 'idea'
+    id 'me.modmuss50.mod-publish-plugin' version '2.2.1'
 }
 
 abstract class MinecraftClientService implements org.gradle.api.services.BuildService<org.gradle.api.services.BuildServiceParameters.None> {}
@@ -83,21 +84,25 @@ tasks.register('verifyTranslations') {
     group = 'verification'
     description = 'Checks locale coverage and translation format arguments.'
     def languages = file('src/main/resources/assets/interactivestuff/lang')
+    def packLanguages = file('src/main/resources/resourcepacks/interactive_resourcepack/assets/interactivestuff/lang')
     inputs.dir(languages)
+    inputs.dir(packLanguages)
     doLast {
         def expected = ['en_us', 'nl_nl', 'fil_ph', 'fr_fr', 'fr_ca', 'pl_pl', 'zh_cn', 'es_ar', 'es_mx', 'tr_tr', 'uk_ua', 'th_th', 'hi_in', 'en_gb', 'en_ca', 'en_au']
-        def source = new groovy.json.JsonSlurper().parse(new File(languages, 'en_us.json'), 'UTF-8')
         def arguments = { String text -> (text =~ /%[0-9]+[$]s/).findAll().sort() }
-        expected.each { locale ->
-            def translated = new groovy.json.JsonSlurper().parse(new File(languages, "${locale}.json"), 'UTF-8')
-            if (translated.keySet() != source.keySet()) throw new GradleException("Translation keys differ for ${locale}")
-            source.each { key, value ->
-                if (!(translated[key] instanceof String) || translated[key].isEmpty()
-                        || arguments(translated[key]) != arguments(value))
-                    throw new GradleException("Invalid translation/format arguments: ${locale}:${key}")
+        [languages, packLanguages].each { directory ->
+            def source = new groovy.json.JsonSlurper().parse(new File(directory, 'en_us.json'), 'UTF-8')
+            expected.each { locale ->
+                def translated = new groovy.json.JsonSlurper().parse(new File(directory, "${locale}.json"), 'UTF-8')
+                if (translated.keySet() != source.keySet()) throw new GradleException("Translation keys differ for ${directory.name}:${locale}")
+                source.each { key, value ->
+                    if (!(translated[key] instanceof String) || translated[key].isEmpty()
+                            || arguments(translated[key]) != arguments(value))
+                        throw new GradleException("Invalid translation/format arguments: ${directory}:${locale}:${key}")
+                }
             }
+            println "Verified ${expected.size()} complete locales (${source.size()} keys each) in ${relativePath(directory)}."
         }
-        println "Verified ${expected.size()} complete locales (${source.size()} keys each)."
     }
 }
 
@@ -108,7 +113,7 @@ def stageRelease = tasks.register('stageRelease', Sync) {
     description = 'Collects the verified release JARs and release notes.'
     dependsOn tasks.named('buildAll')
     into distributionDirectory
-    from('LICENSE.txt', 'CHANGELOG.md', 'README.md')
+    from('LICENSE.txt', 'changelog.md', 'README.md')
 }
 subprojects { targetProject ->
     targetProject.afterEvaluate {
@@ -150,6 +155,8 @@ tasks.register('releaseAll', Zip) {
     reproducibleFileOrder = true
 }
 
+apply from: 'gradle/publishing.gradle'
+
 tasks.register('commands') {
     group = 'interactivestuff'
     description = 'Prints the supported versions and everyday Gradle commands.'
@@ -158,6 +165,8 @@ tasks.register('commands') {
         println '  ./gradlew prepareIde   Refresh all IDE source adapters and client run configurations'
         println '  ./gradlew buildAll     Build and check every Minecraft version'
         println '  ./gradlew releaseAll   Package upload JARs in build/dist/'
+        println '  ./gradlew previewPublish  Build and preview Modrinth/CurseForge uploads without publishing'
+        println '  ./gradlew publishAll      Publish all builds; full changelog on the newest Minecraft target'
         println '  ./gradlew testAll      Run all real-client tests (requires a display)'
         println '  ./gradlew cleanAll     Clean build outputs while preserving development saves'
         println ''

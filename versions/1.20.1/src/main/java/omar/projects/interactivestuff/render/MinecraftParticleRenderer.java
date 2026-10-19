@@ -20,13 +20,14 @@ public final class MinecraftParticleRenderer {
         RenderTransforms.multiply(pose, new org.joml.Matrix4f(com.mojang.blaze3d.systems.RenderSystem.getModelViewStack().last().pose()).invert());
         var draws = new java.util.ArrayList<ParticleSystem.DrawParticle>();
         if (config.enableParticles) draws.addAll(ParticleSystem.INSTANCE.snapshot(config.particleEmitterMarkers));
-        if (config.resourcePackDebugMode) draws.addAll(ModelDebugMarkers.snapshot());
+        if (config.pivotMarkers) draws.addAll(ModelDebugMarkers.snapshot());
         if (draws.isEmpty()) return;
         // Finish solid hand buffers before drawing overlay markers/effects.
         queue.endBatch();
         for (var particle : draws) {
-            RenderType type = particle.marker() ? RenderType.textSeeThrough(ParticleTextures.MARKER) : particle.depth()
-                    ? RenderType.text(ParticleTextures.texture(particle)) : RenderType.textSeeThrough(ParticleTextures.texture(particle));
+            var texture = particle.marker() ? ParticleTextures.MARKER : ParticleTextures.texture(particle);
+            RenderType type = particle.depthTest(config.debugMarkersThroughItems)
+                    ? RenderType.text(texture) : RenderType.textSeeThrough(texture);
             ParticleGeometry.draw(particle, pose.last(), queue.getBuffer(type));
         }
         // Flush while the hand pass still owns its camera matrix.

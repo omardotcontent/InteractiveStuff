@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 
 /** Shared screen behavior. Only native drawing and entry-point APIs vary by Minecraft release. */
 public abstract class SettingsScreen extends Screen {
-    public enum Section { GENERAL, PARTICLES, SCRIPTING, MATERIALS, EXCLUSIONS, PACKS }
+    public enum Section { GENERAL, PARTICLES, SCRIPTING, MATERIALS, EXCLUSIONS, DEBUG, PACKS }
+    private static final List<Section> NAVIGATION = List.of(Section.GENERAL, Section.SCRIPTING, Section.PARTICLES, Section.MATERIALS, Section.DEBUG, Section.PACKS);
     public final Screen parent;
     private ConfigHandler draft;
     private final ConfigHandler defaults;
@@ -38,10 +39,16 @@ public abstract class SettingsScreen extends Screen {
     private Button addItems, removeItems, editPitch;
     private static final Identifier LOGO = Identifier.parse("interactivestuff:textures/gui/icon.png");
     private final Map<String, ConfigOption> colorControls = new HashMap<>();
+    private final Map<String, Integer> labelEnds = new HashMap<>();
     private final Map<AbstractWidget, Integer> animated = new LinkedHashMap<>();
+    private final Map<AbstractWidget, BooleanSupplier> enabledControls = new LinkedHashMap<>();
     private Row building;
     private EditBox search;
-    private Button apply;
+    private Button apply, reset;
+    private final PackSettingsNavigation packNavigation = new PackSettingsNavigation();
+    private boolean packsExpanded, revealPackSelection;
+    private int sidebarOffset, sidebarCount, previousWidth, previousHeight;
+    private final List<TreeEntry> packTree = new ArrayList<>();
     private final Map<String, String> invalid = new LinkedHashMap<>();
     private final Map<String, String> pendingText = new HashMap<>();
     private final Map<String, Runnable> refreshValues = new HashMap<>();
@@ -57,17 +64,33 @@ public abstract class SettingsScreen extends Screen {
     }
     public ConfigHandler draft() { return draft; }
     public Section section() { return section; }
-    public void select(Section value) { section = value; editing = null; picker = null; soundPicker = null; pitchItem = null; offset = 0; transition = System.nanoTime(); init(); }
+    public void select(Section value) { packsExpanded = value == Section.PACKS; section = value; editing = null; picker = null; soundPicker = null; pitchItem = null; offset = 0; transition = System.nanoTime(); init(); }
+    public boolean packsExpanded() { return packsExpanded; }
+    public int sidebarWidth() { return contentX - 14; }
+    public String selectedPack() { return packNavigation.pack(); }
+    public String selectedPackCategory() { return packNavigation.category(); }
+    public void openPack(String id) { openPackCategory(id, null); }
+    public void openPackCategory(String id, String category) {
+        packNavigation.refresh(PackOptions.options()); packNavigation.open(id, category);
+        section = Section.PACKS; packsExpanded = true; revealPackSelection = true;
+        editing = null; picker = null; soundPicker = null; pitchItem = null;
+        query = ""; offset = 0; transition = System.nanoTime(); init();
+    }
+    public void collapsePacks() { packsExpanded = false; init(); }
+    private void togglePack(String id) {
+        if (Objects.equals(packNavigation.pack(), id)) openPackCategory(null, null);
+        else openPack(id);
+    }
     public void search(String value) {
         if (picker != null) picker.filter(value);
         else if (soundPicker != null) { soundPicker.filter(value); offset = 0; }
         else { query = value; offset = 0; }
         refreshContent();
     }
-    public void editMaterial(int index) { section = Section.MATERIALS; query = ""; editing = draft.materials.get(index); picker = null; soundPicker = null; pitchItem = null; offset = 0; init(); }
+    public void editMaterial(int index) { packsExpanded = false; section = Section.MATERIALS; query = ""; editing = draft.materials.get(index); picker = null; soundPicker = null; pitchItem = null; offset = 0; init(); }
     public void openMaterialItems() { if (editing != null) { picker = new MaterialItemPicker(editing); soundPicker = null; pitchItem = null; init(); } }
     public void openItemPitches() { if (editing != null) { picker = MaterialItemPicker.pitches(editing); soundPicker = null; pitchItem = null; init(); } }
-    public void openExclusions() { section = Section.EXCLUSIONS; editing = null; query = ""; picker = MaterialItemPicker.exclusions(draft.excludedBlocks); soundPicker = null; pitchItem = null; init(); }
+    public void openExclusions() { packsExpanded = false; section = Section.EXCLUSIONS; editing = null; query = ""; picker = MaterialItemPicker.exclusions(draft.excludedBlocks); soundPicker = null; pitchItem = null; init(); }
     public void openSounds() { if (editing != null) { soundPicker = new SoundPicker(); picker = null; pitchItem = null; offset = 0; init(); } }
     public void editItemPitch(Item item) {
         if (picker != null && picker.purpose == MaterialItemPicker.Purpose.ITEM_PITCHES && picker.contains(item)) { pitchItem = item; offset = 0; init(); }
@@ -98,17 +121,24 @@ public abstract class SettingsScreen extends Screen {
     @Override protected void init() {
         clearWidgets(); displayed.clear(); animated.clear(); navigation.clear(); icons.clear(); slots.clear();
         addItems = null; removeItems = null; editPitch = null;
-        int side = Math.max(104, Math.min(126, width / 4));
+        packNavigation.refresh(PackOptions.options());
+        if (width != previousWidth || height != previousHeight) revealPackSelection = true;
+        previousWidth = width; previousHeight = height;
+        int side = packsExpanded ? Math.max(104, Math.min(178, width / 3)) : Math.max(104, Math.min(126, width / 4));
         contentX = side + 14; contentWidth = width - contentX - 12;
         rowTop = soundPicker == null ? 68 : 96; visibleCount = Math.max(1, (height - 76 - rowTop - 23) / 28 + 1);
-        int y = 43;
-        for (Section value : Section.values()) {
-            Button category = addRenderableWidget(Button.builder(Component.empty(), ignored -> select(value))
-                    .createNarration(ignored -> Component.literal(name(value))).bounds(10, y, side - 20, 20).build());
-            category.setTooltip(Tooltip.create(Component.literal(name(value))));
-            category.active = value != section || editing != null || picker != null;
-            navigation.add(new Navigation(category, value));
-            y += 24;
+        if (packsExpanded) buildPackNavigation(side);
+        else for (Section value : NAVIGATION) {
+            String label = switch (value) {
+                case EXCLUSIONS -> SettingsText.text("category.exclusions.short");
+                case PACKS -> SettingsText.text("category.packs.short");
+                default -> name(value);
+            };
+            boolean selected = value == section || value == Section.MATERIALS && section == Section.EXCLUSIONS;
+            Button category = navigationButton(label, value == Section.PACKS ? SettingsText.text("pack.navigation.open") : name(value), value == Section.MATERIALS ? SettingsIcon.SOUND : SettingsIcon.valueOf(value.name()),
+                    43 + NAVIGATION.indexOf(value) * 24, side - 20, 20, () -> select(value), selected, 0, true,
+                    value == Section.PACKS ? SettingsIcon.EXPAND : null, NavigationStyle.BUTTON);
+            category.active = value == Section.PACKS || !selected || editing != null || picker != null || section == Section.EXCLUSIONS;
         }
         iconButton(SettingsIcon.FOLDER, SettingsText.text("action.folder"), width - 30, 6, () -> ConfigHandler.INSTANCE.openConfigDirectory());
         search = new EditBox(font, contentX, 39, contentWidth, 20, Component.literal(picker != null ? SettingsText.text("search.items") : soundPicker != null ? SettingsText.text("search.sounds") : SettingsText.text("search.settings")));
@@ -118,13 +148,13 @@ public abstract class SettingsScreen extends Screen {
         search.setTooltip(Tooltip.create(Component.literal(picker != null ? SettingsText.text("search.items.tooltip") : soundPicker != null ? SettingsText.text("search.sounds.tooltip") : SettingsText.text("search.settings.tooltip"))));
         search.active = pitchItem == null;
         search.setResponder(this::search); addRenderableWidget(search);
-        iconButton(SettingsIcon.RESET, SettingsText.text("action.reset"), width - 56, height - 29, this::resetPage);
+        reset = iconButton(() -> SettingsIcon.RESET, this::resetDescription, width - 56, height - 29, this::resetPage);
         iconButton(SettingsIcon.CLOSE, SettingsText.text("action.cancel"), 10, height - 29, this::onClose);
         apply = iconButton(SettingsIcon.CHECK, SettingsText.text("action.apply"), width - 30, height - 29, this::applyChanges);
         refreshContent();
     }
     private static String name(Section value) {
-        return SettingsText.text("category." + value.name().toLowerCase(Locale.ROOT));
+        return SettingsText.text("category." + (value == Section.SCRIPTING ? "rendering" : value.name().toLowerCase(Locale.ROOT)));
     }
     private Button button(String text, int x, int y, int w, int h, Runnable action) {
         return addRenderableWidget(Button.builder(Component.literal(text), ignored -> action.run()).bounds(x, y, w, h).build());
@@ -144,21 +174,87 @@ public abstract class SettingsScreen extends Screen {
         icons.add(new IconControl(button, icon, stateColor));
         return button;
     }
-    private record Row(String key, String label, String help, Consumer<Integer> build, Item icon, Runnable reset) {
-        Row(String key, String label, String help, Consumer<Integer> build, Item icon) { this(key, label, help, build, icon, null); }
+    private record Row(String key, String label, String help, Consumer<Integer> build, Item icon, Runnable reset, BooleanSupplier enabled) {
+        Row(String key, String label, String help, Consumer<Integer> build, Item icon, Runnable reset) { this(key, label, help, build, icon, reset, null); }
+        Row(String key, String label, String help, Consumer<Integer> build, Item icon) { this(key, label, help, build, icon, null, null); }
+        boolean isEnabled() { return enabled == null || enabled.getAsBoolean(); }
     }
-    private record Navigation(Button button, Section section) {}
+    private enum NavigationStyle { BUTTON, PACK_HEADER, PACK_OPTION }
+    private record Navigation(Button button, String label, SettingsIcon icon, boolean selected, int indent, boolean centered,
+                              SettingsIcon disclosure, NavigationStyle style) {}
+    private record TreeEntry(String pack, String category, String label) {}
     private record IconControl(Button button, Supplier<SettingsIcon> icon, java.util.function.IntSupplier stateColor) {}
     private record SlotControl(Button button, MaterialItemPicker.Entry entry, boolean available) {}
     private record InventoryPane(int x, int y, int columns, int rows, boolean available) {
         int size() { return columns * rows; }
         int bottom() { return y + rows * 18; }
     }
+    private Button navigationButton(String label, String help, SettingsIcon icon, int y, int w, int h,
+                                    Runnable action, boolean selected, int indent, boolean centered, SettingsIcon disclosure, NavigationStyle style) {
+        Button button = addRenderableWidget(Button.builder(Component.empty(), ignored -> action.run())
+                .createNarration(ignored -> Component.literal(help)).bounds(10, y, w, h).build());
+        button.setTooltip(Tooltip.create(Component.literal(help)));
+        navigation.add(new Navigation(button, label, icon, selected, indent, centered, disclosure, style));
+        return button;
+    }
+    private void buildPackNavigation(int side) {
+        navigationButton(SettingsText.text("pack.navigation.settings"), SettingsText.text("pack.navigation.back"), SettingsIcon.BACK,
+                43, side - 20, 20, this::collapsePacks, false, 0, true, null, NavigationStyle.BUTTON);
+        packTree.clear();
+        for (String id : packNavigation.packs()) {
+            packTree.add(new TreeEntry(id, null, packName(id)));
+            if (id.equals(packNavigation.pack())) for (String category : packNavigation.categories(id))
+                packTree.add(new TreeEntry(id, category, SettingsText.resolve(category)));
+        }
+        int available = Math.max(20, height - 35 - 67);
+        boolean paged = packTree.size() > available / 20;
+        sidebarCount = Math.max(1, (available - (paged ? 24 : 0)) / 20);
+        sidebarOffset = Math.max(0, Math.min(sidebarOffset, Math.max(0, packTree.size() - sidebarCount)));
+        if (revealPackSelection) {
+            for (int i = 0; i < packTree.size(); i++) {
+                TreeEntry entry = packTree.get(i);
+                if (Objects.equals(entry.pack, packNavigation.pack()) && Objects.equals(entry.category, packNavigation.category())) {
+                    if (i < sidebarOffset) sidebarOffset = i;
+                    if (i >= sidebarOffset + sidebarCount) sidebarOffset = i - sidebarCount + 1;
+                    break;
+                }
+            }
+            revealPackSelection = false;
+        }
+        for (int i = sidebarOffset; i < Math.min(packTree.size(), sidebarOffset + sidebarCount); i++) {
+            TreeEntry entry = packTree.get(i);
+            boolean parent = entry.category == null;
+            boolean selected = Objects.equals(entry.pack, packNavigation.pack()) && Objects.equals(entry.category, packNavigation.category());
+            String help = parent ? SettingsText.text("pack.navigation.pack", entry.label) + "\n" + entry.pack
+                    : SettingsText.text("pack.navigation.category", packName(entry.pack), entry.label);
+            Button button = navigationButton(entry.label, help, parent ? SettingsIcon.PACKS : null,
+                    67 + (i - sidebarOffset) * 20, side - 20, 18,
+                    () -> { if (parent) togglePack(entry.pack); else openPackCategory(entry.pack, entry.category); }, selected,
+                    parent ? 5 : 14, false, parent ? entry.pack.equals(packNavigation.pack()) ? SettingsIcon.COLLAPSE : SettingsIcon.EXPAND : null,
+                    parent ? NavigationStyle.PACK_HEADER : NavigationStyle.PACK_OPTION);
+            button.active = parent || !selected;
+        }
+        if (paged) {
+            Button previous = iconButton(SettingsIcon.BACK, SettingsText.text("pack.navigation.previous"), 10, height - 57, () -> scrollPackNavigation(-sidebarCount));
+            Button next = iconButton(SettingsIcon.NEXT, SettingsText.text("pack.navigation.next"), 36, height - 57, () -> scrollPackNavigation(sidebarCount));
+            previous.active = sidebarOffset > 0; next.active = sidebarOffset + sidebarCount < packTree.size();
+        }
+    }
+    private void scrollPackNavigation(int distance) {
+        sidebarOffset = Math.max(0, Math.min(Math.max(0, packTree.size() - sidebarCount), sidebarOffset + distance));
+        init();
+    }
+    private String resetDescription() {
+        if (section != Section.PACKS) return SettingsText.text("action.reset");
+        if (packNavigation.pack() == null) return SettingsText.text("pack.navigation.reset_select");
+        return packNavigation.category() == null ? SettingsText.text("pack.navigation.reset_pack", packName(packNavigation.pack()))
+                : SettingsText.text("pack.navigation.reset_category", SettingsText.resolve(packNavigation.category()), packName(packNavigation.pack()));
+    }
     private void refreshContent() {
         if (animated.containsKey(getFocused())) setFocused(null);
         for (AbstractWidget widget : new ArrayList<>(animated.keySet())) removeWidget(widget);
         icons.removeIf(icon -> animated.containsKey(icon.button));
-        animated.clear(); displayed.clear(); colorControls.clear(); refreshValues.clear(); slots.clear();
+        animated.clear(); enabledControls.clear(); displayed.clear(); colorControls.clear(); labelEnds.clear(); refreshValues.clear(); slots.clear();
         if (picker != null && pitchItem == null) { buildInventory(); updateValidation(); return; }
         if (soundPicker != null) {
             var back = iconButton(SettingsIcon.BACK, SettingsText.text("back.material_sound"), contentX, rowTop - 28, () -> { soundPicker = null; offset = 0; init(); });
@@ -171,9 +267,9 @@ public abstract class SettingsScreen extends Screen {
         else if (needle.isEmpty() || editing != null) all.addAll(rows());
         else {
             Section savedSection = section;
-            for (Section value : Section.values()) {
+            for (Section value : NAVIGATION) {
                 section = value;
-                for (Row row : rows()) all.add(new Row(row.key, row.label, name(value) + " · " + row.help, row.build, row.icon, row.reset));
+                for (Row row : rows()) all.add(new Row(row.key, row.label, name(value) + " · " + row.help, row.build, row.icon, row.reset, row.enabled));
             }
             section = savedSection;
         }
@@ -188,10 +284,14 @@ public abstract class SettingsScreen extends Screen {
                 row.reset.run(); invalid.remove(row.key); pendingText.remove(row.key); refreshContent();
             });
             building = null;
+            int firstControl = contentX + contentWidth;
             for (var child : children()) if (!before.contains(child) && child instanceof AbstractWidget widget) {
+                firstControl = Math.min(firstControl, widget.getX());
                 animated.put(widget, widget.getX());
+                if (row.enabled != null) enabledControls.put(widget, row.enabled);
                 if (icons.stream().noneMatch(control -> control.button == widget)) widget.setTooltip(Tooltip.create(Component.literal(row.label + "\n" + row.help)));
             }
+            labelEnds.put(row.key, firstControl);
             displayed.add(row);
         }
         if (count > visibleCount) {
@@ -200,7 +300,15 @@ public abstract class SettingsScreen extends Screen {
             var next = iconButton(SettingsIcon.NEXT, SettingsText.text("page.next"), contentX + 26, y, () -> scroll(visibleCount)); next.active = offset + visibleCount < count;
             animated.put(previous, previous.getX()); animated.put(next, next.getX());
         }
+        updateRowAvailability();
         updateValidation();
+    }
+    private void updateRowAvailability() {
+        enabledControls.forEach((widget, enabled) -> {
+            widget.active = enabled.getAsBoolean();
+            if (widget instanceof EditBox field) field.setEditable(widget.active);
+            if (!widget.active && getFocused() == widget) setFocused(null);
+        });
     }
     private void scroll(int distance) { offset += distance; refreshContent(); }
     private void buildInventory() {
@@ -220,7 +328,11 @@ public abstract class SettingsScreen extends Screen {
             selectedPane = new InventoryPane(x, availablePane.bottom() + 44, columns, rows, false);
         }
         var before = new HashSet<>(children());
-        iconButton(SettingsIcon.BACK, editing == null ? SettingsText.text("back.exclusions") : SettingsText.text("back.material_items"), contentX, rowTop, () -> { picker = null; init(); });
+        iconButton(SettingsIcon.BACK, editing == null ? SettingsText.text("back.exclusions") : SettingsText.text("back.material_items"), contentX, rowTop, () -> {
+            boolean exclusions = picker.purpose == MaterialItemPicker.Purpose.EXCLUSIONS;
+            picker = null;
+            if (exclusions) select(Section.MATERIALS); else init();
+        });
         inventoryPane(availablePane, availablePane.bottom() + 4);
         inventoryPane(selectedPane, wide ? selectedPane.bottom() + 4 : height - 57);
         for (var child : children()) if (!before.contains(child) && child instanceof AbstractWidget widget) animated.put(widget, widget.getX());
@@ -282,6 +394,10 @@ public abstract class SettingsScreen extends Screen {
         refreshContent();
     }
     public boolean scrollContent(double mouseX, double mouseY, double delta) {
+        if (packsExpanded && mouseX >= 0 && mouseX < sidebarWidth() && mouseY >= 67 && mouseY < height - 35 && delta != 0) {
+            if (packTree.size() > sidebarCount) scrollPackNavigation(delta < 0 ? 1 : -1);
+            return true;
+        }
         if (picker != null && pitchItem == null && delta != 0 && mouseX >= contentX && mouseY >= rowTop && mouseY < height - 72) {
             boolean available = mouseY < selectedPane.y - 12 || availablePane.y == selectedPane.y && mouseX < selectedPane.x;
             changeInventoryPage(available, delta < 0 ? 1 : -1); return true;
@@ -295,8 +411,6 @@ public abstract class SettingsScreen extends Screen {
         List<Row> rows = new ArrayList<>();
         switch (section) {
             case GENERAL -> {
-                toggle(rows, "hits", SettingsText.text("setting.hits"), SettingsText.text("setting.hits.tooltip"), () -> draft.enableInteractiveHits, value -> draft.enableInteractiveHits = value);
-                number(rows, "cooldown", SettingsText.text("setting.cooldown"), SettingsText.text("setting.cooldown.tooltip"), 0, 100, 1, () -> (double) draft.HitCooldownTicks, value -> draft.HitCooldownTicks = value.intValue());
                 toggle(rows, "animation", SettingsText.text("setting.animation"), SettingsText.text("setting.animation.tooltip"), () -> draft.menuAnimations, value -> draft.menuAnimations = value);
                 action(rows, "reload", SettingsText.text("setting.reload"), SettingsText.text("setting.reload.tooltip"), () -> { draft = ConfigHandler.load(); invalid.clear(); pendingText.clear(); error = ""; init(); });
             }
@@ -304,13 +418,15 @@ public abstract class SettingsScreen extends Screen {
                 toggle(rows, "particles", SettingsText.text("setting.particles"), SettingsText.text("setting.particles.tooltip"), () -> draft.enableParticles, value -> draft.enableParticles = value);
                 number(rows, "density", SettingsText.text("setting.density"), SettingsText.text("setting.density.tooltip"), 0, 200, 1, () -> (double) draft.particleDensity, value -> draft.particleDensity = value.intValue());
                 number(rows, "limit", SettingsText.text("setting.limit"), SettingsText.text("setting.limit.tooltip"), 0, 4096, 1, () -> (double) draft.particleLimit, value -> draft.particleLimit = value.intValue());
-                toggle(rows, "counter", SettingsText.text("setting.counter"), SettingsText.text("setting.counter.tooltip"), () -> draft.particleDebugCounters, value -> draft.particleDebugCounters = value);
-                toggle(rows, "markers", SettingsText.text("setting.markers"), SettingsText.text("setting.markers.tooltip"), () -> draft.particleEmitterMarkers, value -> draft.particleEmitterMarkers = value);
             }
             case SCRIPTING -> {
-                toggle(rows, "debug", SettingsText.text("setting.debug"), SettingsText.text("setting.debug.tooltip"), () -> draft.resourcePackDebugMode, value -> draft.resourcePackDebugMode = value);
                 toggle(rows, "matrix", SettingsText.text("setting.matrix"), SettingsText.text("setting.matrix.tooltip"), () -> draft.resourcePackMatrixEditing, value -> draft.resourcePackMatrixEditing = value);
                 toggle(rows, "color", SettingsText.text("setting.color"), SettingsText.text("setting.color.tooltip"), () -> draft.resourcePackColorChanging, value -> draft.resourcePackColorChanging = value);
+            }
+            case DEBUG -> {
+                toggle(rows, "pivot_markers", SettingsText.text("setting.pivot_markers"), SettingsText.text("setting.pivot_markers.tooltip"), () -> draft.pivotMarkers, value -> draft.pivotMarkers = value);
+                toggle(rows, "markers", SettingsText.text("setting.markers"), SettingsText.text("setting.markers.tooltip"), () -> draft.particleEmitterMarkers, value -> draft.particleEmitterMarkers = value);
+                toggle(rows, "marker_visibility", SettingsText.text("setting.marker_visibility"), SettingsText.text("setting.marker_visibility.tooltip"), () -> draft.debugMarkersThroughItems, value -> draft.debugMarkersThroughItems = value);
             }
             case EXCLUSIONS -> action(rows, "excluded:items", SettingsText.text("exclusions.count", draft.excludedBlocks.size()), SettingsText.text("exclusions.tooltip"), this::openExclusions);
             case MATERIALS -> materialRows(rows);
@@ -319,7 +435,14 @@ public abstract class SettingsScreen extends Screen {
         return rows;
     }
     private void materialRows(List<Row> rows) {
+        int first = rows.size();
         if (editing == null) {
+            toggle(rows, "hits", SettingsText.text("setting.hits"), SettingsText.text("setting.hits.tooltip"), () -> draft.enableInteractiveHits, value -> {
+                draft.enableInteractiveHits = value;
+                updateRowAvailability();
+            });
+            number(rows, "cooldown", SettingsText.text("setting.cooldown"), SettingsText.text("setting.cooldown.tooltip"), 0, 100, 1, () -> (double) draft.HitCooldownTicks, value -> draft.HitCooldownTicks = value.intValue());
+            action(rows, "excluded:items", SettingsText.text("exclusions.count", draft.excludedBlocks.size()), SettingsText.text("exclusions.tooltip"), this::openExclusions);
             action(rows, "new", SettingsText.text("material.add"), SettingsText.text("material.add.tooltip"), () -> {
                 section = Section.MATERIALS; query = ""; editing = new InteractionMaterial(SettingsText.text("material.new")); draft.materials.add(editing); offset = 0; init();
             });
@@ -350,6 +473,11 @@ public abstract class SettingsScreen extends Screen {
             toggle(rows, materialKey + "block", SettingsText.text("material.block"), SettingsText.text("material.block.tooltip"), () -> material.requiresBlockHit, value -> material.requiresBlockHit = value);
             action(rows, materialKey + "pitches", SettingsText.text("material.pitches_count", material.customPitches.size()), SettingsText.text("material.pitches.tooltip"), this::openItemPitches);
             action(rows, "preview", SettingsText.text("material.preview"), SettingsText.text("material.preview.tooltip"), () -> SettingsAccess.preview(material));
+        }
+        for (int index = first; index < rows.size(); index++) {
+            Row row = rows.get(index);
+            if (!row.key.equals("hits") && !row.key.equals("back"))
+                rows.set(index, new Row(row.key, row.label, row.help, row.build, row.icon, row.reset, () -> draft.enableInteractiveHits));
         }
     }
     private String pitchKey(Item item) { return "mat:" + System.identityHashCode(editing) + ":pitch:" + BuiltInRegistries.ITEM.getKey(item); }
@@ -386,12 +514,27 @@ public abstract class SettingsScreen extends Screen {
         return pack == null ? id : pack.getTitle().getString();
     }
     private void packRows(List<Row> rows) {
-        String group = "";
-        for (ConfigOption option : PackOptions.options().stream().sorted(Comparator.comparing((ConfigOption option) -> option.owner.getPackId()).thenComparing(option -> option.category)).toList()) {
-            String nextGroup = packName(option.owner.getPackId()) + " / " + SettingsText.resolve(option.category);
-            if (!nextGroup.equals(group)) {
+        packNavigation.refresh(PackOptions.options());
+        boolean searching = !query.isBlank();
+        if (!searching && packNavigation.pack() == null) {
+            for (String id : packNavigation.packs()) packDestination(rows, "pack-open:" + id, packName(id),
+                    SettingsText.text("pack.navigation.summary", packNavigation.options(id, null).size(), packNavigation.categories(id).size()) + "\n" + id, () -> openPack(id));
+            return;
+        }
+        if (!searching && packNavigation.category() == null) {
+            for (String category : packNavigation.categories(packNavigation.pack())) packDestination(rows, "pack-category:" + category, SettingsText.resolve(category),
+                    SettingsText.text("pack.navigation.section_summary", packNavigation.options(packNavigation.pack(), category).size()),
+                    () -> openPackCategory(packNavigation.pack(), category));
+            return;
+        }
+        List<String> group = List.of();
+        for (ConfigOption option : searching ? packNavigation.allOptions() : packNavigation.selectedOptions()) {
+            List<String> nextGroup = List.of(option.owner.getPackId(), option.category);
+            if (searching && !nextGroup.equals(group)) {
                 group = nextGroup;
-                rows.add(new Row("group:" + option.owner.getPackId() + ":" + option.category, group, option.owner.getPackId() + " / " + SettingsText.resolve(option.category), ignored -> {}, null));
+                rows.add(new Row("group:" + option.owner.getPackId() + ":" + option.category,
+                        packName(option.owner.getPackId()) + " / " + SettingsText.resolve(option.category),
+                        option.owner.getPackId() + " / " + SettingsText.resolve(option.category), ignored -> {}, null));
             }
             String key = "pack:" + option.owner.getPackId() + ":" + option.id;
             String label = SettingsText.resolve(option.label);
@@ -434,6 +577,10 @@ public abstract class SettingsScreen extends Screen {
                 }));
             }
         }
+    }
+    private void packDestination(List<Row> rows, String key, String label, String help, Runnable action) {
+        rows.add(new Row(key, label, help, y -> iconButton(SettingsIcon.NEXT, label + "\n" + help,
+                controlX() + controlWidth() - 20, y, action), null));
     }
     private void toggle(List<Row> rows, String key, String label, String help, Supplier<Boolean> get, Consumer<Boolean> set) {
         rows.add(new Row(key, label, help, y -> {
@@ -515,28 +662,37 @@ public abstract class SettingsScreen extends Screen {
         } finally { synchronizing = false; }
     }
     private void updateValidation() {
+        reset.active = section != Section.PACKS || packNavigation.pack() != null;
+        reset.setTooltip(Tooltip.create(Component.literal(resetDescription())));
         apply.active = invalid.isEmpty();
         apply.setTooltip(Tooltip.create(Component.literal(invalid.isEmpty() ? SettingsText.text("action.apply_all") : SettingsText.text("action.apply_invalid", invalid.values().iterator().next()))));
     }
     private static String format(double value) { return String.format(Locale.ROOT, "%.3f", value).replaceAll("0+$", "").replaceAll("\\.$", ""); }
     private void resetPage() {
-        Set<String> keys = rows().stream().map(Row::key).collect(Collectors.toSet());
-        if (section == Section.MATERIALS) { invalid.keySet().removeIf(key -> key.startsWith("mat:")); pendingText.keySet().removeIf(key -> key.startsWith("mat:")); }
+        Set<String> keys = section == Section.PACKS ? packNavigation.selectedOptions().stream()
+                .map(option -> "pack:" + option.owner.getPackId() + ":" + option.id).collect(Collectors.toSet())
+                : rows().stream().map(Row::key).collect(Collectors.toSet());
+        if (section == Section.MATERIALS) {
+            // Hit timing resets with this category even when an individual material editor is open.
+            keys.add("cooldown");
+            invalid.keySet().removeIf(key -> key.startsWith("mat:")); pendingText.keySet().removeIf(key -> key.startsWith("mat:"));
+        }
         switch (section) {
             case GENERAL -> {
-                draft.enableInteractiveHits = defaults.enableInteractiveHits;
-                draft.HitCooldownTicks = defaults.HitCooldownTicks; draft.menuAnimations = defaults.menuAnimations;
+                draft.menuAnimations = defaults.menuAnimations;
             }
             case PARTICLES -> {
                 draft.enableParticles = defaults.enableParticles; draft.particleDensity = defaults.particleDensity; draft.particleLimit = defaults.particleLimit;
-                draft.particleDebugCounters = defaults.particleDebugCounters; draft.particleEmitterMarkers = defaults.particleEmitterMarkers;
             }
-            case SCRIPTING -> { draft.resourcePackDebugMode = defaults.resourcePackDebugMode; draft.resourcePackMatrixEditing = defaults.resourcePackMatrixEditing; draft.resourcePackColorChanging = defaults.resourcePackColorChanging; }
+            case SCRIPTING -> { draft.resourcePackMatrixEditing = defaults.resourcePackMatrixEditing; draft.resourcePackColorChanging = defaults.resourcePackColorChanging; }
+            case DEBUG -> { draft.pivotMarkers = defaults.pivotMarkers; draft.particleEmitterMarkers = defaults.particleEmitterMarkers; draft.debugMarkersThroughItems = defaults.debugMarkersThroughItems; }
             case EXCLUSIONS -> { draft.excludedBlocks = new ArrayList<>(defaults.excludedBlocks); picker = null; }
-            case MATERIALS -> { draft.materials = defaults.copy().materials; editing = null; picker = null; }
-            case PACKS -> { for (ConfigOption option : PackOptions.options()) PackOptions.put(draft.packOptionValues, option, option.defaultValue); }
+            case MATERIALS -> { draft.enableInteractiveHits = defaults.enableInteractiveHits; draft.HitCooldownTicks = defaults.HitCooldownTicks;
+                draft.materials = defaults.copy().materials; draft.excludedBlocks = new ArrayList<>(defaults.excludedBlocks); editing = null; picker = null; }
+            case PACKS -> { for (ConfigOption option : packNavigation.selectedOptions()) PackOptions.put(draft.packOptionValues, option, option.defaultValue); }
         }
-        invalid.keySet().removeIf(keys::contains); pendingText.keySet().removeIf(keys::contains);
+        Predicate<String> resetKey = key -> keys.contains(key) || section == Section.PACKS && keys.stream().anyMatch(prefix -> key.startsWith(prefix + ":"));
+        invalid.keySet().removeIf(resetKey); pendingText.keySet().removeIf(resetKey);
         pitchItem = null; soundPicker = null;
         error = ""; offset = 0; init();
     }
@@ -554,16 +710,38 @@ public abstract class SettingsScreen extends Screen {
     }
     /** Draw above native button backgrounds; center each icon/label pair together. */
     protected void drawNavigation(Painter graphics) {
+        // Keep native widgets for input and narration; join child rows into one recessed dropdown surface.
+        for (int i = 0; i < navigation.size(); i++) {
+            Navigation entry = navigation.get(i);
+            if (entry.style != NavigationStyle.PACK_OPTION) continue;
+            Button button = entry.button;
+            int left = button.getX(), top = button.getY(), right = left + button.getWidth(), bottom = top + button.getHeight();
+            boolean firstVisible = i == 0 || navigation.get(i - 1).style == NavigationStyle.BUTTON;
+            boolean lastVisible = i + 1 == navigation.size() || navigation.get(i + 1).style != NavigationStyle.PACK_OPTION;
+            int panelTop = firstVisible ? top : top - 2;
+            graphics.fill(left, panelTop, right, bottom, SettingsTheme.DROPDOWN_EDGE);
+            graphics.fill(left + 1, panelTop + (firstVisible ? 1 : 0), right - 1, bottom - (lastVisible ? 1 : 0), SettingsTheme.DROPDOWN_SURFACE);
+            if (entry.selected || button.active && button.isHoveredOrFocused())
+                graphics.fill(left + 2, top + 1, right - 2, bottom - 1,
+                        entry.selected ? SettingsTheme.DROPDOWN_SELECTED : SettingsTheme.DROPDOWN_HOVER);
+        }
         for (Navigation entry : navigation) {
             Button button = entry.button;
-            String label = font.plainSubstrByWidth(switch (entry.section) {
-                case EXCLUSIONS -> SettingsText.text("category.exclusions.short"); case PACKS -> SettingsText.text("category.packs.short"); default -> name(entry.section);
-            }, button.getWidth() - 25);
-            int x = button.getX() + (button.getWidth() - 13 - font.width(label)) / 2;
+            if (entry.style == NavigationStyle.PACK_HEADER) {
+                int divider = button.getX() + button.getWidth() - 18;
+                graphics.fill(divider, button.getY() + 4, divider + 1, button.getY() + button.getHeight() - 4, SettingsTheme.SLOT_SHADOW);
+            }
+            int iconWidth = entry.icon == null ? 0 : 13;
+            int reserved = entry.disclosure == null ? 6 : 18;
+            String label = font.plainSubstrByWidth(entry.label, Math.max(0, button.getWidth() - entry.indent - iconWidth - reserved));
+            int x = entry.centered ? button.getX() + (button.getWidth() - iconWidth - font.width(label)) / 2
+                    : button.getX() + entry.indent;
             int color = button.active && button.isHovered() ? SettingsTheme.ACCENT : SettingsTheme.ICON;
-            SettingsIcon.valueOf(entry.section.name()).draw(graphics, x, button.getY() + 6, color);
-            graphics.text(label, x + 13, button.getY() + (button.getHeight() - font.lineHeight) / 2, color);
-            if (entry.section == section) {
+            if (entry.icon != null) entry.icon.draw(graphics, x, button.getY() + (button.getHeight() - 8) / 2, color);
+            graphics.text(label, x + iconWidth, button.getY() + (button.getHeight() - font.lineHeight) / 2, color);
+            if (entry.disclosure != null) entry.disclosure.draw(graphics, button.getX() + button.getWidth() - 12,
+                    button.getY() + (button.getHeight() - 8) / 2, color);
+            if (entry.selected || entry.style == NavigationStyle.PACK_OPTION && button.active && button.isFocused()) {
                 int left = button.getX(), top = button.getY(), right = left + button.getWidth(), bottom = top + button.getHeight();
                 graphics.fill(left, top, right, top + 1, SettingsTheme.SLOT_LIGHT);
                 graphics.fill(left, bottom - 1, right, bottom, SettingsTheme.SLOT_LIGHT);
@@ -616,6 +794,10 @@ public abstract class SettingsScreen extends Screen {
         String title = pitchItem != null ? SettingsText.text("title.pitch", picker.name(pitchItem)) : soundPicker != null ? SettingsText.text("title.sounds", editing.name)
                 : picker != null ? picker.purpose == MaterialItemPicker.Purpose.EXCLUSIONS ? SettingsText.text("category.exclusions") : SettingsText.text(picker.purpose == MaterialItemPicker.Purpose.ITEM_PITCHES ? "title.pitches" : "title.items", editing.name)
                 : editing == null ? name(section) : SettingsText.text("title.material", editing.name);
+        if (editing == null && picker == null && soundPicker == null && !query.isBlank()) title = SettingsText.text("search.results");
+        else if (section == Section.PACKS && packNavigation.pack() != null)
+            title = packNavigation.category() == null ? packName(packNavigation.pack())
+                    : SettingsText.text("pack.navigation.title", SettingsText.resolve(packNavigation.category()), packName(packNavigation.pack()));
         graphics.text(font.plainSubstrByWidth(title, width - contentX - 40), contentX, 12, SettingsTheme.ACCENT);
         double elapsed = (System.nanoTime() - transition) / 1_000_000_000.0;
         double progress = picker != null || !draft.menuAnimations || elapsed >= 0.2 ? 1 : 1 - Math.pow(2, -10 * elapsed / 0.2);
@@ -629,13 +811,14 @@ public abstract class SettingsScreen extends Screen {
             if (row.icon != null) { graphics.item(MenuItems.stack(row.icon), x, y + 1); x += 20; }
             ConfigOption colorOption = colorControls.get(row.key);
             int reserved = colorOption == null ? 5 : 23;
-            graphics.text(font.plainSubstrByWidth(row.label, row.key.startsWith("group:") ? contentWidth - 5 : row.key.startsWith("sound:") ? contentWidth - 54 : controlX() - x - reserved), x, y + 6, row.key.startsWith("group:") ? SettingsTheme.ACCENT : SettingsTheme.TEXT);
+            int labelWidth = Math.max(0, labelEnds.getOrDefault(row.key, contentX + contentWidth) + shift - x - reserved);
+            graphics.text(font.plainSubstrByWidth(row.label, labelWidth), x, y + 6, !row.isEnabled() ? SettingsTheme.ICON_DISABLED : row.key.startsWith("group:") ? SettingsTheme.ACCENT : SettingsTheme.TEXT);
             if (colorOption != null) {
                 int color = 0xFF000000 | Integer.parseInt(((String) PackOptions.value(colorOption, draft.packOptionValues)).substring(1), 16);
                 graphics.fill(controlX() - 20, y + 2, controlX() - 4, y + 18, 0xFF000000);
                 graphics.fill(controlX() - 19, y + 3, controlX() - 5, y + 17, color);
             }
-            if (mouseX >= contentX && mouseX < controlX() && mouseY >= y && mouseY < y + 22)
+            if (mouseX >= contentX && mouseX < labelEnds.getOrDefault(row.key, controlX()) + shift && mouseY >= y && mouseY < y + 22)
                 graphics.tooltip(row.label + "\n" + row.help, mouseX, mouseY);
             y += 28;
         }

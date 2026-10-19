@@ -9,12 +9,13 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Frame-local pivot crosses use the same geometry and hand colors as emitter origins. */
+/** Frame-local purple diamond markers distinguish model pivots from emitter crosses. */
 public final class ModelDebugMarkers {
     private static final List<DrawParticle> PIVOTS = new ArrayList<>();
     private ModelDebugMarkers() {}
     public static void clear() { PIVOTS.clear(); }
     public static void capture(ItemModel model, PoseStack matrices) {
+        if (!ConfigHandler.INSTANCE.pivotMarkers) return;
         boolean editing = ConfigHandler.INSTANCE.resourcePackMatrixEditing;
         matrices.pushPose();
         try {
@@ -33,7 +34,7 @@ public final class ModelDebugMarkers {
         if (editing) point.add((float) model.getTranslateX(), (float) model.getTranslateY(),
                 (float) model.getTranslateZ());
         parentAnchor.transformPosition(point);
-        if (point.isFinite()) PIVOTS.add(DrawParticle.markerAt(point, model.isMainHand()));
+        if (point.isFinite()) PIVOTS.add(DrawParticle.pivotAt(point, model.isMainHand()));
     }
     public static List<DrawParticle> snapshot() { return List.copyOf(PIVOTS); }
 }

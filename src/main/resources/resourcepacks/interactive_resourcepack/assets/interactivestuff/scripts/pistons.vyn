@@ -1,106 +1,61 @@
+importScript("interactivestuff:interactive_resourcepack", "effect_helpers")
+
+make animationOption = packToggle("animate_pistons", "animation")
+animationOption.setOnChange("onAnimationChanged")
+
 lock interactiveItems = ["minecraft:piston", "minecraft:sticky_piston"]
+lock pistonExtensions = new Map
+pistonExtensions.put("minecraft:piston", 0.25)
+pistonExtensions.put("minecraft:sticky_piston", 0.275)
 
 make wasSneaking = false
 make isSneaking = false
-
 make wasOnRedstone = false
 make isOnRedstone = false
+make extensionState = createProgressState()
 
-make progress = 0
-make stprogress = 0
-
+task onAnimationChanged takes option, previous, value do
+    make extensionState = createProgressState()
+end
 
 task onTick do
-    check player.getWorld() == nothing do
-        reply nothing
-    end
+    check !animationOption.getBoolean() do reply nothing end
+    check player.getWorld() == nothing do reply nothing end
 
     make isSneaking = player.isSneaking()
     make isOnRedstone = player.getSteppingBlock().getName() == "minecraft:redstone_block"
-
     check (player.isHoldingItem("minecraft:piston") || player.isHoldingItem("minecraft:sticky_piston")) && player.isFirstPerson() do
-
         check isOnRedstone && isSneaking && (!wasOnRedstone || !wasSneaking) do
             player.playSound("minecraft:block.piston.extend", 0.5, 1)
         end
-
-        check isOnRedstone && !isSneaking && wasSneaking do
+        check (isOnRedstone && !isSneaking && wasSneaking) || (!isOnRedstone && wasOnRedstone && wasSneaking) do
             player.playSound("minecraft:block.piston.contract", 0.5, 1)
         end
-
-        check !isOnRedstone && wasOnRedstone && wasSneaking do
-            player.playSound("minecraft:block.piston.contract", 0.5, 1)
-        end
-
     end
-
     make wasSneaking = isSneaking
     make wasOnRedstone = isOnRedstone
 end
 
-
 task onItemUpdate takes itemRendered do
+    check !animationOption.getBoolean() do reply nothing end
+    check !player.isFirstPerson() do reply nothing end
+    make itemId = itemRendered.getName()
+    make extension = pistonExtensions.get(itemId)
+    check extension == nothing do reply nothing end
 
-    check !player.isFirstPerson() do
-        reply nothing
+    check hasMod("punchy") do
+        itemRendered.translate(0, 0.18, 0)
+        itemRendered.scale(0.9, 0.9, 0.9)
     end
+    itemRendered.setItemModel("interactivestuff:piston_base")
+    make pistonTop = new ItemModel(itemId)
+    pistonTop.setItemModel("interactivestuff:" + replace(itemId, "minecraft:", "") + "_top")
+    pistonTop.setParent(itemRendered)
 
-
+    make target = 0
     make vy = player.getVelocityY()
-    make fallTarget = 0
-
-
-    check vy < -0.1 do
-        make fallTarget = vy * -100
-        check fallTarget > 100 do
-            make fallTarget = 100
-        end
-    end
-
-    check itemRendered.getName() == "minecraft:piston" do
-
-		check modLoader.isModLoaded("punchy") do
-			itemRendered.translate(0, 0.18, 0)
-			itemRendered.scale(0.9, 0.9, 0.9)
-		end
-
-        itemRendered.setItemModel("interactivestuff:piston_base")
-
-        make pistonTop = new ItemModel("minecraft:piston")
-        pistonTop.setItemModel("interactivestuff:piston_top")
-		pistonTop.setParent(itemRendered)
-
-        make currentTarget = fallTarget
-
-        check isOnRedstone && isSneaking do
-            make currentTarget = 100
-        end
-
-        make progress = pistonTop.smooth(progress, currentTarget, 0.45)
-        pistonTop.translate(0, 0.25 * (progress / 100), 0)
-    end
-
-    check itemRendered.getName() == "minecraft:sticky_piston" do
-
-		check modLoader.isModLoaded("punchy") do
-			itemRendered.translate(0, 0.18, 0)
-			itemRendered.scale(0.9, 0.9, 0.9)
-		end
-
-        itemRendered.setItemModel("interactivestuff:piston_base")
-
-        make pistonTop = new ItemModel("minecraft:sticky_piston")
-        pistonTop.setItemModel("interactivestuff:sticky_piston_top")
-		pistonTop.setParent(itemRendered)
-
-        make currentStTarget = fallTarget
-
-        check isOnRedstone && isSneaking do
-            make currentStTarget = 100
-        end
-
-        make stprogress = pistonTop.smooth(stprogress, currentStTarget, 0.45)
-        pistonTop.translate(0, 0.275 * (stprogress / 100), 0)
-    end
-
+    check vy < -0.1 do make target = min(100, vy * -100) end
+    check isOnRedstone && isSneaking do make target = 100 end
+    make progress = smoothItemProgress(extensionState, itemRendered, target, 0.45)
+    pistonTop.translate(0, extension * (progress / 100), 0)
 end

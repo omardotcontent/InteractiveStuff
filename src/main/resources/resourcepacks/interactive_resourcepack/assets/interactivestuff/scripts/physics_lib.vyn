@@ -1,3 +1,8 @@
+importScript("interactivestuff:interactive_resourcepack", "effect_helpers")
+
+make masterPhysicsOption = packToggle("physics_enabled", "physics")
+masterPhysicsOption.setOnChange("onMasterPhysicsChanged")
+
 make angleX = 0
 make angleZ = 0
 make velX = 0
@@ -9,27 +14,29 @@ make prevMoveY = 0
 make prevMoveZ = 0
 make isFirstFrame = 1
 make lastUpdateFrame = -1
+make lastUpdateTime = 0
 
 task runPhysicsEngine takes stiffness, damping, moveRes, lookRes, vertRes, inertial, maxAngle, windMult do
+    check !masterPhysicsOption.getBoolean() do
+        resetPhysicsEngine()
+        reply 0
+    end
     make now = getFrameId()
 
     check lastUpdateFrame == now do
         reply 0
     end
 
-    make lastUpdateFrame = now
-
     make dt = getDelta()
-
-    check dt > 5.0 do
-            make velX = 0
-            make velZ = 0
-            make isFirstFrame = 1
-            reply 0
+    make nowTime = time()
+    check (lastUpdateFrame >= 0 && (now - lastUpdateFrame) > 1) || (lastUpdateTime > 0 && ((nowTime - lastUpdateTime) > 250 || nowTime < lastUpdateTime)) do
+        resetPhysicsEngine()
     end
-
-    check dt > 3.0 do
-        make dt = 3.0
+    make lastUpdateFrame = now
+    make lastUpdateTime = nowTime
+    check dt <= 0 do
+        make isFirstFrame = 1
+        reply 0
     end
 
     make currCamPitch = player.getCameraPitchVelocity()
@@ -56,42 +63,57 @@ task runPhysicsEngine takes stiffness, damping, moveRes, lookRes, vertRes, inert
     make accZ = (currMoveZ - prevMoveZ) * moveRes
     make accY = (currMoveY - prevMoveY) * vertRes
 
-    make windTime = time()
-    make windPhase = windTime * 0.0015
-    make windVal = sin(windPhase)
-
-    make gustPhase = windTime * 0.004
-    make gustVal = sin(gustPhase)
-
-    make envPhase = windTime * 0.0008
-    make envVal = sin(envPhase) * 0.5 + 0.5
-    make envVal = envVal * envVal
-
-    make windX = (windVal * 0.02 + gustVal * 0.04 * envVal) * windMult / 100
-    make windZ = (windVal * 0.02 * 0.6 - gustVal * 0.04 * envVal * 0.4) * windMult / 100
-
-    make windForceX = (windX * 100) * inertial
-    make windForceZ = (windZ * 100) * inertial
+    make windForceX = 0
+    make windForceZ = 0
+    check windMult != 0 do
+        make windVal = sin(nowTime * 0.0015)
+        make gustVal = sin(nowTime * 0.004)
+        make envVal = sin(nowTime * 0.0008) * 0.5 + 0.5
+        make envVal = envVal * envVal
+        make windForceX = (windVal * 0.02 + gustVal * 0.04 * envVal) * windMult * inertial
+        make windForceZ = (windVal * 0.02 * 0.6 - gustVal * 0.04 * envVal * 0.4) * windMult * inertial
+    end
 
     make impulseX = ((dPitch * lookRes) + (accZ * 10.0) + (accY * 5.0)) * inertial
     make impulseZ = ((dYaw * lookRes) + (accX * 10.0)) * inertial
 
-    make springDampX = (0 - angleX * stiffness) - (velX * damping)
-    make springDampZ = (0 - angleZ * stiffness) - (velZ * damping)
-
-    make velX = velX + (springDampX + windForceX) * dt + impulseX
-    make velZ = velZ + (springDampZ + windForceZ) * dt + impulseZ
-    make angleX = angleX + velX * dt
-    make angleZ = angleZ + velZ * dt
-
-    check angleX > maxAngle do make angleX = maxAngle make velX = velX * -0.5 end
-    check angleX < -maxAngle do make angleX = -maxAngle make velX = velX * -0.5 end
-    check angleZ > maxAngle do make angleZ = maxAngle make velZ = velZ * -0.5 end
-    check angleZ < -maxAngle do make angleZ = -maxAngle make velZ = velZ * -0.5 end
+    make steps = int(dt)
+    check steps < dt do make steps = steps + 1 end
+    make stepDelta = dt / steps
+    cycle step from 1 to steps do
+        make springDampX = (0 - angleX * stiffness) - (velX * damping)
+        make springDampZ = (0 - angleZ * stiffness) - (velZ * damping)
+        make velX = velX + (springDampX + windForceX) * stepDelta
+        make velZ = velZ + (springDampZ + windForceZ) * stepDelta
+        check step == 1 do
+            make velX = velX + impulseX
+            make velZ = velZ + impulseZ
+        end
+        make angleX = angleX + velX * stepDelta
+        make angleZ = angleZ + velZ * stepDelta
+        check angleX > maxAngle do make angleX = maxAngle make velX = velX * -0.5 end
+        check angleX < -maxAngle do make angleX = -maxAngle make velX = velX * -0.5 end
+        check angleZ > maxAngle do make angleZ = maxAngle make velZ = velZ * -0.5 end
+        check angleZ < -maxAngle do make angleZ = -maxAngle make velZ = velZ * -0.5 end
+    end
 
     make prevCamPitch = currCamPitch
     make prevCamYaw = currCamYaw
     make prevMoveX = currMoveX
     make prevMoveY = currMoveY
     make prevMoveZ = currMoveZ
+end
+
+task resetPhysicsEngine do
+    make angleX = 0
+    make angleZ = 0
+    make velX = 0
+    make velZ = 0
+    make isFirstFrame = 1
+    make lastUpdateFrame = -1
+    make lastUpdateTime = 0
+end
+
+task onMasterPhysicsChanged takes option, previous, value do
+    resetPhysicsEngine()
 end

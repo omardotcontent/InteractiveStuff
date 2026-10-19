@@ -9,17 +9,7 @@ public final class DebugTextHandler {
     private final List<String> textBuffer = new ArrayList<>();
 
     public DebugTextHandler() { INSTANCE = this; }
-    public static List<String> getRenderedTexts() {
-        var config = omar.projects.interactivestuff.handlers.config.ConfigHandler.INSTANCE;
-        if (config == null) return renderedTexts;
-        if (!config.particleDebugCounters) return config.resourcePackDebugMode ? renderedTexts : List.of();
-        var result = new ArrayList<String>();
-        if (config.resourcePackDebugMode) result.addAll(renderedTexts);
-        var particles = omar.projects.interactivestuff.particles.ParticleSystem.INSTANCE;
-        result.add(omar.projects.interactivestuff.handlers.config.SettingsText.text("debug.counters",
-                particles.getCount(), config.particleLimit, particles.getEmitterCount(), particles.getDroppedCount()));
-        return result;
-    }
+    public static List<String> getRenderedTexts() { return renderedTexts; }
     public void addText(String text) { textBuffer.add(text); }
     public void onTickEnd() {
         renderedTexts = List.copyOf(textBuffer);

@@ -1,22 +1,44 @@
-lock interactiveItems = ["minecraft:mace"]
-
 importScript("interactivestuff:interactive_resourcepack","physics_lib")
 
+make physicsOption = packToggle("physics_mace", "physics")
+physicsOption.setOnChange("onMacePhysicsChanged")
+masterPhysicsOption.setOnChange("onMacePhysicsChanged")
+
+make shakeOption = packShakeOption()
+
+lock interactiveItems = ["minecraft:mace"]
+
+
 make smoothFallLean = 0
+make fallLeanState = createProgressState()
+
+task resetMacePhysics do
+    resetPhysicsEngine()
+    make smoothFallLean = 0
+    check fallLeanState.size() > 0 do make fallLeanState = createProgressState() end
+end
+
+task onMacePhysicsChanged takes option, previous, value do
+    resetMacePhysics()
+end
 
 task onItemUpdate takes itemRendered do
-    check player.getGamemode() != "spectator" && itemRendered.getName() == "minecraft:mace" && !modLoader.isModLoaded("punchy") do
+    check !masterPhysicsOption.getBoolean() || !physicsOption.getBoolean() do
+        resetMacePhysics()
+        reply nothing
+    end
+    check player.getGamemode() != "spectator" && itemRendered.getName() == "minecraft:mace" && !hasMod("punchy") do
 
         runPhysicsEngine(0.01, 0.2, 0.1, 0.2, 0.4, 1.0, 45, 0)
 
 
         make targetLean = player.getVelocityY() * -20
-        make smoothFallLean = itemRendered.smooth(smoothFallLean, targetLean, 0.5)
+        make smoothFallLean = smoothItemProgress(fallLeanState, itemRendered, targetLean, 0.5)
 
         itemRendered.setPivot(0, -0.4, 0)
 
         itemRendered.rotateX(angleX + smoothFallLean)
         itemRendered.rotateZ(angleZ)
-        itemRendered.translate(((random() - 0.5) * smoothFallLean / 5000), ((random() - 0.5) * smoothFallLean / 5000), 0)
+        itemRendered.translate(((random() - 0.5) * smoothFallLean / 5000 * shakeOption.getNumber() / 100), ((random() - 0.5) * smoothFallLean / 5000 * shakeOption.getNumber() / 100), 0)
     end
 end

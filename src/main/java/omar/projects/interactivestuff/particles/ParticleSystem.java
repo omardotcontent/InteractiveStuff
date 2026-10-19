@@ -114,10 +114,11 @@ public final class ParticleSystem {
                     result.add(new DrawParticle(position, (float) size,
                             (float) (particle.style.rotation.sample(progress) % 360), rgba, particle.style.light == -1 ? channel.light : particle.style.light,
                             particle.style.type, particle.style.texture, particle.style.animation, particle.style.frameTicks,
-                            Math.max(0, particle.age - 1 + interpolation), progress, particle.variant, particle.style.depth, false));
+                            Math.max(0, particle.age - 1 + interpolation), progress, particle.variant, particle.style.depth, Marker.NONE));
                 }
-                if (markers && channel.boundTick == tick) result.add(DrawParticle.markerAt(
-                        channel.anchor.transformPosition(new Vector3f((float) channel.style.x, (float) channel.style.y, (float) channel.style.z)), channel.mainHand));
+                if (markers && channel.boundTick == tick)
+                    result.add(DrawParticle.markerAt(channel.anchor.transformPosition(new Vector3f((float) channel.style.x, (float) channel.style.y, (float) channel.style.z)),
+                            channel.mainHand));
             }
         }
         result.sort(Comparator.comparingDouble(particle -> particle.position.z));
@@ -130,11 +131,25 @@ public final class ParticleSystem {
     @VynFunc public long getDroppedCount() { return dropped; }
     @VynFunc public void clear() { generation++; for (var emitter : emitters) emitter.clear(); }
     public void reset() { clear(); emitters.clear(); interpolation = 0; dropped = 0; camera = ParticleCamera.IDENTITY; }
+    public enum Marker { NONE, EMITTER, PIVOT }
     public record DrawParticle(Vector3f position, float size, float rotation, int color, int light, String type, String texture,
-                               String animation, double frameTicks, double age, double progress, int variant, boolean depth, boolean marker) {
+                               String animation, double frameTicks, double age, double progress, int variant, boolean depth, Marker markerKind) {
+        public boolean marker() { return markerKind != Marker.NONE; }
+        /** Debug visibility never overrides an emitted particle's own Vyn depth setting. */
+        public boolean depthTest(boolean markersThroughItems) { return marker() ? !markersThroughItems : depth; }
         public static DrawParticle markerAt(Vector3f position, boolean mainHand) {
+            return markerAt(position, mainHand, true);
+        }
+        public static DrawParticle markerAt(Vector3f position, boolean mainHand, boolean throughItems) {
             return new DrawParticle(new Vector3f(position), 0.025f, 0, mainHand ? 0xFF40FF70 : 0xFFFFA040,
-                    0xF000F0, "", "", "first", 1, 0, 0, 0, false, true);
+                    0xF000F0, "", "", "first", 1, 0, 0, 0, !throughItems, Marker.EMITTER);
+        }
+        public static DrawParticle pivotAt(Vector3f position, boolean mainHand) {
+            return pivotAt(position, mainHand, true);
+        }
+        public static DrawParticle pivotAt(Vector3f position, boolean mainHand, boolean throughItems) {
+            return new DrawParticle(new Vector3f(position), 0.025f, 0, mainHand ? 0xFFDC80FF : 0xFF9C90FF,
+                    0xF000F0, "", "", "first", 1, 0, 0, 0, !throughItems, Marker.PIVOT);
         }
     }
 }

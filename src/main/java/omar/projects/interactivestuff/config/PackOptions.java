@@ -34,7 +34,10 @@ public final class PackOptions {
             bindings.stream().filter(ConfigOption::active).findFirst().ifPresent(result::add);
         return List.copyOf(result);
     }
-    public static void bind(Map<String, Map<String, Object>> saved) { values = copy(saved); }
+    public static void bind(Map<String, Map<String, Object>> saved) {
+        values = copy(saved);
+        LegacyPackOptions.upgradeBundledValues(values);
+    }
     public static Map<String, Map<String, Object>> snapshot() { return copy(values); }
     public static Map<String, Map<String, Object>> copy(Map<String, Map<String, Object>> source) {
         Map<String, Map<String, Object>> result = new LinkedHashMap<>();

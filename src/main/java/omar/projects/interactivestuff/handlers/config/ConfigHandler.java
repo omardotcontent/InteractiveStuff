@@ -45,16 +45,16 @@ public final class ConfigHandler {
     public boolean enableInteractiveHits = true;
     public int HitCooldownTicks = 4;
 
-    public boolean resourcePackDebugMode = false;
     public boolean resourcePackMatrixEditing = true;
     public boolean resourcePackColorChanging = true;
     public boolean menuAnimations = true;
+    public boolean pivotMarkers = false;
+    public boolean particleEmitterMarkers = false;
+    public boolean debugMarkersThroughItems = true;
     public Map<String, Map<String, Object>> packOptionValues = new LinkedHashMap<>();
     public boolean enableParticles = true;
     public int particleDensity = 100;
     public int particleLimit = 512;
-    public boolean particleDebugCounters = false;
-    public boolean particleEmitterMarkers = false;
 
     public @NotNull List<Item> excludedBlocks = new ArrayList<>();
     public List<InteractionMaterial> materials = new ArrayList<>();
@@ -144,6 +144,13 @@ public final class ConfigHandler {
         if (loaded != null && json.isJsonObject()) {
             if (loaded.packOptionValues == null) loaded.packOptionValues = new LinkedHashMap<>();
             omar.projects.interactivestuff.config.LegacyPackOptions.migrate(json.getAsJsonObject(), loaded.packOptionValues);
+            var legacy = json.getAsJsonObject();
+            loaded.pivotMarkers = omar.projects.interactivestuff.config.LegacyPackOptions.markerValue(
+                    legacy, loaded.packOptionValues, "pivotMarkers", "debug_mode", false);
+            loaded.particleEmitterMarkers = omar.projects.interactivestuff.config.LegacyPackOptions.markerValue(
+                    legacy, loaded.packOptionValues, "particleEmitterMarkers", "debug_emitters", false);
+            loaded.debugMarkersThroughItems = omar.projects.interactivestuff.config.LegacyPackOptions.markerValue(
+                    legacy, loaded.packOptionValues, "debugMarkersThroughItems", "debug_markers_through_items", true);
         }
         return loaded;
     }

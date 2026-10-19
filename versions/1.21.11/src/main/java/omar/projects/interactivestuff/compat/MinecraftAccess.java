@@ -8,6 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
 /** Version-dependent client access kept outside the shared script runtime. */
 public final class MinecraftAccess {
     private MinecraftAccess() {}
+    public static String gameVersion() { return net.minecraft.SharedConstants.getCurrentVersion().name(); }
     public static void openDirectory(java.nio.file.Path path) { net.minecraft.util.Util.getPlatform().openFile(path.toFile()); }
     public static void chat(LocalPlayer player, net.minecraft.network.chat.Component message) { player.displayClientMessage(message, false); }
     public static long dayTime(net.minecraft.world.level.Level level) { return level.getDayTime(); }

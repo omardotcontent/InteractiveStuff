@@ -24,10 +24,11 @@ public final class MinecraftParticleRenderer {
         var batches = new LinkedHashMap<RenderType, List<ParticleSystem.DrawParticle>>();
         var draws = new java.util.ArrayList<ParticleSystem.DrawParticle>();
         if (config.enableParticles) draws.addAll(ParticleSystem.INSTANCE.snapshot(config.particleEmitterMarkers));
-        if (config.resourcePackDebugMode) draws.addAll(ModelDebugMarkers.snapshot());
+        if (config.pivotMarkers) draws.addAll(ModelDebugMarkers.snapshot());
         for (var particle : draws) {
-            RenderType type = particle.marker() ? RenderTypes.textSeeThrough(ParticleTextures.MARKER) : particle.depth()
-                    ? RenderTypes.text(ParticleTextures.texture(particle)) : RenderTypes.textSeeThrough(ParticleTextures.texture(particle));
+            var texture = particle.marker() ? ParticleTextures.MARKER : ParticleTextures.texture(particle);
+            RenderType type = particle.depthTest(config.debugMarkersThroughItems)
+                    ? RenderTypes.text(texture) : RenderTypes.textSeeThrough(texture);
             batches.computeIfAbsent(type, ignored -> new ArrayList<>()).add(particle);
         }
         // Custom geometry in the item bucket can be consumed before its solid models.

@@ -1,9 +1,16 @@
 {
   "enableInteractiveHits": true,
   "HitCooldownTicks": 4,
-  "resourcePackDebugMode": false,
   "resourcePackMatrixEditing": true,
   "resourcePackColorChanging": true,
+  "menuAnimations": true,
+  "pivotMarkers": false,
+  "particleEmitterMarkers": false,
+  "debugMarkersThroughItems": true,
+  "packOptionValues": {},
+  "enableParticles": true,
+  "particleDensity": 100,
+  "particleLimit": 512,
   "excludedBlocks": [
     "minecraft:pink_wool",
     "minecraft:magenta_wool",
@@ -2098,10 +2105,5 @@
       "randomPitch": true,
       "customPitches": []
     }
-  ],
-  "enableParticles": true,
-  "particleDensity": 100,
-  "particleLimit": 512,
-  "particleDebugCounters": false,
-  "particleEmitterMarkers": false
+  ]
 }

@@ -105,7 +105,9 @@ jobs:
           destination.mkdir(parents=True)
           for jar in jars:
               shutil.copyfile(jar, destination / jar.name)
-          for source, name in [('README.md', 'README.md'), ('CHANGELOG.md', 'CHANGELOG.md'), ('LICENSE.txt', 'LICENSE.txt')]:
+          for source, name in [('README.md', 'README.md'), ('changelog.md', 'changelog.md'), ('LICENSE.txt', 'LICENSE.txt')]:
+              if not Path(source).is_file():
+                  continue
               (destination / name).parent.mkdir(parents=True, exist_ok=True)
               shutil.copyfile(source, destination / name)
           checksums = [f'{hashlib.sha256(jar.read_bytes()).hexdigest()}  {jar.name}' for jar in sorted(destination.glob('*.jar'))]
