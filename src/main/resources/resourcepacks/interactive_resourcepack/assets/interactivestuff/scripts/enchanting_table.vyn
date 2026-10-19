@@ -12,28 +12,62 @@ animateBookOption.setOnChange("onBookOptionChanged")
 lock interactiveItems = ["minecraft:enchanting_table"]
 
 make openingState = createProgressState()
-make glyphState = createProgressState()
 make openingProgress = 0
-make glyphProgress = 0
+make bookshelfPosition = nothing
 
 make glyphParticles = new ParticleEmitter("minecraft:enchant")
 glyphParticles.setSpace("world")
-glyphParticles.setPosition(0.5, 1.25, 0.5)
-glyphParticles.setSpread(0.28, 0.15, 0.28)
-glyphParticles.setLifetime(45)
-glyphParticles.setVelocity(0, 0.004, 0)
-glyphParticles.setVelocitySpread(0.004, 0.002, 0.004)
+glyphParticles.setPosition(0.5, 0.05, 0.69)
+glyphParticles.setSpread(0.08, 0.04, 0.08)
+glyphParticles.setLifetime(90)
 glyphParticles.setSizeOverLife(0.055, 0.085, "easeOutSine")
 glyphParticles.setOpacityOverLife(0, 0, "linear")
 glyphParticles.addOpacityKeyframe(0.15, 0.85, "easeOutQuad")
 glyphParticles.addOpacityKeyframe(0.7, 0.7, "linear")
-glyphParticles.setColor(200, 170, 255)
+glyphParticles.setColor(131, 131, 145)
 glyphParticles.setAnimation("random", 1)
 glyphParticles.setLight(15)
+glyphParticles.setOnSpawn("drawGlyphFromBookshelf")
 
+task drawGlyphFromBookshelf takes particle do
+    check bookshelfPosition == nothing do
+        particle.kill()
+        reply nothing
+    end
+    make targetX = particle.getX()
+    make targetY = particle.getY()
+    make targetZ = particle.getZ()
+    make centerX = bookshelfPosition.getX() + 0.5
+    make centerY = bookshelfPosition.getY() + 0.5
+    make centerZ = bookshelfPosition.getZ() + 0.5
+    make directionX = targetX - centerX
+    make directionY = targetY - centerY
+    make directionZ = targetZ - centerZ
+    make distanceX = max(directionX, -directionX)
+    make distanceY = max(directionY, -directionY)
+    make distanceZ = max(directionZ, -directionZ)
+    make sourceX = centerX + (random() - 0.5) * 0.7
+    make sourceY = centerY + (random() - 0.5) * 0.7
+    make sourceZ = centerZ + (random() - 0.5) * 0.7
+    check distanceX >= distanceY && distanceX >= distanceZ do
+        make sourceX = centerX + 0.51
+        check directionX < 0 do make sourceX = centerX - 0.51 end
+    otherwise
+        check distanceY >= distanceZ do
+            make sourceY = centerY + 0.51
+            check directionY < 0 do make sourceY = centerY - 0.51 end
+        otherwise
+            make sourceZ = centerZ + 0.51
+            check directionZ < 0 do make sourceZ = centerZ - 0.51 end
+        end
+    end
+    particle.setPosition(sourceX, sourceY, sourceZ)
+    make ticks = particle.getLifetime()
+    particle.setVelocity((targetX - sourceX) / ticks, (targetY - sourceY) / ticks, (targetZ - sourceZ) / ticks)
+end
 
 task syncParticleEmission do
-    check particleOption.getBoolean() do
+    check particleOption.getBoolean() && showBookOption.getBoolean() && animateBookOption.getBoolean() && bookshelfPosition != nothing && openingProgress > 0 do
         glyphParticles.start()
     otherwise
         glyphParticles.stop()
@@ -47,52 +81,55 @@ end
 task onBookOptionChanged takes option, oldValue, newValue do
     make openingState = createProgressState()
     make openingProgress = 0
+    syncParticleEmission()
 end
 
 syncParticleEmission()
 
 task onItemUpdate takes itemRendered do
+    check itemRendered.getName() != "minecraft:enchanting_table" do reply nothing end
+    check hasMod("punchy") do
+        itemRendered.translate(0, 0.2, 0)
+        itemRendered.scale(0.8, 0.8, 0.8)
+    end
 
-    check itemRendered.getName() != "minecraft:enchanting_table" do
-        reply nothing
-    otherwise
-		check hasMod("punchy") do
-			itemRendered.translate(0,0.2,0)
-			itemRendered.scale(0.8,0.8,0.8)
-		end
-	end
-
-    make bookshelfNearby = player.hasNearbyBlock("minecraft:bookshelf", 2)
-
+    make bookshelf = player.getNearestBlock("minecraft:bookshelf", 2)
+    make bookshelfPosition = nothing
     make progress = 0
-    check bookshelfNearby do
+    check bookshelf != nothing do
+        make bookshelfPosition = bookshelf.getPosition()
         make progress = 100
     end
 
-    make glyphProgress = smoothItemProgress(glyphState, itemRendered, progress, 0.2)
-    glyphParticles.setRate(0.2 + (glyphProgress / 100) * 0.3)
-    syncParticleEmission()
-    glyphParticles.attach(itemRendered)
-    check !showBookOption.getBoolean() do
-        make openingProgress = 0
-        resetItemProgress(openingState, itemRendered)
-        reply nothing
-    end
-    check animateBookOption.getBoolean() do
+    check showBookOption.getBoolean() && animateBookOption.getBoolean() do
         make openingProgress = smoothItemProgress(openingState, itemRendered, progress, 0.2)
     otherwise
         make openingProgress = 0
         resetItemProgress(openingState, itemRendered)
     end
+    glyphParticles.setRate(0.05 * (openingProgress / 100))
+    syncParticleEmission()
+    check !showBookOption.getBoolean() do
+        glyphParticles.attach(itemRendered)
+        reply nothing
+    end
+
     make book_left = new ItemModel("minecraft:book")
     make book_right = new ItemModel("minecraft:book")
-	book_left.setParent(itemRendered)
-	book_right.setParent(itemRendered)
+    setupBookHalf(book_left, itemRendered, "interactivestuff:book_left", 60)
+    setupBookHalf(book_right, itemRendered, "interactivestuff:book_right", -60)
+    glyphParticles.attach(book_left)
+end
 
-    book_right.setPivot(0, 0.13, 0)
-    book_left.setPivot(0.0, 0.13, 0.0)
-    book_right.rotate(0, 0, -60 * (openingProgress / 100))
-    book_left.rotate(0, 0, 60 * (openingProgress / 100))
-    book_left.setItemModel("interactivestuff:book_left")
-    book_right.setItemModel("interactivestuff:book_right")
+task setupBookHalf takes book, item, model, angle do
+    book.setParent(item)
+    make hingeX = -0.015625
+    check !item.isRightHand() do make hingeX = 0.015625 end
+    book.setPivot(hingeX, 0.13, 0)
+    make lookWeight = 0
+    check animateBookOption.getBoolean() do make lookWeight = 1 end
+    book.lookAt(bookshelfPosition, "enchanting_book", 0.16, lookWeight)
+    book.setLookAtClearance(0.125, -0.16, 0.09, -0.13, 0.16, 0.29, 0.13)
+    book.rotate(0, 0, angle * (openingProgress / 100))
+    book.setItemModel(model)
 end

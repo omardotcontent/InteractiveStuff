@@ -95,6 +95,7 @@ public final class ScriptInterpreter {
         sessionGeneration++;
         BackgroundLoopHandler.getInstance().clearAll();
         ItemModelRenderRegistry.clear();
+        omar.projects.interactivestuff.render.ModelTargeting.clear();
         RenderTickHandler.reset();
         ParticleSystem.INSTANCE.reset();
         if (DebugTextHandler.INSTANCE != null) DebugTextHandler.INSTANCE.clear();

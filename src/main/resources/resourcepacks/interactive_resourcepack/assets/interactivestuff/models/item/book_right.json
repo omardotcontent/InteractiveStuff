@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 32],
 	"textures": {
-		"particle": "#1",
-		"1": "entity/enchantment/enchanting_table_book"
+		"1": "entity/enchantment/enchanting_table_book",
+		"particle": "entity/enchantment/enchanting_table_book"
 	},
 	"elements": [
 		{
@@ -15,8 +15,7 @@
 				"north": {"uv": [1.5, 5.5, 1.75, 9.5], "texture": "#1"},
 				"south": {"uv": [0.25, 5, 1.5, 5.5], "texture": "#1"},
 				"west": {"uv": [0.25, 5.5, 1.5, 9.5], "rotation": 90, "texture": "#1"},
-				"up": {"uv": [1.5, 5.5, 0.25, 5], "rotation": 90, "texture": "#1"},
-				"down": {"uv": [2.75, 5, 1.5, 5.5], "rotation": 270, "texture": "#1"}
+				"up": {"uv": [1.5, 5.5, 0.25, 5], "rotation": 90, "texture": "#1"}
 			}
 		},
 		{

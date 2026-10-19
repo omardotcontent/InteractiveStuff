@@ -55,6 +55,12 @@ public class ItemModel {
     private float shZX = 0, shZY = 0;
 
     private Quaternionf rotation;
+    private org.joml.Vector3d lookTarget;
+    private String lookGroup;
+    private Object lookOwner;
+    private double lookSpeed = 1, lookWeight = 1;
+    private omar.projects.interactivestuff.render.ModelTargeting.Clearance lookClearance;
+    private record LookKey(Object owner, String group, boolean mainHand, ItemDisplayContext context, String item) {}
     private Matrix4f shearMatrix;
     private boolean mainHand = true;
 
@@ -358,6 +364,31 @@ public class ItemModel {
                 (float) (axisY / length), (float) (axisZ / length));
     }
 
+    /** Face a block's center from the rendered pivot; later rotations can still open hinged parts. */
+    @VynFunc
+    public void lookAt(final Position position) {
+        markModified();
+        lookTarget = position == null ? null : new org.joml.Vector3d(position.getX() + 0.5, position.getY() + 0.5, position.getZ() + 0.5);
+        lookGroup = null;
+    }
+
+    /** Reuse a group across frames and pieces; weight zero eases back to the closed/default pose. */
+    @VynFunc
+    public void lookAt(final Position position, final String group, final double speed, final double weight) {
+        if (group == null || group.isBlank() || group.length() > 80 || !Double.isFinite(speed) || speed < 0 || speed > 1
+                || !Double.isFinite(weight) || weight < 0 || weight > 1) throw new IllegalArgumentException("Invalid look-at group, speed or weight");
+        lookAt(position);
+        lookGroup = group; lookSpeed = speed; lookWeight = weight;
+        lookOwner = omar.projects.interactivestuff.scripts.ScriptExecutionContext.current();
+    }
+
+    /** A render-space envelope of all folded parts, supplied by the resource pack. */
+    @VynFunc
+    public void setLookAtClearance(double surface, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        markModified();
+        lookClearance = new omar.projects.interactivestuff.render.ModelTargeting.Clearance(surface, minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
     @VynFunc
     public void rotate(final double dx, final double dy, final double dz) {
         markModified();
@@ -510,6 +541,8 @@ public class ItemModel {
         copy.shYX = shYX; copy.shYZ = shYZ;
         copy.shZX = shZX; copy.shZY = shZY;
         copy.rotation = rotation == null ? null : new Quaternionf(rotation);
+        copy.lookTarget = lookTarget == null ? null : new org.joml.Vector3d(lookTarget);
+        copy.lookGroup = lookGroup; copy.lookOwner = lookOwner; copy.lookSpeed = lookSpeed; copy.lookWeight = lookWeight; copy.lookClearance = lookClearance;
         copy.indexTints = indexTints == null ? null : new HashMap<>(indexTints);
         copy.red = red; copy.green = green; copy.blue = blue; copy.alpha = alpha;
         ItemModelRenderRegistry.enqueue(copy);
@@ -572,6 +605,26 @@ public class ItemModel {
     public void applySelf(final PoseStack matrices) {
         matrices.translate(x, y, z);
         matrices.translate(px, py, pz);
+
+        if ((lookTarget != null || lookGroup != null) && isFirstPerson()) {
+            ItemModel root = this;
+            while (root.parent != null) root = root.parent;
+            Object key = lookGroup == null ? null : new LookKey(lookOwner, lookGroup, mainHand, displayContext, root.originalStack == null ? "" : root.getName());
+            var aim = new Quaternionf();
+            if (lookTarget != null) {
+                var view = omar.projects.interactivestuff.render.ParticleView.capture(matrices.last().pose());
+                if (key != null) view.translate(0, (float) omar.projects.interactivestuff.render.ModelTargeting.previousLift(key), 0);
+                var target = omar.projects.interactivestuff.render.ParticleCameraCapture.capture().toView(lookTarget.x, lookTarget.y, lookTarget.z);
+                aim = omar.projects.interactivestuff.render.ModelTargeting.rotation(view, target);
+            }
+            if (key != null) aim = omar.projects.interactivestuff.render.ModelTargeting.smooth(key, aim, RenderTickHandler.getFrameId(), RenderTickHandler.normalizedDelta, lookSpeed, lookWeight);
+            if (lookClearance != null) {
+                double lift = omar.projects.interactivestuff.render.ModelTargeting.clearance(aim, px, py, pz, y, lookClearance);
+                matrices.translate(0, lift, 0);
+                if (key != null) omar.projects.interactivestuff.render.ModelTargeting.rememberLift(key, lift);
+            }
+            RenderTransforms.rotate(matrices, aim);
+        }
 
         if (shXY != 0 || shXZ != 0 || shYX != 0 || shYZ != 0 || shZX != 0 || shZY != 0) {
             if (shearMatrix == null) {

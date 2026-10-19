@@ -32,6 +32,7 @@ public final class Player {
     private long nearbyTick = Long.MIN_VALUE;
     private BlockPos nearbyPosition;
     private final Map<NearbyQuery, Boolean> nearbyQueries = new HashMap<>();
+    private final Map<NearbyQuery, BlockPos> nearestQueries = new HashMap<>();
     private record NearbyQuery(String blockId, int radius) {}
     private Vec3 velocitySource;
     private float velocityYaw = Float.NaN;
@@ -56,6 +57,7 @@ public final class Player {
         worldView.setWorld(player == null ? null : client.level);
         nearbyTick = Long.MIN_VALUE;
         nearbyQueries.clear();
+        nearestQueries.clear();
         velocitySource = null;
     }
 
@@ -252,6 +254,7 @@ public final class Player {
             nearbyTick = tick;
             nearbyPosition = center;
             nearbyQueries.clear();
+            nearestQueries.clear();
         }
         return nearbyQueries.computeIfAbsent(new NearbyQuery(blockId, radius), query -> {
             var block = omar.projects.interactivestuff.compat.MinecraftRegistries.block(Identifier.parse(query.blockId()));
@@ -265,6 +268,42 @@ public final class Player {
                     }
             return false;
         });
+    }
+
+    /** Same search cube as hasNearbyBlock, ordered by actual distance instead of scan order. */
+    @VynFunc
+    public Block getNearestBlock(String blockId, int radius) {
+        if (player == null || client.level == null || radius < 0) return null;
+        if (radius > 32) throw new IllegalArgumentException("Nearest-block radius must be 0..32");
+        long tick = client.level.getGameTime();
+        BlockPos center = player.blockPosition();
+        if (tick != nearbyTick || !center.equals(nearbyPosition)) {
+            nearbyTick = tick; nearbyPosition = center;
+            nearbyQueries.clear(); nearestQueries.clear();
+        }
+        var query = new NearbyQuery(blockId, radius);
+        if (!nearestQueries.containsKey(query)) {
+            var block = omar.projects.interactivestuff.compat.MinecraftRegistries.block(Identifier.parse(blockId));
+            BlockPos nearest = null;
+            double distance = Double.POSITIVE_INFINITY;
+            if (block != null) {
+                var cursor = new BlockPos.MutableBlockPos();
+                for (int x = -radius; x <= radius; x++)
+                    for (int y = -radius; y <= radius; y++)
+                        for (int z = -radius; z <= radius; z++) {
+                            cursor.set(center.getX() + x, center.getY() + y, center.getZ() + z);
+                            if (!client.level.getBlockState(cursor).is(block)) continue;
+                            double dx = cursor.getX() + 0.5 - player.getX();
+                            double dy = cursor.getY() + 0.5 - player.getY();
+                            double dz = cursor.getZ() + 0.5 - player.getZ();
+                            double squared = dx * dx + dy * dy + dz * dz;
+                            if (squared < distance) { distance = squared; nearest = cursor.immutable(); }
+                        }
+            }
+            nearestQueries.put(query, nearest);
+        }
+        var nearest = nearestQueries.get(query);
+        return nearest == null ? null : new Block(nearest, client.level);
     }
 
     @VynFunc
