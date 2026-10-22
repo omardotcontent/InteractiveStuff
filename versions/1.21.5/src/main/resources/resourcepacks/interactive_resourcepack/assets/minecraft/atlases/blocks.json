@@ -1,0 +1,19 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/normal",
+      "sprite": "interactivestuff:vanilla/chest/normal"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/trapped",
+      "sprite": "interactivestuff:vanilla/chest/trapped"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/ender",
+      "sprite": "interactivestuff:vanilla/chest/ender"
+    }
+  ]
+}

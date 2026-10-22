@@ -1,0 +1,7 @@
+{
+  "parent": "interactivestuff:item/chest_base",
+  "textures": {
+    "particle": "#0",
+    "0": "interactivestuff:vanilla/chest/normal"
+  }
+}

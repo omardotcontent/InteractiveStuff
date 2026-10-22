@@ -1,0 +1,39 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/normal",
+      "sprite": "interactivestuff:vanilla/chest/normal"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/trapped",
+      "sprite": "interactivestuff:vanilla/chest/trapped"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/ender",
+      "sprite": "interactivestuff:vanilla/chest/ender"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/copper",
+      "sprite": "interactivestuff:vanilla/chest/copper"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/copper_exposed",
+      "sprite": "interactivestuff:vanilla/chest/copper_exposed"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/copper_weathered",
+      "sprite": "interactivestuff:vanilla/chest/copper_weathered"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:entity/chest/copper_oxidized",
+      "sprite": "interactivestuff:vanilla/chest/copper_oxidized"
+    }
+  ]
+}

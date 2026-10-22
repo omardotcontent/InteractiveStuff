@@ -40,6 +40,7 @@ public final class LegacyPackOptions {
         Map<String, Object> pack = values.get(BUNDLED_PACK);
         if (pack == null) return;
         copyToggle(pack, "texture_changes", "tint_blocks", "tint_saplings", "tint_water", "animate_vault", "torch_extinguish");
+        copyToggle(pack, "tint_water", "animate_water_bucket");
         copyToggle(pack, "sculk_sensors", "animate_sculk_sensor");
         copyToggle(pack, "sculk_particles", "particles_sculk_sensor");
         if (pack.get("note_block_hits") instanceof Boolean || pack.get("note_block_crouch") instanceof Boolean) {

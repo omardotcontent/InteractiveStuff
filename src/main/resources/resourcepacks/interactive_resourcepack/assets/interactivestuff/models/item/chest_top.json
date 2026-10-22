@@ -4,7 +4,7 @@
 	"texture_size": [64, 64],
 	"textures": {
 		"particle": "#1_0",
-		"1_0": "interactivestuff:item/chest"
+		"1_0": "interactivestuff:vanilla/chest/normal"
 	},
 	"elements": [
 		{
