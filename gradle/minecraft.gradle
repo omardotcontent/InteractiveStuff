@@ -329,7 +329,7 @@ def configureOverlays = { sourceSet, category, kind ->
     if (kind == "java") {
         sourceSet.java.setSrcDirs(sourceDirs)
         tasks.named(sourceSet.compileJavaTaskName) { dependsOn generator }
-        idea.module.generatedSourceDirs += generatedRoot
+        if (category == 'main') idea.module.generatedSourceDirs += generatedRoot
     } else {
         sourceSet.resources.setSrcDirs(sourceDirs)
         tasks.named(sourceSet.processResourcesTaskName) { dependsOn generator }
@@ -341,8 +341,13 @@ def configureOverlays = { sourceSet, category, kind ->
     configureOverlays(sourceSet, sourceSet.name, "java")
     configureOverlays(sourceSet, sourceSet.name, "resources")
 }
-idea.module.testSources.from(sourceSets.regression.java.srcDirs, sourceSets.gametest.java.srcDirs)
-idea.module.testResources.from(sourceSets.regression.resources.srcDirs, sourceSets.gametest.resources.srcDirs)
+// Hide local fixtures from the IDE model without changing Gradle source sets or tasks.
+idea.module.testSources.setFrom([])
+idea.module.testResources.setFrom([])
+idea.module.excludeDirs += rootProject.localDevelopmentDirectories + rootProject.localTestDirectories
+sourceSets.matching { it.name in ['gametest', 'regression', 'test'] }.each { fixture ->
+    idea.module.excludeDirs += fixture.allSource.srcDirs
+}
 // IntelliJ imports the unique generated source roots with each target's own Minecraft classpath.
 tasks.named("ideaSyncTask") { dependsOn prepareSources }
 
